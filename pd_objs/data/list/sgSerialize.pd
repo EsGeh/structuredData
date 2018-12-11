@@ -1,0 +1,16 @@
+#N canvas 0 30 990 411 10;
+#X obj 49 155 until;
+#X obj 176 200 bang;
+#X obj 67 23 inlet;
+#X obj 67 284 outlet;
+#X text 61 4 list;
+#X text 65 302 messages;
+#X obj 75 122 t b a;
+#X obj 53 212 sgListPop;
+#X connect 0 0 7 0;
+#X connect 1 0 0 1;
+#X connect 2 0 6 0;
+#X connect 6 0 0 0;
+#X connect 6 1 7 1;
+#X connect 7 0 1 0;
+#X connect 7 1 3 0;

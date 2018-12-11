@@ -1,0 +1,11 @@
+#N canvas 0 30 846 854 10;
+#X obj 92 49 inlet;
+#X obj 292 47 inlet;
+#X obj 142 235 outlet;
+#X text 289 17 stream of sgPacks;
+#X text 86 30 bang to output;
+#X text 290 30 clear to clear;
+#X obj 143 142 sgList;
+#X connect 0 0 6 0;
+#X connect 1 0 6 1;
+#X connect 6 0 2 0;

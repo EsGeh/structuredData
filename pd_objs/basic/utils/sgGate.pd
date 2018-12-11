@@ -1,0 +1,18 @@
+#N canvas 0 30 942 411 10;
+#X obj 307 30 inlet;
+#X obj 43 33 inlet;
+#X obj 139 193 route 0;
+#X obj 280 330 outlet;
+#X obj 56 293 outlet;
+#X obj 139 165 list prepend;
+#X obj 47 250 list split 1;
+#X obj 307 54 sgFloatBang \$1;
+#X obj 256 280 list;
+#X connect 0 0 7 0;
+#X connect 1 0 5 0;
+#X connect 2 0 8 0;
+#X connect 2 1 6 0;
+#X connect 5 0 2 0;
+#X connect 6 1 4 0;
+#X connect 7 0 5 1;
+#X connect 8 0 3 0;

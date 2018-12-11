@@ -1,0 +1,18 @@
+#N canvas 0 30 990 411 10;
+#X obj 49 43 inlet;
+#X obj 68 112 random 1000;
+#X obj 56 71 t f b;
+#X obj 50 159 +;
+#X obj 67 135 sgCenterDelta 0 1000 0 0.4;
+#X obj 50 181 outlet;
+#X obj 262 59 inlet;
+#X text 259 37 randomFactor [0..1];
+#X obj 261 81 sgFloatBang \$1;
+#X connect 0 0 2 0;
+#X connect 1 0 4 0;
+#X connect 2 0 3 0;
+#X connect 2 1 1 0;
+#X connect 3 0 5 0;
+#X connect 4 0 3 1;
+#X connect 6 0 8 0;
+#X connect 8 0 4 4;

@@ -1,0 +1,15 @@
+#N canvas 0 30 990 411 10;
+#X obj 30 49 inlet;
+#X obj 111 325 outlet;
+#X obj 238 327 outlet;
+#X obj 288 56 inlet;
+#X text 26 24 sgEvent to serialize into its parameters;
+#X obj 141 215 sgDataPop;
+#X obj 287 154 sgUnPack;
+#X obj 25 330 outlet;
+#X connect 0 0 5 0;
+#X connect 3 0 6 0;
+#X connect 5 0 7 0;
+#X connect 5 1 1 0;
+#X connect 6 0 5 1;
+#X connect 6 2 2 0;
