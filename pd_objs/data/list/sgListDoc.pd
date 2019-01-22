@@ -1,4 +1,4 @@
-#N canvas 0 30 942 854 10;
+#N canvas 0 30 798 854 10;
 #N canvas 0 30 990 854 example 0;
 #X floatatom 120 160 5 0 0 0 - - -;
 #X msg 223 80 list x y z;
@@ -23,7 +23,7 @@
 e.g.;
 #X msg 646 98 list a b c;
 #X text 502 98 should be treated like;
-#N canvas 0 30 990 411 UnList(Rev) 0;
+#N canvas 0 30 798 854 UnList(Rev) 0;
 #X msg 194 128 list a b c 1;
 #X msg 285 129 a b c 1;
 #X obj 70 123 bng 15 250 50 0 empty empty get_next 17 7 0 10 -262144
@@ -76,7 +76,7 @@ e.g.;
 #X connect 7 0 6 0;
 #X restore 177 219 pd example;
 #X text 15 28 create list by accumulating messages:;
-#N canvas 0 30 990 411 example 0;
+#N canvas 0 30 798 854 example 0;
 #X obj 152 166 sgList;
 #X msg 223 75 a \, b \, c \, 1;
 #X msg 203 52 clear;
@@ -109,7 +109,7 @@ e.g.;
 #X restore 173 63 pd example;
 #X text 11 346 manipulate lists;
 #X text 11 284 check condition on list;
-#N canvas 0 30 990 411 example 0;
+#N canvas 0 30 798 854 example 0;
 #X obj 46 171 sgListDel 1;
 #X msg 69 111 list a b c 1;
 #X obj 50 573 print found;

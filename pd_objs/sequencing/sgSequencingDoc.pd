@@ -41,10 +41,9 @@
 #X obj 670 694 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
 #X obj 662 719 print done;
-#X msg 692 638 set speed \$1;
 #X floatatom 693 616 5 0 0 0 - - -;
 #X obj 696 595 hsl 128 15 0.01 100 0 0 empty empty empty -2 -8 0 10
--262144 -1 -1 0 1;
+-262144 -1 -1 100 1;
 #X obj 441 697 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
 #X text 57 217 example:;
@@ -55,6 +54,7 @@
 #X obj 517 636 sgSeqPlayer 1;
 #X obj 591 569 list prepend sequence;
 #X obj 591 592 sgPack set;
+#X msg 692 638 set 2 speed \$1;
 #X connect 3 0 7 0;
 #X connect 4 0 14 1;
 #X connect 4 0 7 1;
@@ -64,17 +64,17 @@
 #X connect 14 0 15 1;
 #X connect 15 0 17 0;
 #X connect 16 0 15 1;
-#X connect 18 0 33 0;
-#X connect 19 0 32 0;
-#X connect 24 0 32 0;
+#X connect 18 0 32 0;
+#X connect 19 0 31 0;
+#X connect 24 0 34 0;
 #X connect 25 0 24 0;
-#X connect 26 0 25 0;
-#X connect 30 0 32 0;
-#X connect 31 0 30 0;
-#X connect 32 0 27 0;
-#X connect 32 1 20 0;
-#X connect 32 2 21 0;
-#X connect 32 3 22 0;
-#X connect 32 3 23 0;
-#X connect 33 0 34 0;
-#X connect 34 0 32 0;
+#X connect 29 0 31 0;
+#X connect 30 0 29 0;
+#X connect 31 0 26 0;
+#X connect 31 1 20 0;
+#X connect 31 2 21 0;
+#X connect 31 3 22 0;
+#X connect 31 3 23 0;
+#X connect 32 0 33 0;
+#X connect 33 0 31 0;
+#X connect 34 0 31 0;

@@ -1,4 +1,4 @@
-#N canvas 0 30 942 854 10;
+#N canvas 0 30 798 854 10;
 #X text 89 34 structure of a sgEvent:;
 #X text 44 13 sgEvents are packs with a special structure;
 #X text 115 50 <eventType> ( param0 ( valueX ) param1 ( valueY ) ...
@@ -57,7 +57,7 @@
 #X obj 88 377 sgUnEvent;
 #X text 225 372 alias for sgUnPack;
 #X obj 85 509 sgEventAddParam;
-#N canvas 0 30 942 854 example 0;
+#N canvas 0 30 798 854 example 0;
 #X msg 269 108 list 1 0.5 red;
 #X text 38 79 press repeatedly to unpack all parameters;
 #X obj 301 203 print event;

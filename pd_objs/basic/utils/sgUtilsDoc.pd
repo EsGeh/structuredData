@@ -1,8 +1,8 @@
-#N canvas 0 30 942 854 10;
+#N canvas 800 30 798 189 10;
 #X text 65 273 compare symbols;
 #X text 172 272 compare any;
-#N canvas 0 30 990 411 example 0;
-#X obj 135 68 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#N canvas 0 30 798 854 example 0;
+#X obj 135 68 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
 1;
 #X floatatom 44 58 5 0 0 0 - - -;
 #X obj 65 126 print accept;
@@ -18,7 +18,7 @@
 #X text 506 28 Notes: \; all input is treated like a list \; "symbol"
 and "list" are identical \;;
 #X obj 66 14 sgAny;
-#N canvas 0 30 990 411 example 0;
+#N canvas 0 30 798 854 example 0;
 #X obj 96 128 sgAny;
 #X msg 148 104 1;
 #X obj 73 87 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
@@ -67,7 +67,7 @@ and "list" are identical \;;
 #X connect 11 1 2 0;
 #X connect 12 0 11 0;
 #X restore 282 391 pd example;
-#N canvas 0 30 990 411 example 0;
+#N canvas 0 30 798 854 example 0;
 #X msg 126 72 1 \, 2 \, 3;
 #X obj 215 91 bng 15 250 50 0 empty empty reset 17 7 0 10 -262144 -1
 -1;
@@ -85,7 +85,7 @@ and "list" are identical \;;
 #X connect 6 0 5 0;
 #X connect 7 0 5 1;
 #X restore 281 243 pd example;
-#N canvas 0 30 990 411 example 0;
+#N canvas 0 30 798 854 example 1;
 #X obj 210 213 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
 #X text 94 93 second inlet/\$1: MAX \, default: -1 (which means MAX=inf)

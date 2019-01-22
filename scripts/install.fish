@@ -1,5 +1,7 @@
 #!/bin/fish
 
+source (dirname (readlink -m (status filename)))/utils/cmd_args.fish
+
 
 #################################################
 # variables
@@ -7,43 +9,20 @@
 
 
 set src (dirname (readlink -m (status filename)))/../pd_objs
-# set src (pwd)/"pd_objs"
-set install_dir "$HOME/.sgPD"
+set install_dir "$HOME/.local/lib/pd/extra/structuredData"
 
-set options_with_descr 'h/help/print help' 'l/link/don\'t copy files but create symbolic links instead' 'd/dest=/destination dir'
+# (syntax: short/long/description)
+set options_descr 'h/help/print help' 'l/link/don\'t copy files but create symbolic links instead' "d/dest=/destination dir (default: $install_dir)"
 
 
 #################################################
 # functions
 #################################################
 
-function options_from_option_descr
-	for o in $argv
-		set split_res (string split '/' $o)
-		echo "$split_res[1]/$split_res[2]"
-	end
-end
-
-function option_info_from_option_descr
-	for o in $argv
-		set split_res (string split '/' $o)
-		set short $split_res[1]
-		set long_temp (string split '=' $split_res[2])
-		set long $long_temp[1]
-		if test (count $long_temp) -ge 2
-			set long "$long ARG"
-		end
-		set descr $split_res[3]
-		echo "-$short|--$long:$descr\n"
-	end
-	# echo -e $opts_info | column -t -s ':'
-end
-
 function print_help
 	echo "usage: "(status -f)" [OPTIONS...]"
 	echo "OPTIONS:"
-	set opts_info (option_info_from_option_descr $options_with_descr)
-	echo -e $opts_info | column -t -s ':'
+	print_options_descr $options_descr
 end
 
 
@@ -51,10 +30,10 @@ end
 # cmd line interface
 #################################################
 
-set options (options_from_option_descr $options_with_descr)
+set options (options_descr_to_argparse $options_descr)
 
 # parse command line arguments:
-argparse $options -- $argv
+argparse $options -- $argv 2>/dev/null
 or begin
 	print_help
 	exit 1

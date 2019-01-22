@@ -44,13 +44,13 @@
 #X obj 44 411 sgObjStateDoc;
 #X text 19 498 signal;
 #N canvas 0 30 942 854 signal 0;
-#X obj 167 121 sgSig2F~;
 #X obj 164 59 sgF2Sig~;
 #X floatatom 156 25 5 0 0 0 - - -;
 #X floatatom 167 144 5 0 0 0 - - -;
+#X obj 167 120 sgSig2F~;
 #X connect 0 0 3 0;
 #X connect 1 0 0 0;
-#X connect 2 0 1 0;
+#X connect 3 0 2 0;
 #X restore 54 527 pd signal;
 #X text 141 412 standardized way for objects to maintain internal state
 ;

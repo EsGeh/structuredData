@@ -19,6 +19,10 @@ this library offers utilities to aim for the following goals:
 	- stateful objs can be stored/loaded to/from ram or disk
 	- (experimental) gui to inspect and edit objects state
 
+## install dependencies
+
+	$ ./scripts/install_deps.fish
+
 ## install
 
 the script
@@ -27,6 +31,12 @@ the script
 
 will copy all objects into some directory. (check "-h" for options).
 To use the objects add this directory to pd's search path.
+
+## uninstall
+
+	$ ./scripts/uninstall.fish [-d <dest>]
+
+(check "-h" for options).
 
 ## documentation
 

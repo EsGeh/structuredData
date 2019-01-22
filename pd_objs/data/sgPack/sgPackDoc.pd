@@ -1,7 +1,7 @@
-#N canvas 944 30 654 189 10;
+#N canvas 800 30 798 189 10;
 #X obj 52 200 sgPackFromHuman;
 #X text 21 110 check sgPack syntax;
-#N canvas 0 30 942 854 example 1;
+#N canvas 0 30 798 854 example 0;
 #X msg 148 102 a b c 1;
 #X text 259 124 TYPE (init \$1);
 #X text 58 40 wrap arbitrary data into a sgPack;
@@ -67,7 +67,7 @@ it!;
 #X text 17 283 filter Packs;
 #N canvas 0 30 990 411 example 0;
 #X restore 182 248 pd example;
-#N canvas 0 30 846 854 example 0;
+#N canvas 0 30 798 854 example 1;
 #X obj 148 99 sgPackFromHuman;
 #X msg 141 60 volume ( 0 0.2 1 );
 #X msg 276 63 pitch ( 2 );

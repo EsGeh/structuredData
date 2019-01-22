@@ -1,9 +1,9 @@
-#N canvas 944 30 654 189 10;
+#N canvas 800 30 798 189 10;
 #X obj 54 66 sgSetFromList;
 #X obj 54 90 sgSetMinus;
 #X obj 54 41 sgSet;
 #X text 38 13 set operations;
-#N canvas 0 30 942 854 examples 1;
+#N canvas 0 30 798 854 examples 1;
 #X text 258 222 stream of messages \, clear to clear;
 #X text 111 221 bang to output;
 #X msg 258 171 1 \, 2 \, 3 \, 1 \, 4;

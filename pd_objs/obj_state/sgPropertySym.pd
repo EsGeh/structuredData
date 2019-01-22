@@ -1,4 +1,4 @@
-#N canvas 0 473 894 411 10;
+#N canvas 0 473 846 411 10;
 #X obj 730 100 route 0;
 #X obj 607 71 list append \$3;
 #X obj 607 94 route 0;
