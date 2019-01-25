@@ -9,4 +9,5 @@
 /build
 /doc/build
 /doc/install
-/doc/installNonC
+/doc/install_objs
+/doc/install_legacy

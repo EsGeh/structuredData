@@ -58,6 +58,9 @@
 #X msg 591 632 symbol hurz;
 #X msg 409 794 list bla 1 2;
 #X obj 208 396 sdGate 0;
+#X obj 495 142 sdFloatBang;
+#X obj 496 179 sdSymbolBang;
+#X obj 496 219 sdSymbolBang;
 #X connect 0 0 2 0;
 #X connect 2 0 1 0;
 #X connect 3 0 2 0;

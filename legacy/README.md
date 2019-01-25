@@ -1,10 +1,8 @@
 # structuredData (sd)
 
-a library for puredata (pd) provided as a collection of "abstractions" (puredata terminology).
+this is the legacy implementation based solely on pd abstractions. Its mainly kept as a reference implementation.
 
-## purpose
-
-this library aims at the following goals:
+## directory structure
 
 - structured messages (see `./pd_objs/data/`)
 
@@ -46,7 +44,6 @@ It is the only object with external dependencies.
 ## documentation
 
 open `./doc/*` in pd.
-
 
 # structuredData (sd) in C
 

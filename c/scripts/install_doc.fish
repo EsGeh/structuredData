@@ -19,10 +19,8 @@ set doc_dir $BASE_DIR/doc
 set build_dir $doc_dir/build
 
 # where to install:
-set install_prefix $doc_dir/install
-
-# where to install nonC version:
-set install_nonC $doc_dir/installNonC
+set install $doc_dir/install
+set install_legacy $doc_dir/install_legacy
 
 set cmds build install
 
@@ -31,9 +29,8 @@ set cmds build install
 #################################################
 
 function print_help
-	echo "configure and execute CMD in '$install_prefix'"
-	echo "USAGE: "(status -f)" [CMD...]"
-	echo "  default for CMD: build install"
+	echo "install to '$doc_dir'"
+	echo "USAGE: "(status -f)
 end
 
 #################################################
@@ -52,13 +49,13 @@ end
 mkdir -pv $build_dir
 
 and begin
-	set cmd "$SCRIPTS_DIR/build.fish --build-dir '$build_dir' --prefix '$install_prefix' $cmds"
+	set cmd "$SCRIPTS_DIR/build.fish --prefix '$install' --build-dir '$build_dir' build install"
 	echo "executing: '$cmd'"
 	eval "$cmd"
 end
 
 and begin
-	set cmd "$BASE_DIR/../legacy/scripts/install.fish -d '$install_nonC'"
+	set cmd "$BASE_DIR/../legacy/scripts/install.fish --dest '$install_legacy'"
 	echo "executing: '$cmd'"
 	eval "$cmd"
 end
