@@ -1,0 +1,12 @@
+# autotools:
+
+/Makefile.in
+/aclocal.m4
+/autom4te.cache
+/build-aux
+/configure
+
+/build
+/test/build
+/test/install
+/test/installNonC
