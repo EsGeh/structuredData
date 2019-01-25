@@ -15,6 +15,10 @@ Experimental implementation of structuredData in C.
 
 ## Installation
 
+first cd into the c directory:
+
+	$ cd c/
+
 1. run autotools:
 
 		$ ./scripts/run_autotools.fish
