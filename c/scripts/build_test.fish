@@ -14,15 +14,15 @@ source $SCRIPTS_DIR/utils/cmd_args.fish
 # variables
 #################################################
 
-set test_dir $BASE_DIR/test
+set doc_dir $BASE_DIR/doc
 
-set build_dir $test_dir/build
+set build_dir $doc_dir/build
 
 # where to install:
-set install_prefix $test_dir/install
+set install_prefix $doc_dir/install
 
 # where to install nonC version:
-set install_nonC $test_dir/installNonC
+set install_nonC $doc_dir/installNonC
 
 set cmds build install
 
@@ -49,8 +49,7 @@ if test (count $argv) != 0
 	set cmds $argv
 end
 
-mkdir -pv $test_dir
-and mkdir -pv $build_dir
+mkdir -pv $build_dir
 
 and begin
 	set cmd "$SCRIPTS_DIR/build.fish --build-dir '$build_dir' --prefix '$install_prefix' $cmds"

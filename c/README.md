@@ -67,14 +67,14 @@ Experimental implementation of structuredData in C.
 
 ## Tests (Documentation)
 
-### install test
+### install docu
 
 	$ ./scripts/build_test.fish
 
-### run test
+### run docu
 
 	$ ./scripts/run_test.fish
 
-### uninstall test
+### uninstall docu
 
 	$ ./scripts/uninstall_test.fish
