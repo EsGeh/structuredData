@@ -35,7 +35,33 @@ INLINE int compareAtoms(t_atom* atoml, t_atom* atomr)
 }
 
 /*
+#define SETSEMI(atom) ((atom)->a_type = A_SEMI, (atom)->a_w.w_index = 0)
+#define SETCOMMA(atom) ((atom)->a_type = A_COMMA, (atom)->a_w.w_index = 0)
+#define SETPOINTER(atom, gp) ((atom)->a_type = A_POINTER, \
+    (atom)->a_w.w_gpointer = (gp))
+#define SETFLOAT(atom, f) ((atom)->a_type = A_FLOAT, (atom)->a_w.w_float = (f))
+#define SETSYMBOL(atom, s) ((atom)->a_type = A_SYMBOL, \
+    (atom)->a_w.w_symbol = (s))
+#define SETDOLLAR(atom, n) ((atom)->a_type = A_DOLLAR, \
+    (atom)->a_w.w_index = (n))
+#define SETDOLLSYM(atom, s) ((atom)->a_type = A_DOLLSYM, \
+    (atom)->a_w.w_symbol= (s))
 
+INLINE int atom_assign(t_atom* atoml, t_atom* atomr)
+{
+	if(atomr -> a_type == A_SYMBOL)
+	{
+		SETSYMBOL( atoml,atom_getsymbol( atomr ) );
+	}
+	else if(atomr -> a_type == A_FLOAT)
+	{
+		SETFLOAT(atoml, atom_getfloat(atomr) );
+	}
+	return 0;
+}
+*/
+
+/*
 #include "m_pd.h"
 #include "LinkedList.h"
 #include <string.h>

@@ -19,7 +19,8 @@ lib_LTLIBRARIES = structuredDataC.la
 data_DATA = \
 	$(PATH_PD_OBJS)/sdAnyBang.pd \
 	$(PATH_PD_OBJS)/sdFloatBang.pd \
-	$(PATH_PD_OBJS)/sdSymbolBang.pd 
+	$(PATH_PD_OBJS)/sdSymbolBang.pd \
+	$(PATH_PD_OBJS)/sdExampleObj.pd 
 
 structuredDataC_la_SOURCES = \
   $(PATH_CODE)/structuredData.c $(PATH_CODE)/structuredData.h \

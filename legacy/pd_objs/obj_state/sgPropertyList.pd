@@ -1,4 +1,4 @@
-#N canvas 0 30 846 854 10;
+#N canvas 0 30 798 854 10;
 #X obj 57 6 inlet;
 #X obj 455 394 outlet;
 #X obj 712 86 s \$0-delegate;

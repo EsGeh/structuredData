@@ -1,8 +1,66 @@
 #include "structuredData.h"
 #include "Global.h"
+#include <string.h>
+#include <stdlib.h>
 
 #include "m_pd.h"
 
+
+static t_class* any_class;
+static t_class* gate_class;
+static t_class* counter_class;
+static t_class* first_class;
+static t_class* symbolIsEq_class;
+static t_class* isEq_class;
+static t_class* filter_class;
+static t_class* replace_class;
+static t_class* setselector_class;
+
+t_class* register_any(
+	t_symbol* className
+);
+t_class* register_gate(
+	t_symbol* className
+);
+t_class* register_counter(
+	t_symbol* className
+);
+t_class* register_first(
+	t_symbol* className
+);
+t_class* register_symbolIsEq(
+	t_symbol* className
+);
+t_class* register_isEq(
+	t_symbol* className
+);
+t_class* register_filter(
+	t_symbol* className
+);
+t_class* register_replace(
+	t_symbol* className
+);
+t_class* register_setselector(
+	t_symbol* className
+);
+
+void structuredDataC_setup()
+{
+	any_class = register_any( gensym("sdAny") );
+	gate_class = register_gate(gensym("sdGate"));
+	counter_class = register_counter(gensym("sdCounter"));
+	first_class = register_first(gensym("sdFirst"));
+	symbolIsEq_class = register_symbolIsEq(gensym("sdSymbolIsEq"));
+	isEq_class = register_isEq(gensym("sdIsEq"));
+	filter_class = register_filter(gensym("sdFilter"));
+	replace_class = register_replace(gensym("sdReplace"));
+	setselector_class = register_setselector(gensym("sdSetSelector"));
+	sdList_setup();
+	sdPack_setup();
+	sdData_setup();
+	sdEvent_setup();
+	sdObjState_setup();
+}
 
 //----------------------------------
 // sdAny
@@ -12,7 +70,6 @@ typedef struct _any {
   t_object x_obj;
 	t_atom value;
 } t_any;
-static t_class* any_class;
 
 void *any_new(
 	t_symbol *s,
@@ -27,7 +84,7 @@ void any_set(
 	t_atom *argv
 );
 
-void register_any(
+t_class* register_any(
 	t_symbol* className
 )
 {
@@ -44,7 +101,7 @@ void register_any(
 		);
 	class_addbang(class, any_bang);
 	class_addanything(class, any_set);
-	any_class = class;
+	return class;
 }
 
 void *any_new(
@@ -129,8 +186,6 @@ typedef struct _gate {
 	t_outlet* rejectOut;
 } t_gate;
 
-static t_class* gate_class;
-
 void *gate_new(
 	t_float init
 );
@@ -141,7 +196,7 @@ void gate_in(
 	t_atom *argv
 );
 
-void register_gate(
+t_class* register_gate(
 	t_symbol* className
 )
 {
@@ -157,7 +212,7 @@ void register_gate(
 			0
 		);
 	class_addanything(class, gate_in);
-	gate_class = class;
+	return class;
 }
 
 void *gate_new(
@@ -214,8 +269,6 @@ typedef struct _counter {
 	t_outlet* overflowOut;
 } t_counter;
 
-static t_class* counter_class;
-
 void* counter_new(
 	t_float initLimit,
 	t_float initAutoreset
@@ -228,7 +281,7 @@ void counter_bang(
 	t_counter *x
 );
 
-void register_counter(
+t_class* register_counter(
 	t_symbol* className
 )
 {
@@ -247,7 +300,7 @@ void register_counter(
 		);
 	class_addfloat(class, counter_set);
 	class_addbang(class, counter_bang);
-	counter_class = class;
+	return class;
 }
 
 void* counter_new(
@@ -312,8 +365,6 @@ typedef struct _first {
 	t_outlet* rejectOut;
 } t_first;
 
-static t_class* first_class;
-
 void* first_new(
 );
 void first_bang(
@@ -323,7 +374,7 @@ void first_reset(
 	t_first *x
 );
 
-void register_first(
+t_class* register_first(
 	t_symbol* className
 )
 {
@@ -344,7 +395,7 @@ void register_first(
 		gensym("reset"),
 		0
 	);
-	first_class = class;
+	return class;
 }
 
 void* first_new(
@@ -398,8 +449,6 @@ typedef struct _symbolIsEq {
 	t_symbol* sym2;
 } t_symbolIsEq;
 
-static t_class* symbolIsEq_class;
-
 void* symbolIsEq_new(
 	t_symbol *s,
 	int argc,
@@ -410,7 +459,7 @@ void symbolIsEq_compare(
 	t_symbol* sym
 );
 
-void register_symbolIsEq(
+t_class* register_symbolIsEq(
 	t_symbol* className
 )
 {
@@ -426,7 +475,7 @@ void register_symbolIsEq(
 			0
 		);
 	class_addsymbol(class, symbolIsEq_compare);
-	symbolIsEq_class = class;
+	return class;
 }
 
 void* symbolIsEq_new(
@@ -477,8 +526,6 @@ typedef struct _isEq {
 	t_atom other;
 } t_isEq;
 
-static t_class* isEq_class;
-
 void* isEq_new(
 	t_symbol *s,
 	int argc,
@@ -499,7 +546,7 @@ void isEq_setOther(
 	t_atom *argv
 );
 
-void register_isEq(
+t_class* register_isEq(
 	t_symbol* className
 )
 {
@@ -522,7 +569,7 @@ void register_isEq(
 		A_GIMME,
 		0
 	);
-	isEq_class = class;
+	return class;
 }
 
 void* isEq_new(
@@ -601,8 +648,6 @@ typedef struct _filter {
 	t_outlet* rejectOut;
 } t_filter;
 
-static t_class* filter_class;
-
 void* filter_new(
 	t_symbol *s,
 	int argc,
@@ -623,7 +668,7 @@ void filter_setOther(
 	t_atom *argv
 );
 
-void register_filter(
+t_class* register_filter(
 	t_symbol* className
 )
 {
@@ -647,7 +692,7 @@ void register_filter(
 		A_GIMME,
 		0
 	);
-	filter_class = class;
+	return class;
 }
 
 void* filter_new(
@@ -726,18 +771,241 @@ void filter_setOther(
 	x -> other = argv[0];
 }
 
-void structuredDataC_setup()
+//----------------------------------
+// replace
+//----------------------------------
+
+typedef struct _replace {
+  t_object x_obj;
+	t_atom* argv;
+	int argc;
+	t_outlet* outlet;
+} t_replace;
+
+void* replace_init(
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+void replace_exit(
+	t_replace *x
+);
+
+void replace_input(
+	t_replace *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+t_class* register_replace(
+	t_symbol* className
+)
 {
-	register_any( gensym("sdAny") );
-	register_gate(gensym("sdGate"));
-	register_counter(gensym("sdCounter"));
-	register_first(gensym("sdFirst"));
-	register_symbolIsEq(gensym("sdSymbolIsEq"));
-	register_isEq(gensym("sdIsEq"));
-	register_filter(gensym("sdFilter"));
-	sdList_setup();
-	sdPack_setup();
-	sdData_setup();
-	sdEvent_setup();
-	sdObjState_setup();
+	t_class* class =
+		class_new(
+			className,
+			(t_newmethod )replace_init, // constructor
+			(t_method )replace_exit, // destructor
+			sizeof(t_replace),
+			CLASS_DEFAULT, // graphical repr ?
+			// creation arguments:
+			A_GIMME,
+			0
+		);
+	// "methods":
+	class_addanything(class, replace_input);
+	return class;
+}
+
+void* replace_init(
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+  t_replace *x = (t_replace *)pd_new(replace_class);
+
+	x->argc = argc;
+	if( argc )
+	{
+		x->argv = getbytes( sizeof( t_atom ) * argc );
+		for(int i=0; i<argc; i++)
+		{
+			x->argv[i] = argv[i];
+		}
+	}
+
+  x->outlet = outlet_new(&x->x_obj, &s_list);
+
+  return (void *)x;
+}
+
+void replace_exit(
+	t_replace *x
+)
+{
+	if( x->argc )
+	{
+		freebytes( x->argv, sizeof( t_atom ) * x->argc );
+	}
+}
+
+void replace_input(
+	t_replace *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	for( int i=0; i<argc; i++ )
+	{
+		t_atom* current = & argv[i];
+
+		// parse the symbol and replace %<num> by the corresponding creation arg...:
+		char current_str[256];
+		atom_string( current, current_str, 255 );
+		int current_string_length = strlen( current_str );
+		int ret_str_size = 0;
+		char ret_str[256];
+		// post( "parsing %s", current_str );
+		if( current->a_type != A_SYMBOL )
+			continue;
+
+		// loop through all '%'
+		char* current_pos = strchr( current_str, '%' );
+		if( current_pos )
+		{
+			ret_str_size = current_pos-current_str ;
+			strncpy( ret_str, current_str, ret_str_size);
+		}
+		else
+		{
+			ret_str_size = current_string_length;
+			strncpy( ret_str, current_str, 255 );
+		}
+		while( current_pos )
+		{
+			if( (current_pos+1 - current_str) >= current_string_length )
+			{
+				pd_error( x, "number expected after '%%' at pos %i, but end of string found", (int )(current_pos-current_str) );
+			}
+			int argIndex = atoi( current_pos+1 );
+			int arg_len = strspn( current_pos+1, "0123456789" );
+			if( arg_len == 0 )
+			{
+				pd_error( x, "number expected after '%%' at pos %i", (int )(current_pos-current_str) );
+				return;
+			}
+			else if( argIndex >= x->argc )
+			{
+				pd_error( x, "no argument for '%%%i'", argIndex );
+				return;
+			}
+
+			char replacement_str[256];
+			atom_string( & x->argv[argIndex], replacement_str, 255 );
+			int replacement_len = strlen( replacement_str );
+			// append replacement_str:
+			strncpy( ret_str+ret_str_size, replacement_str, replacement_len );
+			ret_str_size += replacement_len;
+
+			// move to next '%'
+
+			char* next_pos = strchr( current_pos+1, '%' );
+			// append rest of current_str until next '%'
+			if( next_pos )
+			{
+				int chars_to_copy = next_pos-current_pos-1-arg_len;
+				strncpy( ret_str+ret_str_size, current_pos+1+arg_len, chars_to_copy);
+				ret_str_size += chars_to_copy;
+			}
+			else
+			{
+				int chars_to_copy = (current_str + current_string_length) - current_pos-1-arg_len;
+				strncpy( ret_str+ret_str_size, current_pos+1+arg_len, chars_to_copy );
+				ret_str_size += chars_to_copy;
+			}
+			current_pos = next_pos;
+		}
+		ret_str[ret_str_size] = '\0';
+		//post( "current_str: %s, ret_str: %s", current_str, ret_str );
+		SETSYMBOL( current, gensym( ret_str ) );
+	}
+	outlet_anything(
+		x->outlet,
+		s,
+		argc,
+		argv
+	);
+}
+
+//----------------------------------
+// setselector
+//----------------------------------
+
+typedef struct _setselector {
+  t_object x_obj;
+	t_symbol* selector;
+	t_outlet* outlet;
+} t_setselector;
+
+void* setselector_init(
+	t_symbol *arg
+);
+
+void setselector_input(
+	t_setselector *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+t_class* register_setselector(
+	t_symbol* className
+)
+{
+	t_class* class =
+		class_new(
+			className,
+			(t_newmethod )setselector_init, // constructor
+			0, // destructor
+			sizeof(t_setselector),
+			CLASS_DEFAULT, // graphical repr ?
+			// creation arguments:
+			A_SYMBOL,
+			0
+		);
+	// "methods":
+	class_addanything(class, setselector_input);
+	post( "register_setselector" );
+	return class;
+}
+
+void* setselector_init(
+	t_symbol *arg
+)
+{
+  t_setselector *x = (t_setselector *)pd_new(setselector_class);
+
+	x->selector = arg;
+  x->outlet = outlet_new(&x->x_obj, &s_list);
+
+  return (void *)x;
+}
+
+void setselector_input(
+	t_setselector *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	outlet_anything(
+		x->outlet,
+		x->selector,
+		argc,
+		argv
+	);
 }

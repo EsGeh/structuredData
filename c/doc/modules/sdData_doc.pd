@@ -1,5 +1,5 @@
-#N canvas 0 30 798 854 10;
-#N canvas 0 30 798 854 example 0;
+#N canvas 800 30 798 189 10;
+#N canvas 0 30 798 854 example 1;
 #X msg 404 173 pack1 ( bla ) \, pack2 ( blubb );
 #X msg 174 93 clear;
 #X obj 402 208 sgPackFromHuman;

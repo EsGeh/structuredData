@@ -53,9 +53,16 @@ and begin
 	echo "executing: '$cmd'"
 	eval "$cmd"
 end
+# replace copies with links:
+and begin
+	and rm $install/*.pd
+	set cmd "$BASE_DIR/../legacy/scripts/install.fish --source '$BASE_DIR/pd_objs' --dest '$install' --link"
+	echo "executing: '$cmd'"
+	eval "$cmd"
+end
 
 and begin
-	set cmd "$BASE_DIR/../legacy/scripts/install.fish --dest '$install_legacy'"
+	set cmd "$BASE_DIR/../legacy/scripts/install.fish --dest '$install_legacy' --link"
 	echo "executing: '$cmd'"
 	eval "$cmd"
 end

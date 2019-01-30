@@ -1,4 +1,4 @@
-#N canvas 0 30 942 854 10;
+#N canvas 0 30 798 411 10;
 #X obj 144 76 r \$0-pitch;
 #X obj 227 76 r \$0-volume;
 #X obj 599 149 sgProperty pitch \$0 64;
@@ -10,11 +10,11 @@
 #X obj 413 158 route start stop;
 #X msg 411 191 start;
 #X msg 469 188 stop;
-#X symbolatom 284 410 10 0 0 0 - - -;
+#X symbolatom 128 250 10 0 0 0 - - -;
 #X obj 400 310 sgObjStateOut \$1, f 79;
 #X obj 413 132 sgEventToMessage;
 #X obj 655 255 sgPropertyList envelope \$1;
-#X obj 284 387 r \$0-descr;
+#X obj 128 227 r \$0-descr;
 #X obj 646 226 sgPropertySym descr \$0;
 #X obj 412 108 sgPackFilter start;
 #X obj 535 110 sgPackFilter stop;

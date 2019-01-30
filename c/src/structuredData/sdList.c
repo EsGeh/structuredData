@@ -102,6 +102,18 @@ void list_get(
 	t_list *x,
 	t_float index
 );
+void list_find(
+	t_list *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+void list_findAll(
+	t_list *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
 void list_equal(
 	t_list *x,
 	t_symbol *s,
@@ -214,6 +226,20 @@ t_class* register_list(
 	);
 	class_addmethod(
 		class,
+		(t_method )list_find,
+		gensym("find"),
+		A_GIMME,
+		0
+	);
+	class_addmethod(
+		class,
+		(t_method )list_findAll,
+		gensym("findAll"),
+		A_GIMME,
+		0
+	);
+	class_addmethod(
+		class,
 		(t_method )list_equal,
 		gensym("equal"),
 		A_GIMME,
@@ -262,6 +288,8 @@ void* list_init(
 				|| sym == gensym("pop")
 				|| sym == gensym("popRev")
 				|| sym == gensym("get")
+				|| sym == gensym("find")
+				|| sym == gensym("findAll")
 				|| sym == gensym("serialize")
 				|| sym == gensym("serializeRev")
 				|| sym == gensym("equal")
@@ -542,6 +570,107 @@ void list_get(
 			pEl = AtomListGetPrev( & x->atoms, pEl );
 		}
 	}
+}
+
+void list_find(
+	t_list *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	if( argc == 0 )
+	{
+		pd_error( x, "find called with no arguments" );
+		return;
+	}
+
+	t_atom ret;
+	AtomEl* pElStart = AtomListGetFirst( & x->atoms );
+	for( int i=0; i<AtomListGetSize( & x->atoms ) - argc + 1; i++ )
+	{
+		AtomEl* pEl = pElStart;
+		int isSame = 1;
+		for( int j=0; j<argc; j++ )
+		{
+			if( !compareAtoms( pEl->pData, & argv[j] ) )
+			{
+				isSame = 0;
+				break;
+			}
+			pEl = AtomListGetNext( & x->atoms, pEl );
+		}
+		if( isSame )
+		{
+			SETFLOAT( &ret, i);
+			list_outputAt(
+				x,
+				gensym("find"),
+				1,
+				&ret
+			);
+			return;
+		}
+		pElStart = AtomListGetNext( & x->atoms, pElStart );
+	}
+
+	SETFLOAT( &ret, -1);
+	list_outputAt(
+		x,
+		gensym("find"),
+		1,
+		&ret
+	);
+}
+
+void list_findAll(
+	t_list *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	if( argc == 0 )
+	{
+		pd_error( x, "findAll called with no arguments" );
+		return;
+	}
+
+	t_atom* ret;
+	int ret_size = 0;
+	ret = getbytes( sizeof( t_atom ) * AtomListGetSize( & x->atoms ) );
+
+
+	AtomEl* pElStart = AtomListGetFirst( & x->atoms );
+	for( int i=0; i<AtomListGetSize( & x->atoms ) - argc + 1; i++ )
+	{
+		AtomEl* pEl = pElStart;
+		int isSame = 1;
+		for( int j=0; j<argc; j++ )
+		{
+			if( !compareAtoms( pEl->pData, & argv[j] ) )
+			{
+				isSame = 0;
+				break;
+			}
+			pEl = AtomListGetNext( & x->atoms, pEl );
+		}
+		if( isSame )
+		{
+			SETFLOAT( & ret[ret_size], i );
+			ret_size++;
+		}
+		pElStart = AtomListGetNext( & x->atoms, pElStart );
+	}
+
+	list_outputAt(
+		x,
+		gensym("findAll"),
+		ret_size,
+		ret
+	);
+
+	freebytes( ret, sizeof( t_atom ) * AtomListGetSize( & x->atoms ) );
 }
 
 void list_equal(
