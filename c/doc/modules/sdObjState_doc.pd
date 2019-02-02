@@ -1,4 +1,4 @@
-#N canvas 0 30 798 854 10;
+#N canvas 800 30 798 189 10;
 #X obj 593 24 r \$0-fromProperties;
 #X obj 493 123 print toProperties;
 #X obj 452 181 s \$0-fromProperties;
@@ -6,7 +6,7 @@
 #X obj 248 533 print hurz;
 #X obj 95 420 s \$0-obj;
 #X msg 104 281 list out 1 clear;
-#X msg 72 245 list out 2 add hurz;
+#X msg 76 224 list out 2 add hurz;
 #X msg 250 344 list get 3 out 1 dest1;
 #X obj 452 75 sdObjState \$0-obj GLOBAL;
 #X obj 452 153 sgProperty numProp \$0;
@@ -17,7 +17,6 @@
 #X obj 593 47 t a a;
 #X obj 620 73 print fromProperties;
 #X msg 258 305 list get 4 numProp out 1 dest1;
-#X msg 259 400 list set 2 numProp \$1;
 #X floatatom 262 371 5 0 0 0 - - -;
 #N canvas 0 30 798 411 test 0;
 #X obj 80 13 inlet;
@@ -407,6 +406,8 @@ info ( \$2 ( foo ) ) );
 #X restore 54 66 pd test property;
 #X obj 54 46 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
+#X msg 259 400 list set 3 numProp 1 \$1;
+#X msg 225 239 list out 2 del hurz;
 #X connect 0 0 15 0;
 #X connect 3 0 4 0;
 #X connect 6 0 5 0;
@@ -415,12 +416,11 @@ info ( \$2 ( foo ) ) );
 #X connect 9 0 11 0;
 #X connect 10 0 2 0;
 #X connect 11 0 10 0;
-#X connect 11 1 1 0;
 #X connect 12 0 5 0;
 #X connect 13 0 14 0;
 #X connect 15 0 9 1;
-#X connect 15 1 16 0;
 #X connect 17 0 5 0;
-#X connect 18 0 5 0;
-#X connect 19 0 18 0;
-#X connect 21 0 20 0;
+#X connect 18 0 21 0;
+#X connect 20 0 19 0;
+#X connect 21 0 5 0;
+#X connect 22 0 5 0;

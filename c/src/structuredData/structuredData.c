@@ -367,8 +367,11 @@ typedef struct _first {
 
 void* first_new(
 );
-void first_bang(
-	t_first *x
+void first_input(
+	t_first *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
 );
 void first_reset(
 	t_first *x
@@ -388,7 +391,7 @@ t_class* register_first(
 			// creation arguments:
 			0
 		);
-	class_addbang(class, first_bang);
+	class_addlist(class, first_input);
 	class_addmethod(
 		class,
 		(t_method )first_reset,
@@ -418,18 +421,31 @@ void* first_new(
   return (void *)x;
 }
 
-void first_bang(
-	t_first *x
+void first_input(
+	t_first *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
 )
 {
 	if( x-> reject == 0 )
 	{
-		outlet_bang( x->acceptOut );
+		outlet_list(
+			x->acceptOut,
+			s,
+			argc,
+			argv
+		);
 		x->reject = 1;
 	}
 	else
 	{
-		outlet_bang( x->rejectOut );
+		outlet_list(
+			x->rejectOut,
+			s,
+			argc,
+			argv
+		);
 	}
 }
 

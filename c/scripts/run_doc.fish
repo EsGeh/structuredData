@@ -11,6 +11,8 @@ set install_legacy $doc_dir/install_legacy
 
 
 pd -noaudio \
+	-noprefs \
+	-lib zexy \
 	-path "$install" \
 	-lib "structuredDataC" \
 	-path "$install_legacy" \

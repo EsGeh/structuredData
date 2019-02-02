@@ -1,4 +1,4 @@
-#N canvas 0 30 798 854 10;
+#N canvas 0 30 894 854 10;
 #X obj 149 166 sdReplace \$0;
 #X msg 174 110 list get 3 out 1 %0-fromAllObjs;
 #X obj 306 290 r \$0-fromAllObjs;
@@ -12,12 +12,13 @@
 #X obj 276 385 sdPack set;
 #X obj 288 415 send, f 10;
 #X obj 118 20 inlet;
-#X obj 118 44 route load save;
 #X obj 118 67 bang;
 #X obj 161 70 bang;
-#X obj 183 336 print;
 #X obj 149 189 s \$1;
-#X connect 0 0 16 0;
+#X obj 128 433 outlet;
+#X obj 118 44 route load save get;
+#X obj 475 114 t b;
+#X connect 0 0 14 0;
 #X connect 1 0 4 0;
 #X connect 2 0 6 1;
 #X connect 3 0 6 0;
@@ -30,8 +31,10 @@
 #X connect 8 0 9 0;
 #X connect 8 2 10 1;
 #X connect 9 0 10 0;
-#X connect 11 0 12 0;
-#X connect 12 0 13 0;
-#X connect 12 1 14 0;
-#X connect 13 0 7 0;
-#X connect 14 0 1 0;
+#X connect 11 0 16 0;
+#X connect 12 0 7 0;
+#X connect 13 0 1 0;
+#X connect 16 0 12 0;
+#X connect 16 1 13 0;
+#X connect 16 2 17 0;
+#X connect 17 0 6 0;

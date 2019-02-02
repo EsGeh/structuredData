@@ -241,7 +241,7 @@ void objState_input(
 		&& atom_getsymbol( & argv[0] ) == gensym("out")
 	)
 	{
-		// add
+		// out ( add <dest> )
 		if( atom_getsymbol( & argv[2] ) == gensym("add") )
 		{
 			if( atom_getint( & argv[1] ) != 2 )
@@ -258,7 +258,30 @@ void objState_input(
 				SymListAdd( x->outList, pDest );
 			}
 		}
-		// clear
+		// out ( del <dest> )
+		else if( atom_getsymbol( & argv[2] ) == gensym("del") )
+		{
+			if( atom_getint( & argv[1] ) != 2 )
+			{
+				pd_error(x, "unknown syntax! expected: out ( del <dest> )");
+				return;
+			}
+			t_symbol* pDest = atom_getsymbol( & argv[3] );
+			SymEl *pDestEl = SymListGetElement( x->outList, pDest, cmp_symbol_ptrs );
+			if( pDestEl )
+			{
+				SymListDel( x->outList, pDestEl );
+			}
+			else
+			{
+				/*
+				char buf[256];
+				atom_string( & argv[3], buf, 255 );
+				post("out ( del <dest> ... ): no element named %s", buf);
+				*/
+			}
+		}
+		// out ( clear )
 		else if( atom_getsymbol( & argv[2] ) == gensym("clear") )
 		{
 			if( atom_getint( & argv[1] ) != 1 )
@@ -267,6 +290,11 @@ void objState_input(
 				return;
 			}
 			SymListClear( x->outList );
+		}
+		else
+		{
+			pd_error(x, "unknown syntax!");
+			return;
 		}
 	}
 	// get ( <property> )
@@ -351,6 +379,15 @@ void objState_input(
 				2,
 				output
 			);
+			// append "pseudo property" <out> ( ... ):
+			int out_size = SymListGetSize( old_outList );
+			SETSYMBOL( & x->accumlArray[ x->accumlPos + 0 ], gensym("out") );
+			SETFLOAT( & x->accumlArray[ x->accumlPos + 1 ], out_size);
+			LIST_FORALL_BEGIN(SymList,SymEl,t_symbol,old_outList,i,pEl)
+				SETSYMBOL( & x->accumlArray[ x->accumlPos + 2 + i ], pEl->pData );
+			LIST_FORALL_END(SymList,SymEl,t_symbol,old_outList,i,pEl)
+			x->accumlPos += ( 2 + out_size);
+
 			// change back outList:
 			objState_flush(x);
 			SymListExit( x->outList );
@@ -397,7 +434,14 @@ void objState_input(
 	}
 	else
 	{
-		pd_error(x, "unknown syntax!");
+		// redirect any other message:
+		outlet_list(
+			x->toProperties_out,
+			&s_list,
+			argc,
+			argv
+		);
+		//pd_error(x, "unknown syntax!");
 		return;
 	}
 }

@@ -6,6 +6,7 @@
 static t_class* event_class;
 static t_class* unevent_class;
 static t_class* eventAddParam_class;
+static t_class* eventToProperties_class;
 
 t_class* register_event(
 	t_symbol* className
@@ -19,11 +20,16 @@ t_class* register_eventAddParam(
 	t_symbol* className
 );
 
+t_class* register_eventToProperties(
+	t_symbol* className
+);
+
 void sdEvent_setup()
 {
 	event_class = register_event( gensym("sdEvent") );
 	unevent_class = register_unevent( gensym("sdUnEvent") );
 	eventAddParam_class = register_eventAddParam( gensym("sdEventAddParam") );
+	eventToProperties_class = register_eventToProperties( gensym("sdEventToProperties") );
 }
 
 //----------------------------------
@@ -488,5 +494,118 @@ void eventAddParam_input(
 		& s_list,
 		argc + x->otherPackCount,
 		ret
+	);
+}
+
+//----------------------------------
+// eventToProperties
+//----------------------------------
+
+typedef struct s_eventToProperties {
+  t_object x_obj;
+	t_outlet* outletSelector;
+	t_outlet* outletToProperties;
+} t_eventToProperties;
+
+void* eventToProperties_init();
+
+void eventToProperties_input(
+	t_eventToProperties* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+t_class* register_eventToProperties(
+	t_symbol* className
+)
+{
+	t_class* class =
+		class_new(
+			className,
+			(t_newmethod )eventToProperties_init, // constructor
+			NULL, // destructor
+			sizeof(t_eventToProperties),
+			CLASS_DEFAULT, // graphical repr ?
+			// creation arguments:
+			0
+		);
+
+	class_addlist( class, eventToProperties_input );
+
+	return class;
+}
+
+void* eventToProperties_init()
+{
+	t_eventToProperties *x = (t_eventToProperties *)pd_new(eventToProperties_class);
+
+	x->outletSelector =
+		outlet_new( & x->x_obj, &s_list);
+
+	x->outletToProperties =
+		outlet_new( & x->x_obj, &s_list);
+
+  return (void *)x;
+}
+
+void eventToProperties_input(
+	t_eventToProperties* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	if(
+		argc < 2
+		|| argv[0].a_type != A_SYMBOL
+		|| argv[1].a_type != A_FLOAT
+		|| atom_getint( & argv[1] ) != (argc - 2 )
+	)
+	{
+		pd_error(x, "invalid sdEvent");
+		return;
+	}
+	// output parameters:
+	unsigned int pos = 2;
+	while( pos < argc )
+	{
+		if(
+			argc < 2
+			|| argv[pos+0].a_type != A_SYMBOL
+			|| argv[pos+1].a_type != A_FLOAT
+			// || (argc-pos) - 2 >= atom_getint( &argv[1] )
+		)
+		{
+			pd_error(x, "at pos %i: invalid sdPack", pos);
+			return;
+		}
+		t_symbol* type = atom_getsymbol( &argv[pos+0] );
+		int count = atom_getint( &argv[pos+1] );
+		// send: set ( <property> <val1> ... )
+		t_atom* to_properties = getbytes( sizeof( t_atom ) * (3+count) );
+		SETSYMBOL( &to_properties[0], gensym("set") );
+		SETFLOAT( &to_properties[1], count+1 );
+		SETSYMBOL( &to_properties[2], type );
+		for( int i=0; i<count; i++ )
+		{
+			to_properties[3+i] = argv[pos+2+i];
+		}
+		outlet_list(
+			x->outletToProperties,
+			& s_list,
+			3+count,
+			to_properties
+		);
+		freebytes( to_properties, sizeof( t_atom ) * (3+count) );
+		pos += (count + 2) ;
+	}
+
+	// output the event type:
+	outlet_anything(
+		x->outletSelector,
+		atom_getsymbol( & argv[0] ),
+		0,
+		NULL
 	);
 }
