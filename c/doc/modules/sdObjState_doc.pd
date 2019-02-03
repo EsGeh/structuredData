@@ -1,4 +1,4 @@
-#N canvas 800 30 798 189 10;
+#N canvas 0 30 798 854 10;
 #X obj 593 24 r \$0-fromProperties;
 #X obj 493 123 print toProperties;
 #X obj 452 181 s \$0-fromProperties;
@@ -18,7 +18,7 @@
 #X obj 620 73 print fromProperties;
 #X msg 258 305 list get 4 numProp out 1 dest1;
 #X floatatom 262 371 5 0 0 0 - - -;
-#N canvas 0 30 798 411 test 0;
+#N canvas 0 30 798 854 test 0;
 #X obj 80 13 inlet;
 #X obj 685 437 sgTest;
 #X obj 267 180 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
@@ -121,7 +121,7 @@
 #X obj 33 179 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
 #X obj 718 412 r \$0-out3;
-#N canvas 0 30 798 411 test-set-intern 0;
+#N canvas 0 30 798 854 test-set-intern 0;
 #X obj 372 621 s \$0-test;
 #X obj 319 41 inlet;
 #X obj 310 169 f \$0;

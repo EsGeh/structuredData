@@ -432,6 +432,19 @@ void objState_input(
 			currentPos = currentPos + 2 + currentSize ;
 		}
 	}
+	// init ( )
+	else if(
+		atom_getsymbol( & argv[0] ) == gensym("init")
+		&& atom_getint( & argv[1] ) == 0
+	)
+	{
+		outlet_list(
+			x->toProperties_out,
+			&s_list,
+			argc,
+			argv
+		);
+	}
 	else
 	{
 		// redirect any other message:
@@ -499,6 +512,7 @@ typedef struct s_property {
 	t_float value;
 	t_symbol* rcv_sym;
 	t_symbol* send_sym;
+	t_symbol* init;
 	t_inlet* fromObjIn_in;
 	t_outlet* out;
 	t_outlet* redirect_out;
@@ -552,7 +566,10 @@ t_class* register_property(
 			0
 		);
 
+	// "sdPack" interface:
 	class_addlist( class, property_input );
+
+	// "internal" messages
 	class_addmethod(
 		class,
 		(t_method )property_set,
@@ -649,17 +666,37 @@ void* property_init(
 	{
 		x->value = 0;
 	}
-	if( argc >= 4 )
+
+	if(
+		argc >= 4
+		&& argv[3].a_type == A_SYMBOL
+	)
 	{
-		//output:
-		t_atom val;
-		SETFLOAT( & val, x->value );
-		typedmess(
-			x->send_sym->s_thing,
-			&s_float,
-			1,
-			&val
-		);
+		if(
+			atom_getsymbol( & argv[3] ) == gensym("intern")
+			|| atom_getsymbol( & argv[3] ) == gensym("info")
+			|| atom_getsymbol( & argv[3] ) == gensym("update")
+		)
+		{
+			x->init = atom_getsymbol( &argv[3] );
+		}
+		else
+		{
+			pd_error( x, "unexpected value for argument 4 ['init?]'. Possible values: intern, info, update " );
+			return NULL;
+		}
+	}
+	else if(
+		argc >= 4
+		&& argv[3].a_type == A_FLOAT
+	)
+	{
+		pd_error( x, "unexpected value for argument 4 ['init?']. Possible values: intern, info, update " );
+		return NULL;
+	}
+	else
+	{
+		x->init = 0;
 	}
 
 	x->fromObjIn_in =
@@ -751,6 +788,51 @@ void property_input(
 			atom_getfloat( & argv[3] )
 		);
 	}
+
+	else if(
+		// init ( )
+		atom_getsymbol( & argv[0] ) == gensym( "init" )
+		&& atom_getint( &argv[1] ) == 0
+	)
+	{
+		if( x->init == gensym( "intern" ) )
+		{
+			t_atom val;
+			SETFLOAT( & val, x->value );
+			if( x->send_sym && x->send_sym->s_thing )
+			{
+				typedmess(
+					x->send_sym->s_thing,
+					&s_float,
+					1,
+					&val
+				);
+			}
+		}
+		else if( x->init == gensym( "info" ) )
+		{
+			// output "info ( <property> ( <val> ) )"
+			property_output(
+				x,
+				gensym("info")
+			);
+		}
+		else if( x->init == gensym( "update" ) )
+		{
+			// output "update ( <property> ( <val> ) )"
+			property_output(
+				x,
+				gensym("update")
+			);
+		}
+		outlet_list(
+			x->redirect_out,
+			&s_list,
+			argc,
+			argv
+		);
+	}
+
 	else
 	{
 		outlet_list(
@@ -832,6 +914,7 @@ typedef struct s_propertySym {
 	t_symbol* value;
 	t_symbol* rcv_sym;
 	t_symbol* send_sym;
+	t_symbol* init;
 	t_inlet* fromObjIn_in;
 	t_outlet* out;
 	t_outlet* redirect_out;
@@ -885,7 +968,10 @@ t_class* register_propertySym(
 			0
 		);
 
+	// "sdPack" interface
 	class_addlist( class, propertySym_input );
+
+	// internal interface
 	class_addmethod(
 		class,
 		(t_method )propertySym_set,
@@ -982,17 +1068,37 @@ void* propertySym_init(
 	{
 		x->value = gensym("");
 	}
-	if( argc >= 4 )
+
+	if(
+		argc >= 4
+		&& argv[3].a_type == A_SYMBOL
+	)
 	{
-		//output:
-		t_atom val;
-		SETSYMBOL( & val, x->value );
-		typedmess(
-			x->send_sym->s_thing,
-			&s_symbol,
-			1,
-			&val
-		);
+		if(
+			atom_getsymbol( & argv[3] ) == gensym("intern")
+			|| atom_getsymbol( & argv[3] ) == gensym("info")
+			|| atom_getsymbol( & argv[3] ) == gensym("update")
+		)
+		{
+			x->init = atom_getsymbol( &argv[3] );
+		}
+		else
+		{
+			pd_error( x, "unexpected value for argument 4 'init?'. Possible values: intern, info, update " );
+			return NULL;
+		}
+	}
+	else if(
+		argc >= 4
+		&& argv[3].a_type == A_FLOAT
+	)
+	{
+		pd_error( x, "unexpected value for argument 4 ['init?']. Possible values: intern, info, update " );
+		return NULL;
+	}
+	else
+	{
+		x->init = 0;
 	}
 
 	x->fromObjIn_in =
@@ -1084,6 +1190,51 @@ void propertySym_input(
 			atom_getsymbol( & argv[3] )
 		);
 	}
+
+	else if(
+		// init ( )
+		atom_getsymbol( & argv[0] ) == gensym( "init" )
+		&& atom_getint( &argv[1] ) == 0
+	)
+	{
+		if( x->init == gensym( "intern" ) )
+		{
+			t_atom val;
+			SETSYMBOL( & val, x->value );
+			if( x->send_sym && x->send_sym->s_thing )
+			{
+				typedmess(
+					x->send_sym->s_thing,
+					&s_symbol,
+					1,
+					&val
+				);
+			}
+		}
+		else if( x->init == gensym( "info" ) )
+		{
+			// output "info ( <property> ( <val> ) )"
+			propertySym_output(
+				x,
+				gensym("info")
+			);
+		}
+		else if( x->init == gensym( "update" ) )
+		{
+			// output "update ( <property> ( <val> ) )"
+			propertySym_output(
+				x,
+				gensym("update")
+			);
+		}
+		outlet_list(
+			x->redirect_out,
+			&s_list,
+			argc,
+			argv
+		);
+	}
+
 	else
 	{
 		outlet_list(
