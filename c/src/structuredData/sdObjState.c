@@ -1581,12 +1581,11 @@ void propertyList_set(
 
 	if( x->send_sym && x->send_sym->s_thing )
 	{
-		val = &argv[3];
 		typedmess(
 			x->send_sym->s_thing,
-			&s_symbol,
+			&s_list,
 			new_value_count,
-			val
+			argv
 		);
 	}
 	// output "update ( <propertyList> ( <val> ... ) )"
