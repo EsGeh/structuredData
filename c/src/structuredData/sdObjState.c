@@ -34,7 +34,7 @@ void sdObjState_setup()
 	objState_class = register_objState( gensym("sdObjState") );
 	property_class = register_property( gensym("sdProperty") );
 	propertySym_class = register_propertySym( gensym("sdPropertySym") );
-	propertyList_class = register_propertySym( gensym("sdPropertyList") );
+	propertyList_class = register_propertyList( gensym("sdPropertyList") );
 }
 
 // SymList: a list of t_symbol
