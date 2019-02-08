@@ -394,6 +394,7 @@ void packFromHuman_exit(
 	(*index) ++; \
 }
 
+// recursively parse the input:
 int packFromHuman_fromHuman(
 	// input:
 	int argc,
@@ -404,32 +405,20 @@ int packFromHuman_fromHuman(
 	unsigned int* outCount,
 	t_atom* outputAtoms,
 	// read pointer:
-	unsigned int* index
+	unsigned int* index,
+	// recursion depth
+	unsigned int depth
 )
 {
 	// EOF:
 	if( *index >= argc )
 		return 0;
+	
+	//char buf[256];
 
-	t_atom* packName;
-	unsigned int indexStart = *outCount;
-	/*
-	char buf[256];
-	atom_string(&argv[*index], buf, 255);
-	post("START: %s", buf);
-	*/
-	GET_PACKNAME( packName );
-	/*
-	atom_string(&argv[*index], buf, 255);
-	post("(: %s", buf);
-	*/
-	GET_SYM( "(" );
-
-	outputAtoms[*outCount] = *packName; (*outCount)++;
-	// size can only be set in the end
-	(*outCount)++;
-
-	do
+	while(
+		(*index) < argc
+	)
 	{
 		// ARBITRARY CONTENT:
 		while(
@@ -448,37 +437,87 @@ int packFromHuman_fromHuman(
 			outputAtoms[*outCount] = argv[*index]; (*outCount)++;
 			(*index)++;
 		}
+
+		// '(' indicates a "pdPack": <packname> ( ... )
+		//                                      /\
+		//                                      ||
 		if(
 			(*index) < argc
 			&&
 			atom_getsymbol( &argv[*index] ) == gensym("(")
 		)
 		{
+			//post("(");
+
+			if( (*index) == 0)
+			{
+				post("at pos 0: got '(' without preceeding 'packname'", (*index));
+				return 1;
+			}
+			// step back one pos, where the pack begins:
+			// '(' indicates a "pdPack": <packname> ( ... )
+			//                              /\
+			//                              ||
+			//                           indexStart
 			(*index) -= 1;
 			(*outCount) -= 1;
+
+			t_atom* packName;
+			unsigned int indexStart = *outCount;
+
+			/*
+			char buf[256];
+			atom_string(&argv[*index], buf, 255);
+			post("START: %s", buf);
+			*/
+			GET_PACKNAME( packName );
+			/*
+			atom_string(&argv[*index], buf, 255);
+			post("(: %s", buf);
+			*/
+			outputAtoms[*outCount] = *packName; (*outCount)++;
+
+			GET_SYM( "(" );
+			// size can only be set in the end
+			(*outCount)++;
+			
+			// recursively read the content of the pack:
 			int err =
 				packFromHuman_fromHuman(
 					argc,
 					argv,
 					outCount,
 					outputAtoms,
-					index
+					index,
+					depth+1
 				);
 			if( err )
 				return err;
+
+			GET_SYM( ")" );
+
+			SETFLOAT(
+				&outputAtoms[indexStart+1],
+				(*outCount) - (indexStart+2)
+			);
+		}
+		// ')' without opening '(':
+		else if( (*index) < argc )
+		{
+			if(
+				depth > 0
+			)
+			{
+				// this ')' is supposed to be consumed by the caller
+				return 0;
+			}
+			else
+			{
+				post("at pos %i: got ')' before opening '('", (*index));
+				return 1;
+			}
 		}
 	}
-	while(
-		(*index) < argc
-		&&
-		atom_getsymbol( &argv[*index] ) != gensym(")")
-	);
-
-	GET_SYM( ")" );
-	SETFLOAT(
-		&outputAtoms[indexStart+1],
-		(*outCount) - (indexStart+2)
-	);
 	return 0;
 }
 
@@ -498,7 +537,8 @@ void packFromHuman_input(
 			argv,
 			&outCount,
 			outputAtoms,
-			&index
+			&index,
+			0 // recursion depth
 		)
 	)
 	{

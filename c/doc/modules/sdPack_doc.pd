@@ -49,6 +49,7 @@
 #X obj 646 206 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
 #X msg 529 175 list get a b c;
+#X text 435 404 produce an error:;
 #X connect 0 0 1 0;
 #X connect 1 0 7 0;
 #X connect 2 0 1 1;
