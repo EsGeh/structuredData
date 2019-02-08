@@ -1,5 +1,5 @@
-#N canvas 896 30 702 189 10;
-#N canvas 0 30 894 854 example 1;
+#N canvas 800 30 798 570 10;
+#N canvas 0 30 798 570 example 1;
 #X msg 404 173 pack1 ( bla ) \, pack2 ( blubb );
 #X msg 174 93 clear;
 #X obj 402 208 sgPackFromHuman;
@@ -21,6 +21,10 @@
 #X obj 124 248 sdData bang pop popRev serialize serializeRev, f 83
 ;
 #X msg 439 97 set pack 5 0 1 2 3 4;
+#X msg 244 27 set pack1 1 1 pack2 1 2 pack3 1 3 \, filterAccept pack2
+\, bang;
+#X msg 240 54 set pack1 1 1 pack2 1 2 pack3 1 3 \, filterReject pack2
+\, bang;
 #X connect 0 0 2 0;
 #X connect 1 0 17 0;
 #X connect 2 0 17 1;
@@ -38,6 +42,8 @@
 #X connect 17 3 14 0;
 #X connect 17 4 15 0;
 #X connect 18 0 17 0;
+#X connect 19 0 17 0;
+#X connect 20 0 17 0;
 #X restore 225 65 pd example;
 #X text 15 16 sgData is a sequence of sgPacks;
 #X text 31 45 create by accumulating sgPacks:;

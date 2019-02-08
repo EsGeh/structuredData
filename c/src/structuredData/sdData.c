@@ -86,6 +86,19 @@ void data_clear(
 	t_data *x
 );
 
+void data_filterPacksAccept(
+	t_data *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+void data_filterPacksReject(
+	t_data *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
 // output packs:
 void data_bang(t_data *x);
 
@@ -156,6 +169,20 @@ t_class* register_data(
 		gensym("clear"),
 		0
 	);
+	class_addmethod(
+		class,
+		(t_method )data_filterPacksAccept,
+		gensym("filterAccept"),
+		A_GIMME,
+		0
+	);
+	class_addmethod(
+		class,
+		(t_method )data_filterPacksReject,
+		gensym("filterReject"),
+		A_GIMME,
+		0
+	);
 
 	class_addmethod(
 		class,
@@ -163,7 +190,6 @@ t_class* register_data(
 		gensym("pop"),
 		0
 	);
-
 	class_addmethod(
 		class,
 		(t_method )data_popRev,
@@ -371,6 +397,84 @@ void data_clear(
 )
 {
 	PackListClear( & x->packs );
+}
+
+void data_filterPacksAccept(
+	t_data *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	if( ! PackListIsEmpty( & x->packs ) )
+	{
+		PackEl* pEl = PackListGetFirst( & x->packs );
+		do
+		{
+			t_atom* packName = & (pEl->pData->atoms[0]);
+			/*
+			char buf[256];
+			atom_string( packName, buf, 255 );
+			post( "pack: %s", buf );
+			*/
+			int accept = 0;
+			for( int iAcc = 0; iAcc< argc; iAcc++ )
+			{
+				if( atom_getsymbol( packName ) == atom_getsymbol( &argv[iAcc] ) )
+				{
+					accept = 1;
+					break;
+				}
+			}
+			PackEl* next = PackListGetNext( & x->packs, pEl );
+			if( !accept )
+			{
+				PackListDel( & x->packs, pEl );
+				//post( "rejected!" );
+			}
+			pEl = next;
+		}
+		while( pEl != NULL );
+	}
+}
+
+void data_filterPacksReject(
+	t_data *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	if( ! PackListIsEmpty( & x->packs ) )
+	{
+		PackEl* pEl = PackListGetFirst( & x->packs );
+		do
+		{
+			t_atom* packName = & (pEl->pData->atoms[0]);
+			/*
+			char buf[256];
+			atom_string( packName, buf, 255 );
+			post( "pack: %s", buf );
+			*/
+			int accept = 1;
+			for( int iAcc = 0; iAcc< argc; iAcc++ )
+			{
+				if( atom_getsymbol( packName ) == atom_getsymbol( &argv[iAcc] ) )
+				{
+					accept = 0;
+					break;
+				}
+			}
+			PackEl* next = PackListGetNext( & x->packs, pEl );
+			if( !accept )
+			{
+				PackListDel( & x->packs, pEl );
+				//post( "rejected!" );
+			}
+			pEl = next;
+		}
+		while( pEl != NULL );
+	}
 }
 
 
