@@ -83,6 +83,13 @@ void objState_input(
 	t_atom *argv
 );
 
+void objState_rawinput(
+	t_objState* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
 void objState_fromProps(
 	t_objState* x,
 	t_symbol *s,
@@ -113,7 +120,17 @@ t_class* register_objState(
 
 	// handle events
 	class_addlist( class, objState_input );
-	// handle messages:
+
+	// handle "raw" messages:
+	class_addmethod(
+		class,
+		(t_method )objState_rawinput,
+		gensym("raw"),
+		A_GIMME,
+		0
+	);
+
+	// from properties:
 	class_addmethod(
 		class,
 		(t_method )objState_fromProps,
@@ -175,7 +192,8 @@ void* objState_init(
 		& x->x_obj.ob_pd,
 		x->objName
 	);
-	// receive:
+
+	// receive GLOBAL:
 	pd_bind(
 		& x->x_obj.ob_pd,
 		x->globalIn
@@ -202,16 +220,17 @@ void objState_exit(
 	t_objState* x
 )
 {
-	// unbind:
+
 	pd_unbind(
 		& x->x_obj.ob_pd,
 		x->objName
 	);
-	// unbind:
+
 	pd_unbind(
 		& x->x_obj.ob_pd,
 		x->globalIn
 	);
+
 	freebytes( x->accumlArray, sizeof( t_atom ) * ACCUML_SIZE);
 	SymListExit( x->outList );
 	freebytes( x->outList, sizeof( SymList ) );
@@ -465,6 +484,172 @@ void objState_input(
 		);
 	}
 	*/
+
+}
+
+void objState_rawinput(
+	t_objState* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+
+	if( argc >= 1 )
+	{
+		if(
+			atom_getsymbol( & argv[0] ) == gensym("out")
+		)
+		{
+
+			// out add <dest>
+			if(
+				argc == 3
+				&& atom_getsymbol( & argv[1] ) == gensym("add")
+			)
+			{
+				t_symbol* pDest = atom_getsymbol( & argv[3] );
+				if( ! SymListGetElement( x->outList, pDest, cmp_symbol_ptrs ) )
+				{
+					char buf[256];
+					atom_string( & argv[3], buf, 255 );
+					//post( "adding dest: %s", buf );
+					SymListAdd( x->outList, pDest );
+				}
+			}
+
+			// out del <dest>
+			else if(
+				argc == 3
+				&& atom_getsymbol( & argv[1] ) == gensym("del")
+			)
+			{
+				t_symbol* pDest = atom_getsymbol( & argv[3] );
+				SymEl *pDestEl = SymListGetElement( x->outList, pDest, cmp_symbol_ptrs );
+				if( pDestEl )
+				{
+					SymListDel( x->outList, pDestEl );
+				}
+			}
+
+			// out clear
+			else if(
+				argc == 2
+				&& atom_getsymbol( & argv[1] ) == gensym("clear")
+			)
+			{
+				SymListClear( x->outList );
+			}
+			else
+			{
+				pd_error(
+					x,
+					"wrong syntax for message starting with 'out'"
+				);
+			}
+
+		}
+		if(
+			atom_getsymbol( & argv[0] ) == gensym("get")
+		)
+		{
+			x->last_method = LAST_METHOD_GET;
+
+			if(
+				// get <property>
+				argc == 2
+				&& (argv[1].a_type == A_SYMBOL)
+			)
+			{
+				// redirect:
+				t_symbol* msg_selector = atom_getsymbol( & argv[0] );
+				outlet_anything(
+					x->toProperties_out,
+					msg_selector,
+					argc-1,
+					& argv[1]
+				);
+			}
+
+			else if(
+				// get out dest1 ...
+				argc >= 2
+				&& atom_getsymbol( & argv[1] ) == gensym("out")
+			)
+			{
+				int out_count = argc-2;
+				// (temporarily) change outList:
+				SymList* old_outList = x->outList;
+				x->outList = getbytes( sizeof( SymList ) );
+				SymListInit( x->outList );
+				for(unsigned int i=0; i< out_count; i++)
+				{
+					SymListAdd( x->outList, atom_getsymbol( & argv[2+i] ) );
+				}
+				// query properties:
+				outlet_anything(
+					x->toProperties_out,
+					gensym("get"),
+					0,
+					NULL
+				);
+				// change back outList:
+				SymListExit( x->outList );
+				freebytes( x->outList, sizeof( SymList ) );
+				x->outList = old_outList;
+			}
+
+			else if(
+				// get <property> out dest1 ...
+				argc >= 3
+				&& (argv[1].a_type == A_SYMBOL)
+				&& atom_getsymbol( & argv[2] ) == gensym("out")
+			)
+			{
+				int out_count = argc-3;
+				// (temporarily) change outList:
+				SymList* old_outList = x->outList;
+				x->outList = getbytes( sizeof( SymList ) );
+				SymListInit( x->outList );
+				for(unsigned int i=0; i< out_count; i++)
+				{
+					SymListAdd( x->outList, atom_getsymbol( & argv[3+i] ) );
+				}
+				// query properties:
+				outlet_anything(
+					x->toProperties_out,
+					gensym("get"),
+					1,
+					& argv[1]
+				);
+				// change back outList:
+				SymListExit( x->outList );
+				freebytes( x->outList, sizeof( SymList ) );
+				x->outList = old_outList;
+			}
+
+			else
+			{
+				pd_error(
+					x,
+					"wrong syntax for message starting with 'get'"
+				);
+			}
+
+		}
+		else
+		{
+			x->last_method = LAST_METHOD_SET;
+			// redirect:
+			t_symbol* msg_selector = atom_getsymbol( & argv[0] );
+			outlet_anything(
+				x->toProperties_out,
+				msg_selector,
+				argc-1,
+				& argv[1]
+			);
+		}
+	}
 }
 
 void objState_fromProps(
