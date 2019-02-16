@@ -1438,10 +1438,8 @@ void propertySym_output(
 // propertyList
 //----------------------------------
 
-#pragma GCC diagnostic ignored "-Wunused-value"
-DECL_LIST(AtomList, AtomEl, t_atom,getbytes,freebytes,)
-DEF_LIST(AtomList, AtomEl, t_atom,getbytes,freebytes,)
-#pragma GCC diagnostic pop
+DECL_LIST(AtomList, AtomEl, t_atom,getbytes,freebytes,freebytes)
+DEF_LIST(AtomList, AtomEl, t_atom,getbytes,freebytes,freebytes)
 
 typedef struct s_propertyList {
   t_object x_obj;
