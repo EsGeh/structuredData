@@ -39,6 +39,9 @@ void sdObjState_setup()
 
 // SymList: a list of t_symbol
 
+/* symbols are handled by pd
+ * they should never to be released manually:
+ */
 #pragma GCC diagnostic ignored "-Wunused-value"
 DECL_LIST(SymList, SymEl, t_symbol,getbytes,freebytes,)
 DEF_LIST(SymList, SymEl, t_symbol,getbytes,freebytes,);
@@ -49,11 +52,14 @@ DEF_LIST(SymList, SymEl, t_symbol,getbytes,freebytes,);
 // objState
 //----------------------------------
 
+typedef enum e_last_method { LAST_METHOD_SET, LAST_METHOD_GET } t_last_method;
+
 typedef struct s_objState {
   t_object x_obj;
 	t_symbol* objName;
 	t_symbol* globalIn;
 	SymList* outList;
+	t_last_method last_method;
 	int accumlPos;
 	t_atom* accumlArray;
 	t_inlet* fromObjIn_in;
@@ -105,7 +111,9 @@ t_class* register_objState(
 			0
 		);
 
+	// handle events
 	class_addlist( class, objState_input );
+	// handle messages:
 	class_addmethod(
 		class,
 		(t_method )objState_fromProps,
@@ -180,7 +188,7 @@ void* objState_init(
 		inlet_new(
 			& x->x_obj,
 			& x->x_obj.ob_pd,
-			gensym("list"),
+			&s_list,
 			gensym("fromProps")
 		);
 
@@ -297,6 +305,7 @@ void objState_input(
 			return;
 		}
 	}
+
 	// get ( <property> )
 	// get ( <property> out ( dest1 ... ) )
 	// get ( out ( dest1 ... ) )
@@ -305,17 +314,20 @@ void objState_input(
 		&& atom_getsymbol( & argv[0] ) == gensym("get")
 	)
 	{
+		x->last_method = LAST_METHOD_GET;
+
 		// get ( <property> )
 		if(
 			atom_getint( &argv[1] ) == 1
 			// && atom_getsymbol( &argv[2] ) != gensym("out")
 		)
 		{
-			outlet_list(
+			// send to obj: "get <property>"
+			outlet_anything(
 				x->toProperties_out,
-				&s_list,
-				argc,
-				argv
+				gensym("get"),
+				1,
+				& argv[2]
 			);
 		}
 		// get ( <property> out ( dest1 ... ) )
@@ -334,16 +346,13 @@ void objState_input(
 			{
 				SymListAdd( x->outList, atom_getsymbol( & argv[5+i] ) );
 			}
+			// send to obj: "get <property>"
 			// query properties:
-			t_atom output[3];
-			SETSYMBOL( &output[0], gensym("get") );
-			SETFLOAT( &output[1], 1 );
-			output[2] = argv[2];
-			outlet_list(
+			outlet_anything(
 				x->toProperties_out,
-				&s_list,
-				3,
-				output
+				gensym("get"),
+				1,
+				& argv[2]
 			);
 			// change back outList:
 			SymListExit( x->outList );
@@ -369,15 +378,12 @@ void objState_input(
 				SymListAdd( x->outList, atom_getsymbol( & argv[4+i] ) );
 			}
 
-			// send "get ( )":
-			t_atom output[2];
-			SETSYMBOL( &output[0], gensym("get") );
-			SETFLOAT( &output[1], 0 );
-			outlet_list(
+			// send to obj: "get ( )":
+			outlet_anything(
 				x->toProperties_out,
-				&s_list,
-				2,
-				output
+				gensym("get"),
+				0,
+				NULL
 			);
 			// append "pseudo property" <out> ( ... ):
 			int out_size = SymListGetSize( old_outList );
@@ -398,12 +404,12 @@ void objState_input(
 			x->accumlPos = -1;
 		}
 	}
-	// set ( <property> ( val1 [...] ) ... )      (...: for list properties)
+
+	// <event_type> ( <property> ( val1 [...] ) ... )      (...: for list properties)
 	//   (you can set several properties at once...)
-	else if(
-		atom_getsymbol( & argv[0] ) == gensym("set")
-	)
+	else
 	{
+		x->last_method = LAST_METHOD_SET;
 		int currentPos = 2;
 		while( currentPos < argc )
 		{
@@ -413,50 +419,52 @@ void objState_input(
 				pd_error( x, "invalid pack at position %i: not enough parameters", currentPos );
 				return;
 			}
-			// send: set ( <property> <val1> [...] )
-			t_atom* toSend = getbytes( sizeof( t_atom ) * (currentSize+2+1) );
-			SETSYMBOL( &toSend[0], gensym("set") );
-			SETFLOAT( &toSend[1], currentSize+1 );
-			toSend[2] = argv[currentPos] ;
+			// send to obj: set <property> <val1> [...]
+			t_atom* toSend = getbytes( sizeof( t_atom ) * (currentSize+1) );
+			toSend[0] = argv[currentPos] ;
 			for( int i=0; i < currentSize; i++ )
 			{
-				toSend[3+i] = argv[currentPos+2+i];
+				toSend[1+i] = argv[currentPos+2+i];
 			}
-			outlet_list(
+			outlet_anything(
 				x->toProperties_out,
-				&s_list,
-				currentSize+2+1,
+				gensym("set"),
+				currentSize+1,
 				toSend
 			);
-			freebytes( toSend, sizeof( t_atom ) * (currentSize+2+1) );
+			freebytes( toSend, sizeof( t_atom ) * (currentSize+1) );
 			currentPos = currentPos + 2 + currentSize ;
 		}
+		if(
+			atom_getsymbol( & argv[0] ) != gensym("set")
+		)
+		{
+			t_symbol* event_type = NULL;
+			event_type = atom_getsymbol( & argv[0]);
+			outlet_anything(
+				x->toProperties_out,
+				event_type,
+				0,
+				NULL
+			);
+		}
 	}
+
+	/*
 	// init ( )
 	else if(
 		atom_getsymbol( & argv[0] ) == gensym("init")
 		&& atom_getint( & argv[1] ) == 0
 	)
 	{
-		outlet_list(
+		outlet_anything(
 			x->toProperties_out,
-			&s_list,
-			argc,
-			argv
+			gensym("init"),
+			0,
+			NULL
 		);
 	}
-	else
-	{
-		// redirect any other message:
-		outlet_list(
-			x->toProperties_out,
-			&s_list,
-			argc,
-			argv
-		);
-		//pd_error(x, "unknown syntax!");
-		return;
-	}
+	*/
 }
 
 void objState_fromProps(
@@ -469,21 +477,67 @@ void objState_fromProps(
 	if( x->accumlPos < 0)
 	{
 		//post("fromProps");
+		// send to all registered "listeners"( = every obj in x->outlist)
 		LIST_FORALL_BEGIN(SymList,SymEl,t_symbol,x->outList,i,pEl)
 			if( pEl->pData->s_thing )
 			{
-				//post("sending to %s", pEl->pData->s_name);
-				typedmess( pEl->pData->s_thing, &s_list, argc, argv );
+				// <prop> <val1> ...
+				// (<package_name> ::= info | update | ... )
+
+				// send as event: <package_name> ( <prop> ( <val1> ...  ) )
+				int val_count = argc-1;
+				t_atom* output_buf = getbytes( sizeof( t_atom ) * (val_count + 4) );
+				{
+					switch( x->last_method )
+					{
+						case LAST_METHOD_GET:
+							SETSYMBOL( & output_buf[0], gensym("info") );
+							break;
+						case LAST_METHOD_SET:
+							SETSYMBOL( & output_buf[0], gensym("update") );
+							break;
+					}
+					SETFLOAT( & output_buf[1], val_count + 2);
+					output_buf[2] = argv[0];
+					SETFLOAT( & output_buf[3], val_count );
+					for( int i=0; i<val_count; i++ )
+					{
+						output_buf[4+i] = argv[1+i];
+					}
+
+					// send event:
+					typedmess(
+							pEl->pData->s_thing,
+							&s_list,
+							val_count + 4,
+							output_buf
+						);
+					//typedmess( pEl->pData->s_thing, &s_list, argc, argv );
+				}
+				freebytes( output_buf, sizeof( t_atom ) * (val_count + 4) );
 			}
 		LIST_FORALL_END(SymList,SymEl,t_symbol,x->outList,i,pEl)
 	}
 	else
+		// accumulate output:
 	{
-		for( unsigned int i=0; i< argc-2; i++ )
+		t_atom* accuml = x->accumlArray;
+		int val_count = argc-1;
+
+		// <property>
+		accuml[ x->accumlPos ] = argv[0];
+		x->accumlPos ++;
+
+		// <property> (
+		SETFLOAT( & accuml[ (x->accumlPos) ], val_count );
+		x->accumlPos ++;
+
+		// <property> ( <val1> ... ) )
+		for( unsigned int i=0; i< val_count; i++ )
 		{
-			x-> accumlArray[ x->accumlPos + i] = argv[ 2+i ];
+			x-> accumlArray[ x->accumlPos + i] = argv[ 1+i ];
+			x->accumlPos ++;
 		}
-		x->accumlPos += argc-2;
 	}
 }
 
@@ -512,7 +566,7 @@ typedef struct s_property {
 	t_float value;
 	t_symbol* rcv_sym;
 	t_symbol* send_sym;
-	t_symbol* init;
+	//t_symbol* init;
 	t_inlet* fromObjIn_in;
 	t_outlet* out;
 	t_outlet* redirect_out;
@@ -527,7 +581,7 @@ void property_exit(
 	struct s_property* x
 );
 
-void property_input(
+void property_get(
 	t_property* x,
 	t_symbol *s,
 	int argc,
@@ -536,18 +590,30 @@ void property_input(
 
 void property_set(
 	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+/*
+void property_initbang(
+	t_property* x
+);
+*/
+
+void property_priv_set(
+	t_property* x,
 	t_float newVal
 );
 
-void property_set_noupdate(
+void property_priv_set_noupdate(
 	t_property* x,
 	t_float newVal
 );
 
 // helper:
 void property_output(
-	t_property* x,
-	t_symbol* package_name
+	t_property* x
 );
 
 t_class* register_property(
@@ -566,21 +632,42 @@ t_class* register_property(
 			0
 		);
 
-	// "sdPack" interface:
-	class_addlist( class, property_input );
-
-	// "internal" messages
+	// "external" interface:
+	class_addmethod(
+		class,
+		(t_method )property_get,
+		gensym("get"),
+		A_GIMME,
+		0
+	);
 	class_addmethod(
 		class,
 		(t_method )property_set,
 		gensym("set"),
+		A_GIMME,
+		0
+	);
+	/*
+	class_addmethod(
+		class,
+		(t_method )property_initbang,
+		gensym("init"),
+		0
+	);
+	*/
+
+	// "priv" messages
+	class_addmethod(
+		class,
+		(t_method )property_priv_set,
+		gensym("priv.set"),
 		A_FLOAT,
 		0
 	);
 	class_addmethod(
 		class,
-		(t_method )property_set_noupdate,
-		gensym("set_noupdate"),
+		(t_method )property_priv_set_noupdate,
+		gensym("priv.set_noupdate"),
 		A_FLOAT,
 		0
 	);
@@ -667,6 +754,7 @@ void* property_init(
 		x->value = 0;
 	}
 
+	/*
 	if(
 		argc >= 4
 		&& argv[3].a_type == A_SYMBOL
@@ -678,7 +766,8 @@ void* property_init(
 			|| atom_getsymbol( & argv[3] ) == gensym("update")
 		)
 		{
-			x->init = atom_getsymbol( &argv[3] );
+			x->init =
+				atom_getsymbol( &argv[3] );
 		}
 		else
 		{
@@ -698,6 +787,7 @@ void* property_init(
 	{
 		x->init = 0;
 	}
+	*/
 
 	x->fromObjIn_in =
 		x->x_obj.ob_inlet;
@@ -724,110 +814,40 @@ void property_exit(
 	}
 }
 
-void property_input(
+void property_get(
 	t_property* x,
 	t_symbol *s,
 	int argc,
 	t_atom *argv
 )
 {
-	//post("sdProperty: input");
+
 	if(
-		(argc < 2)
-		|| (argv[0].a_type != A_SYMBOL)
-		|| (argv[1].a_type != A_FLOAT)
-		|| ((atom_getint( &argv[1] ) + 2) != argc)
+		// get <property>
+		argc == 1
+		&& atom_getsymbol( &argv[0] ) == x->name
 	)
 	{
-		//post("argc: %i, argv[1]: %i", argc, atom_getint( & argv[1] ));
-		pd_error(x, "invalid sdPack");
-		return;
+		// output "<val>"
+		property_output(
+			x
+			//gensym("info")
+		);
 	}
 
-	if(
-		// get ( <property> )
-		atom_getsymbol( & argv[0] ) == gensym( "get" )
-		&& atom_getint( &argv[1] ) == 1
-		&& atom_getsymbol( &argv[2] ) == x->name
-
+	else if(
+		// get
+		argc == 0
 	)
 	{
 		// output "info ( <property> ( <val> ) )"
 		property_output(
-			x,
-			gensym("info")
+			x
+			//gensym("info")
 		);
-	}
-	else if(
-		// get ( )
-		atom_getsymbol( & argv[0] ) == gensym( "get" )
-		&& atom_getint( &argv[1] ) == 0
-	)
-	{
-		// output "info ( <property> ( <val> ) )"
-		property_output(
-			x,
-			gensym("info")
-		);
-		outlet_list(
+		outlet_anything(
 			x->redirect_out,
-			&s_list,
-			argc,
-			argv
-		);
-	}
-	else if(
-		// set ( <property> <val> )
-		atom_getsymbol( & argv[0] ) == gensym( "set" )
-		&& atom_getint( &argv[1] ) == 2
-		&& atom_getsymbol( &argv[2] ) == x->name
-	)
-	{
-		property_set(
-			x,
-			atom_getfloat( & argv[3] )
-		);
-	}
-
-	else if(
-		// init ( )
-		atom_getsymbol( & argv[0] ) == gensym( "init" )
-		&& atom_getint( &argv[1] ) == 0
-	)
-	{
-		if( x->init == gensym( "intern" ) )
-		{
-			t_atom val;
-			SETFLOAT( & val, x->value );
-			if( x->send_sym && x->send_sym->s_thing )
-			{
-				typedmess(
-					x->send_sym->s_thing,
-					&s_float,
-					1,
-					&val
-				);
-			}
-		}
-		else if( x->init == gensym( "info" ) )
-		{
-			// output "info ( <property> ( <val> ) )"
-			property_output(
-				x,
-				gensym("info")
-			);
-		}
-		else if( x->init == gensym( "update" ) )
-		{
-			// output "update ( <property> ( <val> ) )"
-			property_output(
-				x,
-				gensym("update")
-			);
-		}
-		outlet_list(
-			x->redirect_out,
-			&s_list,
+			s,
 			argc,
 			argv
 		);
@@ -835,16 +855,93 @@ void property_input(
 
 	else
 	{
-		outlet_list(
+		outlet_anything(
 			x->redirect_out,
-			&s_list,
+			s,
 			argc,
 			argv
 		);
 	}
+
 }
 
 void property_set(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+
+	if(
+		// set <property> <val>
+		argc == 2
+		&& atom_getsymbol( &argv[0] ) == x->name
+		&& (argv[1].a_type == A_FLOAT)
+	)
+	{
+		property_priv_set(
+			x,
+			atom_getfloat( & argv[1] )
+		);
+	}
+
+	else
+	{
+		outlet_anything(
+			x->redirect_out,
+			s,
+			argc,
+			argv
+		);
+	}
+
+
+}
+
+/*
+void property_initbang(
+	t_property* x
+)
+{
+
+	if( x->init == gensym( "intern" ) )
+	{
+		t_atom val;
+		SETFLOAT( & val, x->value );
+		if( x->send_sym && x->send_sym->s_thing )
+		{
+			typedmess(
+				x->send_sym->s_thing,
+				&s_float,
+				1,
+				&val
+			);
+		}
+	}
+
+	else if( x->init == gensym( "info" ) )
+	{
+		// output "info ( <property> ( <val> ) )"
+		property_output(
+			x
+			//gensym("info")
+		);
+	}
+
+	else if( x->init == gensym( "update" ) )
+	{
+		// output "update ( <property> ( <val> ) )"
+		property_output(
+			x
+			//gensym("update")
+		);
+	}
+
+}
+*/
+
+void property_priv_set(
 	t_property* x,
 	t_float newVal
 )
@@ -865,12 +962,12 @@ void property_set(
 	}
 	// output "update ( <property> ( <val> ) )"
 	property_output(
-		x,
-		gensym("update")
+		x
+		//gensym("update")
 	);
 }
 
-void property_set_noupdate(
+void property_priv_set_noupdate(
 	t_property* x,
 	t_float newVal
 )
@@ -879,27 +976,22 @@ void property_set_noupdate(
 	x->value = newVal;
 	// output "update ( <property> ( <val> ) )"
 	property_output(
-		x,
-		gensym("update")
+		x
+		//gensym("update")
 	);
 }
 
 void property_output(
-	t_property* x,
-	t_symbol* package_name
+	t_property* x
 )
 {
-	// output "<package_name> ( <propertySym> ( <val> ) )"
-	t_atom outArray[5];
-	SETSYMBOL( & outArray[0], package_name );
-	SETFLOAT( & outArray[1], 3 );
-	SETSYMBOL( & outArray[2], x->name );
-	SETFLOAT( & outArray[3], 1 );
-	SETFLOAT( & outArray[4], x->value );
-	outlet_list(
+	// output "<property> <val>"
+	t_atom outArray[1];
+	SETFLOAT( & outArray[0], x->value );
+	outlet_anything(
 		x->out,
-		&s_list,
-		5,
+		x->name,
+		1,
 		outArray
 	);
 }
@@ -914,7 +1006,7 @@ typedef struct s_propertySym {
 	t_symbol* value;
 	t_symbol* rcv_sym;
 	t_symbol* send_sym;
-	t_symbol* init;
+	//t_symbol* init;
 	t_inlet* fromObjIn_in;
 	t_outlet* out;
 	t_outlet* redirect_out;
@@ -929,7 +1021,7 @@ void propertySym_exit(
 	struct s_propertySym* x
 );
 
-void propertySym_input(
+void propertySym_get(
 	t_propertySym* x,
 	t_symbol *s,
 	int argc,
@@ -938,18 +1030,30 @@ void propertySym_input(
 
 void propertySym_set(
 	t_propertySym* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+/*
+void property_initbang(
+	t_property* x
+);
+*/
+
+void propertySym_priv_set(
+	t_propertySym* x,
 	t_symbol* newVal
 );
 
-void propertySym_set_noupdate(
+void propertySym_priv_set_noupdate(
 	t_propertySym* x,
 	t_symbol* newVal
 );
 
 // helper:
 void propertySym_output(
-	t_propertySym* x,
-	t_symbol* package_name
+	t_propertySym* x
 );
 
 t_class* register_propertySym(
@@ -968,21 +1072,42 @@ t_class* register_propertySym(
 			0
 		);
 
-	// "sdPack" interface
-	class_addlist( class, propertySym_input );
-
-	// internal interface
+	// "external" interface:
+	class_addmethod(
+		class,
+		(t_method )propertySym_get,
+		gensym("get"),
+		A_GIMME,
+		0
+	);
 	class_addmethod(
 		class,
 		(t_method )propertySym_set,
 		gensym("set"),
+		A_GIMME,
+		0
+	);
+	/*
+	class_addmethod(
+		class,
+		(t_method )propertySym_initbang,
+		gensym("init"),
+		0
+	);
+	*/
+
+	// "internal" messages
+	class_addmethod(
+		class,
+		(t_method )propertySym_priv_set,
+		gensym("priv.set"),
 		A_SYMBOL,
 		0
 	);
 	class_addmethod(
 		class,
-		(t_method )propertySym_set_noupdate,
-		gensym("set_noupdate"),
+		(t_method )propertySym_priv_set_noupdate,
+		gensym("priv.set_noupdate"),
 		A_SYMBOL,
 		0
 	);
@@ -1069,6 +1194,7 @@ void* propertySym_init(
 		x->value = gensym("");
 	}
 
+	/*
 	if(
 		argc >= 4
 		&& argv[3].a_type == A_SYMBOL
@@ -1100,6 +1226,7 @@ void* propertySym_init(
 	{
 		x->init = 0;
 	}
+	*/
 
 	x->fromObjIn_in =
 		x->x_obj.ob_inlet;
@@ -1126,77 +1253,97 @@ void propertySym_exit(
 	}
 }
 
-void propertySym_input(
+void propertySym_get(
 	t_propertySym* x,
 	t_symbol *s,
 	int argc,
 	t_atom *argv
 )
 {
-	//post("sdPropertySym: input");
-	if(
-		(argc < 2)
-		|| (argv[0].a_type != A_SYMBOL)
-		|| (argv[1].a_type != A_FLOAT)
-		|| ((atom_getint( &argv[1] ) + 2) != argc)
-	)
-	{
-		//post("argc: %i, argv[1]: %i", argc, atom_getint( & argv[1] ));
-		pd_error(x, "invalid sdPack");
-		return;
-	}
 
 	if(
-		// get ( <property> )
-		atom_getsymbol( & argv[0] ) == gensym( "get" )
-		&& atom_getint( &argv[1] ) == 1
-		&& atom_getsymbol( &argv[2] ) == x->name
+		// get <property>
+		argc == 1
+		&& atom_getsymbol( &argv[0] ) == x->name
 
 	)
 	{
 		// output "info ( <propertySym> ( <val> ) )"
 		propertySym_output(
-			x,
-			gensym("info")
-		);
-	}
-	else if(
-		// get ( )
-		atom_getsymbol( & argv[0] ) == gensym( "get" )
-		&& atom_getint( &argv[1] ) == 0
-	)
-	{
-		// output "info ( <property> ( <val> ) )"
-		propertySym_output(
-			x,
-			gensym("info")
-		);
-		outlet_list(
-			x->redirect_out,
-			&s_list,
-			argc,
-			argv
-		);
-	}
-	else if(
-		// set ( <propertySym> <val> )
-		atom_getsymbol( & argv[0] ) == gensym( "set" )
-		&& atom_getint( &argv[1] ) == 2
-		&& atom_getsymbol( &argv[2] ) == x->name
-	)
-	{
-		propertySym_set(
-			x,
-			atom_getsymbol( & argv[3] )
+			x
+			//gensym("info")
 		);
 	}
 
 	else if(
-		// init ( )
-		atom_getsymbol( & argv[0] ) == gensym( "init" )
-		&& atom_getint( &argv[1] ) == 0
+		// get
+		argc == 0
 	)
 	{
+		// output "info ( <property> ( <val> ) )"
+		propertySym_output(
+			x
+			//gensym("info")
+		);
+		outlet_anything(
+			x->redirect_out,
+			s,
+			argc,
+			argv
+		);
+	}
+
+	else
+	{
+		outlet_anything(
+			x->redirect_out,
+			s,
+			argc,
+			argv
+		);
+	}
+
+}
+
+void propertySym_set(
+	t_propertySym* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+
+	if(
+		// set <propertySym> <val>
+		argc == 2
+		&& atom_getsymbol( &argv[0] ) == x->name
+		&& (argv[1].a_type == A_SYMBOL)
+	)
+	{
+		propertySym_priv_set(
+			x,
+			atom_getsymbol( & argv[1] )
+		);
+	}
+
+	else
+	{
+		outlet_anything(
+			x->redirect_out,
+			s,
+			argc,
+			argv
+		);
+	}
+
+}
+
+/*
+void propertySym_initbang(
+	t_property* x
+)
+{
+
 		if( x->init == gensym( "intern" ) )
 		{
 			t_atom val;
@@ -1211,6 +1358,7 @@ void propertySym_input(
 				);
 			}
 		}
+
 		else if( x->init == gensym( "info" ) )
 		{
 			// output "info ( <property> ( <val> ) )"
@@ -1219,6 +1367,7 @@ void propertySym_input(
 				gensym("info")
 			);
 		}
+
 		else if( x->init == gensym( "update" ) )
 		{
 			// output "update ( <property> ( <val> ) )"
@@ -1227,26 +1376,11 @@ void propertySym_input(
 				gensym("update")
 			);
 		}
-		outlet_list(
-			x->redirect_out,
-			&s_list,
-			argc,
-			argv
-		);
-	}
 
-	else
-	{
-		outlet_list(
-			x->redirect_out,
-			&s_list,
-			argc,
-			argv
-		);
-	}
 }
+*/
 
-void propertySym_set(
+void propertySym_priv_set(
 	t_propertySym* x,
 	t_symbol* newVal
 )
@@ -1267,12 +1401,12 @@ void propertySym_set(
 	}
 	// output "update ( <property> ( <val> ) )"
 	propertySym_output(
-		x,
-		gensym("update")
+		x
+		//gensym("update")
 	);
 }
 
-void propertySym_set_noupdate(
+void propertySym_priv_set_noupdate(
 	t_propertySym* x,
 	t_symbol* newVal
 )
@@ -1280,27 +1414,22 @@ void propertySym_set_noupdate(
 	//post("sdPropertySym: set_noupdate");
 	x->value = newVal;
 	propertySym_output(
-		x,
-		gensym("update")
+		x
+		//gensym("update")
 	);
 }
 
 void propertySym_output(
-	t_propertySym* x,
-	t_symbol* package_name
+	t_propertySym* x
 )
 {
-	// output "<package_name> ( <propertySym> ( <val> ) )"
-	t_atom outArray[5];
-	SETSYMBOL( & outArray[0], package_name );
-	SETFLOAT( & outArray[1], 3 );
-	SETSYMBOL( & outArray[2], x->name );
-	SETFLOAT( & outArray[3], 1 );
-	SETSYMBOL( & outArray[4], x->value );
-	outlet_list(
+	// output "<propertySym> <val> "
+	t_atom outArray[1];
+	SETSYMBOL( & outArray[0], x->value );
+	outlet_anything(
 		x->out,
-		&s_list,
-		5,
+		x->name,
+		1,
 		outArray
 	);
 }
@@ -1335,7 +1464,7 @@ void propertyList_exit(
 	struct s_propertyList* x
 );
 
-void propertyList_input(
+void propertyList_get(
 	t_propertyList* x,
 	t_symbol *s,
 	int argc,
@@ -1349,16 +1478,23 @@ void propertyList_set(
 	t_atom *argv
 );
 
-void propertyList_set_noupdate(
+void propertyList_priv_set(
 	t_propertyList* x,
 	t_symbol *s,
 	int argc,
 	t_atom *argv
 );
 
-void propertyList_output(
+void propertyList_priv_set_noupdate(
 	t_propertyList* x,
-	t_symbol* package_name
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+// helper:
+void propertyList_output(
+	t_propertyList* x
 );
 
 t_class* register_propertyList(
@@ -1377,7 +1513,14 @@ t_class* register_propertyList(
 			0
 		);
 
-	class_addlist( class, propertyList_input );
+	// "external" interface:
+	class_addmethod(
+		class,
+		(t_method )propertyList_get,
+		gensym("get"),
+		A_GIMME,
+		0
+	);
 	class_addmethod(
 		class,
 		(t_method )propertyList_set,
@@ -1385,10 +1528,19 @@ t_class* register_propertyList(
 		A_GIMME,
 		0
 	);
+
+	// "private" interface:
 	class_addmethod(
 		class,
-		(t_method )propertyList_set_noupdate,
-		gensym("set_noupdate"),
+		(t_method )propertyList_priv_set,
+		gensym("priv.set"),
+		A_GIMME,
+		0
+	);
+	class_addmethod(
+		class,
+		(t_method )propertyList_priv_set_noupdate,
+		gensym("priv.set_noupdate"),
 		A_GIMME,
 		0
 	);
@@ -1484,82 +1636,54 @@ void propertyList_exit(
 	AtomListExit( & x->value );
 }
 
-void propertyList_input(
+void propertyList_get(
 	t_propertyList* x,
 	t_symbol *s,
 	int argc,
 	t_atom *argv
 )
 {
-	//post("sdPropertyList: input");
-	if(
-		(argc < 2)
-		|| (argv[0].a_type != A_SYMBOL)
-		|| (argv[1].a_type != A_FLOAT)
-		|| ((atom_getint( &argv[1] ) + 2) != argc)
-	)
-	{
-		//post("argc: %i, argv[1]: %i", argc, atom_getint( & argv[1] ));
-		pd_error(x, "invalid sdPack");
-		return;
-	}
 
 	if(
-		// get ( <property> )
+		// get <property>
 		(
-		atom_getsymbol( & argv[0] ) == gensym( "get" )
-		&& atom_getint( &argv[1] ) == 1
-		&& atom_getsymbol( &argv[2] ) == x->name
+		argc == 1
+		&& atom_getsymbol( &argv[0] ) == x->name
 		)
 	||
-		// get ( )
-		(
-		atom_getsymbol( & argv[0] ) == gensym( "get" )
-		&& atom_getint( &argv[1] ) == 0
-		)
+		// get
+		argc == 0
 	)
 	{
 		// output "info ( <property> ( <val> ... ) )"
 		propertyList_output(
-			x,
-			gensym( "info" )
+			x
+			//gensym( "info" )
 		);
-		// get ( ):
+		// get:
 		if(
-			atom_getsymbol( & argv[0] ) == gensym( "get" )
-			&& atom_getint( &argv[1] ) == 0
+			argc == 0
 		)
 		{
-			outlet_list(
+			outlet_anything(
 				x->redirect_out,
-				&s_list,
+				s,
 				argc,
 				argv
 			);
 		}
 	}
-	else if(
-		// set ( <property> <val1> <val2> )
-		atom_getsymbol( & argv[0] ) == gensym( "set" )
-		&& atom_getsymbol( &argv[2] ) == x->name
-	)
-	{
-		propertyList_set(
-			x,
-			NULL,
-			atom_getint( &argv[1] ) - 1,
-			& argv[3]
-		);
-	}
+
 	else
 	{
-		outlet_list(
+		outlet_anything(
 			x->redirect_out,
-			&s_list,
+			s,
 			argc,
 			argv
 		);
 	}
+
 }
 
 void propertyList_set(
@@ -1569,14 +1693,46 @@ void propertyList_set(
 	t_atom *argv
 )
 {
+
+	if(
+		// set <property> <val1> <val2> ...
+		argc >= 1
+		&& atom_getsymbol( &argv[0] ) == x->name
+	)
+	{
+		propertyList_priv_set(
+			x,
+			&s_list,
+			argc - 1,
+			& argv[1]
+		);
+	}
+	else
+	{
+		outlet_anything(
+			x->redirect_out,
+			s,
+			argc,
+			argv
+		);
+	}
+}
+
+void propertyList_priv_set(
+	t_propertyList* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
 	//post("sdPropertyList: set");
 	int new_value_count = argc;
-	t_atom* val;
 	AtomListClear( & x->value );
 	for(int i=0; i < new_value_count; i++)
 	{
-		val = &argv[i];
-		AtomListAdd( & x->value, val );
+		t_atom* newVal = getbytes( sizeof( t_atom ) );
+		*newVal = argv[i];
+		AtomListAdd( & x->value, newVal );
 	}
 
 	if( x->send_sym && x->send_sym->s_thing )
@@ -1590,12 +1746,12 @@ void propertyList_set(
 	}
 	// output "update ( <propertyList> ( <val> ... ) )"
 	propertyList_output(
-		x,
-		gensym( "update" )
+		x
+		//gensym( "update" )
 	);
 }
 
-void propertyList_set_noupdate(
+void propertyList_priv_set_noupdate(
 	t_propertyList* x,
 	t_symbol *s,
 	int argc,
@@ -1604,41 +1760,36 @@ void propertyList_set_noupdate(
 {
 	//post("sdPropertyList: set_noupdate");
 	int new_value_count = argc;
-	t_atom* val;
 	AtomListClear( & x->value );
 	for(int i=0; i < new_value_count; i++)
 	{
-		val = &argv[i];
-		AtomListAdd( & x->value, val );
+		t_atom* newVal = getbytes( sizeof( t_atom ) );
+		*newVal = argv[i];
+		AtomListAdd( & x->value, newVal );
 	}
 
 	// output "update ( <propertyList> ( <val> ... ) )"
 	propertyList_output(
-		x,
-		gensym( "update" )
+		x
+		//gensym( "update" )
 	);
 }
 
 void propertyList_output(
-	t_propertyList* x,
-	t_symbol* package_name
+	t_propertyList* x
 )
 {
-	// output "<package_name> ( <property> ( <val> ... ) )"
+	// output "<property> <val> ..."
 	int value_count = AtomListGetSize( &x->value );
-	t_atom* outArray = getbytes( sizeof( t_atom ) * ( 2 + 2 + value_count ) );
-	SETSYMBOL( & outArray[0], package_name );
-	SETFLOAT( & outArray[1], 2 + value_count );
-	SETSYMBOL( & outArray[2], x->name );
-	SETFLOAT( & outArray[3], value_count );
+	t_atom* outArray = getbytes( sizeof( t_atom ) * value_count );
 	LIST_FORALL_BEGIN(AtomList,AtomEl,t_atom,&x->value,i,pEl)
-		outArray[4+i] = *(pEl->pData);
+		outArray[i] = *(pEl->pData);
 	LIST_FORALL_END(AtomList,AtomEl,t_atom,&x->value,i,pEl)
-	outlet_list(
+	outlet_anything(
 		x->out,
-		&s_list,
-		2 + 2 + value_count,
+		x->name,
+		value_count,
 		outArray
 	);
-	freebytes( outArray, sizeof( t_atom ) * ( 2 + 2 + value_count ) );
+	freebytes( outArray, sizeof( t_atom ) * value_count );
 }
