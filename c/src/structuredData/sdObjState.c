@@ -329,8 +329,7 @@ void objState_input(
 	// get ( <property> out ( dest1 ... ) )
 	// get ( out ( dest1 ... ) )
 	else if(
-		atom_getint( &argv[1] ) >= 1
-		&& atom_getsymbol( & argv[0] ) == gensym("get")
+		atom_getsymbol( & argv[0] ) == gensym("get")
 	)
 	{
 		x->last_method = LAST_METHOD_GET;
@@ -421,6 +420,11 @@ void objState_input(
 			// unset "accuml":
 			//post("unset accuml");
 			x->accumlPos = -1;
+		}
+		else
+		{
+			pd_error(x, "unknown syntax in event starting with 'get'!");
+			return;
 		}
 	}
 
@@ -663,33 +667,32 @@ void objState_fromProps(
 	{
 		//post("fromProps");
 		// send to all registered "listeners"( = every obj in x->outlist)
-		LIST_FORALL_BEGIN(SymList,SymEl,t_symbol,x->outList,i,pEl)
-			if( pEl->pData->s_thing )
+		// <prop> <val1> ...
+
+		// send as event: <package_name> ( <prop> ( <val1> ...  ) )
+		int val_count = argc-1;
+		t_atom* output_buf = getbytes( sizeof( t_atom ) * (val_count + 4) );
+		{
+			switch( x->last_method )
 			{
-				// <prop> <val1> ...
-				// (<package_name> ::= info | update | ... )
+				case LAST_METHOD_GET:
+					SETSYMBOL( & output_buf[0], gensym("info") );
+					break;
+				case LAST_METHOD_SET:
+					SETSYMBOL( & output_buf[0], gensym("update") );
+					break;
+			}
+			SETFLOAT( & output_buf[1], val_count + 2);
+			output_buf[2] = argv[0];
+			SETFLOAT( & output_buf[3], val_count );
+			for( int i=0; i<val_count; i++ )
+			{
+				output_buf[4+i] = argv[1+i];
+			}
 
-				// send as event: <package_name> ( <prop> ( <val1> ...  ) )
-				int val_count = argc-1;
-				t_atom* output_buf = getbytes( sizeof( t_atom ) * (val_count + 4) );
+			LIST_FORALL_BEGIN(SymList,SymEl,t_symbol,x->outList,iOut,pEl)
+				if( pEl->pData->s_thing )
 				{
-					switch( x->last_method )
-					{
-						case LAST_METHOD_GET:
-							SETSYMBOL( & output_buf[0], gensym("info") );
-							break;
-						case LAST_METHOD_SET:
-							SETSYMBOL( & output_buf[0], gensym("update") );
-							break;
-					}
-					SETFLOAT( & output_buf[1], val_count + 2);
-					output_buf[2] = argv[0];
-					SETFLOAT( & output_buf[3], val_count );
-					for( int i=0; i<val_count; i++ )
-					{
-						output_buf[4+i] = argv[1+i];
-					}
-
 					// send event:
 					typedmess(
 							pEl->pData->s_thing,
@@ -697,11 +700,10 @@ void objState_fromProps(
 							val_count + 4,
 							output_buf
 						);
-					//typedmess( pEl->pData->s_thing, &s_list, argc, argv );
 				}
-				freebytes( output_buf, sizeof( t_atom ) * (val_count + 4) );
-			}
-		LIST_FORALL_END(SymList,SymEl,t_symbol,x->outList,i,pEl)
+			LIST_FORALL_END(SymList,SymEl,t_symbol,x->outList,iOut,pEl)
+		}
+		freebytes( output_buf, sizeof( t_atom ) * (val_count + 4) );
 	}
 	else
 		// accumulate output:
