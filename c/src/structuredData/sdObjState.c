@@ -65,6 +65,7 @@ typedef struct s_objState {
 	t_inlet* fromObjIn_in;
 	t_inlet* fromProperties_in;
 	t_outlet* toProperties_out;
+	t_outlet* obj_out;
 } t_objState;
 
 void* objState_init(
@@ -211,6 +212,8 @@ void* objState_init(
 		);
 
 	x->toProperties_out =
+		outlet_new( & x->x_obj, &s_list);
+	x->obj_out =
 		outlet_new( & x->x_obj, &s_list);
 
   return (void *)x;
@@ -702,6 +705,12 @@ void objState_fromProps(
 						);
 				}
 			LIST_FORALL_END(SymList,SymEl,t_symbol,x->outList,iOut,pEl)
+			outlet_list(
+				x->obj_out,
+				&s_list,
+				val_count + 4,
+				output_buf
+			);
 		}
 		freebytes( output_buf, sizeof( t_atom ) * (val_count + 4) );
 	}
