@@ -30,6 +30,7 @@ structuredDataC_la_SOURCES = \
   $(PATH_CODE)/sdPack.c $(PATH_CODE)/sdPack.h \
   $(PATH_CODE)/sdData.c $(PATH_CODE)/sdData.h \
   $(PATH_CODE)/sdEvent.c $(PATH_CODE)/sdEvent.h \
+  $(PATH_CODE)/sdProperties.c $(PATH_CODE)/sdProperties.h \
   $(PATH_CODE)/sdObjState.c $(PATH_CODE)/sdObjState.h
 
 structuredDataC_la_LDFLAGS = -module

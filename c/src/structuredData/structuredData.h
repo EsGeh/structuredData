@@ -5,6 +5,7 @@
 #include "sdPack.h"
 #include "sdData.h"
 #include "sdEvent.h"
+#include "sdProperties.h"
 #include "sdObjState.h"
 
 

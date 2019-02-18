@@ -59,6 +59,7 @@ void structuredDataC_setup()
 	sdPack_setup();
 	sdData_setup();
 	sdEvent_setup();
+	sdProperties_setup();
 	sdObjState_setup();
 }
 
