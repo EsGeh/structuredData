@@ -567,21 +567,44 @@ void eventToProperties_input(
 		return;
 	}
 	// output parameters:
-	unsigned int pos = 2;
-	while( pos < argc )
+	int currentPos = 2;
+	while( currentPos < argc )
 	{
 		if(
 			argc < 2
-			|| argv[pos+0].a_type != A_SYMBOL
-			|| argv[pos+1].a_type != A_FLOAT
+			|| argv[currentPos+0].a_type != A_SYMBOL
+			|| argv[currentPos+1].a_type != A_FLOAT
 			// || (argc-pos) - 2 >= atom_getint( &argv[1] )
 		)
 		{
-			pd_error(x, "at pos %i: invalid sdPack", pos);
+			pd_error(x, "at pos %i: invalid sdPack", currentPos);
 			return;
 		}
-		t_symbol* type = atom_getsymbol( &argv[pos+0] );
-		int count = atom_getint( &argv[pos+1] );
+		//t_symbol* currentType = atom_getsymbol( &argv[currentPos+0] );
+		int currentSize = atom_getint( &argv[currentPos + 1] );
+		if( currentPos + currentSize >= argc )
+		{
+			pd_error( x, "invalid pack at position %i: not enough parameters", currentPos );
+			return;
+		}
+
+		// send to obj: set <property> <val1> [...]
+		t_atom* toSend = getbytes( sizeof( t_atom ) * (currentSize+1) );
+		toSend[0] = argv[currentPos] ;
+		for( int i=0; i < currentSize; i++ )
+		{
+			toSend[1+i] = argv[currentPos+2+i];
+		}
+		outlet_anything(
+			x->outletToProperties,
+			gensym("set"),
+			currentSize+1,
+			toSend
+		);
+		freebytes( toSend, sizeof( t_atom ) * (currentSize+1) );
+		currentPos = currentPos + 2 + currentSize ;
+
+		/*
 		// send: set ( <property> <val1> ... )
 		t_atom* to_properties = getbytes( sizeof( t_atom ) * (3+count) );
 		SETSYMBOL( &to_properties[0], gensym("set") );
@@ -599,6 +622,7 @@ void eventToProperties_input(
 		);
 		freebytes( to_properties, sizeof( t_atom ) * (3+count) );
 		pos += (count + 2) ;
+		*/
 	}
 
 	// output the event type:

@@ -64,6 +64,7 @@ typedef struct s_objState {
 	t_atom* accumlArray;
 	t_inlet* fromObjIn_in;
 	t_inlet* fromProperties_in;
+	t_outlet* events_to_obj;
 	t_outlet* toProperties_out;
 	t_outlet* obj_out;
 } t_objState;
@@ -211,6 +212,8 @@ void* objState_init(
 			gensym("fromProps")
 		);
 
+	x->events_to_obj =
+		outlet_new( & x->x_obj, &s_list);
 	x->toProperties_out =
 		outlet_new( & x->x_obj, &s_list);
 	x->obj_out =
@@ -431,9 +434,11 @@ void objState_input(
 		}
 	}
 
-	// <event_type> ( <property> ( val1 [...] ) ... )      (...: for list properties)
+	// set ( <property> ( val1 [...] ) ... )      (...: for list properties)
 	//   (you can set several properties at once...)
-	else
+	else if(
+		atom_getsymbol( & argv[0] ) == gensym("set")
+	)
 	{
 		x->last_method = LAST_METHOD_SET;
 		int currentPos = 2;
@@ -461,19 +466,15 @@ void objState_input(
 			freebytes( toSend, sizeof( t_atom ) * (currentSize+1) );
 			currentPos = currentPos + 2 + currentSize ;
 		}
-		if(
-			atom_getsymbol( & argv[0] ) != gensym("set")
-		)
-		{
-			t_symbol* event_type = NULL;
-			event_type = atom_getsymbol( & argv[0]);
-			outlet_anything(
-				x->toProperties_out,
-				event_type,
-				0,
-				NULL
-			);
-		}
+	}
+	else
+	{
+		outlet_anything(
+			x->events_to_obj,
+			s,
+			argc,
+			argv
+		);
 	}
 
 	/*
@@ -642,7 +643,6 @@ void objState_rawinput(
 					"wrong syntax for message starting with 'get'"
 				);
 			}
-
 		}
 		else
 		{
