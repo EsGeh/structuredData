@@ -629,7 +629,7 @@ void* packFilter_init(
 			& x->acceptedTypes[0]
 		);
 	}
-	if( argc == 1 )
+	else if( argc == 1 )
 	{
 		x->acceptedTypesCount = 1;
 		x->acceptedTypes = getbytes( sizeof( t_symbol* ) * 1 );
