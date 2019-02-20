@@ -82,6 +82,15 @@ void objState_fromProps(
 );
 
 // helper:
+
+void objState_get(
+	t_objState* x,
+	t_atom* prop,
+	int out_count,
+	t_atom* out
+);
+
+
 void objState_flush(
 	t_objState* x
 );
@@ -264,13 +273,10 @@ void objState_input(
 				pd_error(x, "unknown syntax! expected: out ( add <dest> )");
 				return;
 			}
-			t_symbol* pDest = atom_getsymbol( & argv[3] );
-			if( ! SymListGetElement( x->outList, pDest, cmp_symbol_ptrs ) )
+			t_symbol* dest = atom_getsymbol( & argv[3] );
+			if( ! SymListGetElement( x->outList, dest, cmp_symbol_ptrs ) )
 			{
-				char buf[256];
-				atom_string( & argv[3], buf, 255 );
-				//post( "adding dest: %s", buf );
-				SymListAdd( x->outList, pDest );
+				SymListAdd( x->outList, dest );
 			}
 		}
 		// out ( del <dest> )
@@ -286,14 +292,6 @@ void objState_input(
 			if( pDestEl )
 			{
 				SymListDel( x->outList, pDestEl );
-			}
-			else
-			{
-				/*
-				char buf[256];
-				atom_string( & argv[3], buf, 255 );
-				post("out ( del <dest> ... ): no element named %s", buf);
-				*/
 			}
 		}
 		// out ( clear )
@@ -325,45 +323,16 @@ void objState_input(
 		// get ( <property> )
 		if(
 			atom_getint( &argv[1] ) == 1
-			// && atom_getsymbol( &argv[2] ) != gensym("out")
+			&& (argv[2].a_type == A_SYMBOL)
 		)
 		{
 			// send to obj: "get <property>"
-			outlet_anything(
-				x->toProperties_out,
-				gensym("get"),
-				1,
-				& argv[2]
+			objState_get(
+				x,
+				&argv[2],
+				0,
+				NULL
 			);
-		}
-		// get ( <property> out ( dest1 ... ) )
-		else if(
-			atom_getint( &argv[1] ) >= 3
-			&& atom_getsymbol( &argv[2] ) != gensym("out")
-			&& atom_getsymbol( &argv[3] ) == gensym("out")
-			&& argv[4].a_type == A_FLOAT
-		)
-		{
-			// (temporarily) change outList:
-			SymList* old_outList = x->outList;
-			x->outList = getbytes( sizeof( SymList ) );
-			SymListInit( x->outList );
-			for(unsigned int i=0; i< atom_getint( & argv[4] ); i++)
-			{
-				SymListAdd( x->outList, atom_getsymbol( & argv[5+i] ) );
-			}
-			// send to obj: "get <property>"
-			// query properties:
-			outlet_anything(
-				x->toProperties_out,
-				gensym("get"),
-				1,
-				& argv[2]
-			);
-			// change back outList:
-			SymListExit( x->outList );
-			freebytes( x->outList, sizeof( SymList ) );
-			x->outList = old_outList;
 		}
 		// get ( out ( dest1 ... ) )
 		else if(
@@ -374,40 +343,43 @@ void objState_input(
 		{
 			// set "accuml":
 			//post("set accuml");
-			x->accumlPos = 2;
-			// (temporarily) change outList:
-			SymList* old_outList = x->outList;
-			x->outList = getbytes( sizeof( SymList ) );
-			SymListInit( x->outList );
-			for(unsigned int i=0; i< atom_getint( & argv[3] ); i++)
+			int out_count = atom_getint( & argv[3] );
+			t_atom* out = getbytes( sizeof( t_symbol ) * out_count );
+			for(unsigned int i=0; i<out_count; i++)
 			{
-				SymListAdd( x->outList, atom_getsymbol( & argv[4+i] ) );
+				out[i] = argv[4+i];
 			}
-
-			// send to obj: "get ( )":
-			outlet_anything(
-				x->toProperties_out,
-				gensym("get"),
-				0,
-				NULL
+			objState_get(
+					x,
+					NULL,
+					out_count,
+					out
 			);
-			// append "pseudo property" <out> ( ... ):
-			int out_size = SymListGetSize( old_outList );
-			SETSYMBOL( & x->accumlArray[ x->accumlPos + 0 ], gensym("out") );
-			SETFLOAT( & x->accumlArray[ x->accumlPos + 1 ], out_size);
-			LIST_FORALL_BEGIN(SymList,SymEl,t_symbol,old_outList,i,pEl)
-				SETSYMBOL( & x->accumlArray[ x->accumlPos + 2 + i ], pEl->pData );
-			LIST_FORALL_END(SymList,SymEl,t_symbol,old_outList,i,pEl)
-			x->accumlPos += ( 2 + out_size);
+			freebytes( out, sizeof( t_symbol ) * out_count );
 
-			// change back outList:
-			objState_flush(x);
-			SymListExit( x->outList );
-			freebytes( x->outList, sizeof( SymList ) );
-			x->outList = old_outList;
-			// unset "accuml":
-			//post("unset accuml");
-			x->accumlPos = -1;
+		}
+		// get ( <property> out ( dest1 ... ) )
+		else if(
+			atom_getint( &argv[1] ) >= 3
+			&& atom_getsymbol( &argv[2] ) != gensym("out")
+			&& atom_getsymbol( &argv[3] ) == gensym("out")
+			&& argv[4].a_type == A_FLOAT
+		)
+		{
+			t_atom* prop = &argv[2];
+			int out_count = atom_getint( & argv[4] );
+			t_atom* out = getbytes( sizeof( t_symbol ) * out_count );
+			for(unsigned int i=0; i<out_count; i++)
+			{
+				out[i] = argv[5+i];
+			}
+			objState_get(
+					x,
+					prop,
+					out_count,
+					out
+			);
+			freebytes( out, sizeof( t_symbol ) * out_count );
 		}
 		else
 		{
@@ -498,13 +470,10 @@ void objState_rawinput(
 				&& atom_getsymbol( & argv[1] ) == gensym("add")
 			)
 			{
-				t_symbol* pDest = atom_getsymbol( & argv[3] );
-				if( ! SymListGetElement( x->outList, pDest, cmp_symbol_ptrs ) )
+				t_symbol* dest = atom_getsymbol( & argv[3] );
+				if( ! SymListGetElement( x->outList, dest, cmp_symbol_ptrs ) )
 				{
-					char buf[256];
-					atom_string( & argv[3], buf, 255 );
-					//post( "adding dest: %s", buf );
-					SymListAdd( x->outList, pDest );
+					SymListAdd( x->outList, dest );
 				}
 			}
 
@@ -551,14 +520,12 @@ void objState_rawinput(
 				&& (argv[1].a_type == A_SYMBOL)
 			)
 			{
-				// redirect:
-				t_symbol* msg_selector = atom_getsymbol( & argv[0] );
-				outlet_anything(
-					x->toProperties_out,
-					msg_selector,
-					argc-1,
-					& argv[1]
-				);
+				objState_get(
+						x,
+						& argv[1],
+						0,
+						NULL
+					);
 			}
 
 			else if(
@@ -568,25 +535,12 @@ void objState_rawinput(
 			)
 			{
 				int out_count = argc-2;
-				// (temporarily) change outList:
-				SymList* old_outList = x->outList;
-				x->outList = getbytes( sizeof( SymList ) );
-				SymListInit( x->outList );
-				for(unsigned int i=0; i< out_count; i++)
-				{
-					SymListAdd( x->outList, atom_getsymbol( & argv[2+i] ) );
-				}
-				// query properties:
-				outlet_anything(
-					x->toProperties_out,
-					gensym("get"),
-					0,
-					NULL
+				objState_get(
+						x,
+						NULL,
+						out_count,
+						& argv[2]
 				);
-				// change back outList:
-				SymListExit( x->outList );
-				freebytes( x->outList, sizeof( SymList ) );
-				x->outList = old_outList;
 			}
 
 			else if(
@@ -597,25 +551,12 @@ void objState_rawinput(
 			)
 			{
 				int out_count = argc-3;
-				// (temporarily) change outList:
-				SymList* old_outList = x->outList;
-				x->outList = getbytes( sizeof( SymList ) );
-				SymListInit( x->outList );
-				for(unsigned int i=0; i< out_count; i++)
-				{
-					SymListAdd( x->outList, atom_getsymbol( & argv[3+i] ) );
-				}
-				// query properties:
-				outlet_anything(
-					x->toProperties_out,
-					gensym("get"),
-					1,
-					& argv[1]
+				objState_get(
+						x,
+						& argv[1],
+						out_count,
+						& argv[3]
 				);
-				// change back outList:
-				SymListExit( x->outList );
-				freebytes( x->outList, sizeof( SymList ) );
-				x->outList = old_outList;
 			}
 
 			else
@@ -716,6 +657,76 @@ void objState_fromProps(
 			x-> accumlArray[ x->accumlPos + i] = argv[ 1+i ];
 			x->accumlPos ++;
 		}
+	}
+}
+
+void objState_get(
+	t_objState* x,
+	t_atom* prop,
+	int out_count,
+	t_atom* out
+)
+{
+	if( prop != NULL && out == NULL )
+	{
+		// send to obj: "get <property>"
+		outlet_anything(
+			x->toProperties_out,
+			gensym("get"),
+			1,
+			prop
+		);
+	}
+	else if( out != NULL )
+	{
+		// (temporarily) change outList:
+		SymList* old_outList = x->outList;
+		x->outList = getbytes( sizeof( SymList ) );
+		SymListInit( x->outList );
+		for(unsigned int i=0; i< out_count; i++)
+		{
+			SymListAdd( x->outList, atom_getsymbol( & out[i] ) );
+		}
+
+		if( prop == NULL )
+		{
+			x->accumlPos = 2;
+			// send to obj: "get ( )":
+			outlet_anything(
+				x->toProperties_out,
+				gensym("get"),
+				0,
+				NULL
+			);
+			// append "pseudo property" <out> ( ... ):
+			int out_size = SymListGetSize( old_outList );
+			SETSYMBOL( & x->accumlArray[ x->accumlPos + 0 ], gensym("out") );
+			SETFLOAT( & x->accumlArray[ x->accumlPos + 1 ], out_size);
+			LIST_FORALL_BEGIN(SymList,SymEl,t_symbol,old_outList,i,pEl)
+				SETSYMBOL( & x->accumlArray[ x->accumlPos + 2 + i ], pEl->pData );
+			LIST_FORALL_END(SymList,SymEl,t_symbol,old_outList,i,pEl)
+			x->accumlPos += ( 2 + out_size);
+
+			// change back outList:
+			objState_flush(x);
+			x->accumlPos = -1;
+		}
+		else
+		{
+			// send to obj: "get <property>"
+			// query properties:
+			outlet_anything(
+				x->toProperties_out,
+				gensym("get"),
+				1,
+				prop
+			);
+		}
+		SymListExit( x->outList );
+		freebytes( x->outList, sizeof( SymList ) );
+		x->outList = old_outList;
+		// unset "accuml":
+		//post("unset accuml");
 	}
 }
 
