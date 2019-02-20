@@ -1,4 +1,4 @@
-#N canvas 0 30 798 854 10;
+#N canvas 0 30 798 411 10;
 #X declare -path ./modules;
 #X text 469 471 record and playback sgEvents in time;
 #X text 343 40 basic:;

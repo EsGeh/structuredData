@@ -1,4 +1,4 @@
-#N canvas 0 30 798 854 10;
+#N canvas 0 30 798 411 10;
 #X msg 186 70 list bla bla;
 #X obj 192 107 sdPack info;
 #X msg 302 83 symbol update;

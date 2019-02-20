@@ -1,7 +1,7 @@
-#N canvas 0 30 798 854 10;
+#N canvas 0 30 798 411 10;
 #X text 30 22 This module is just a convention how to build high level
 objects in a patch.;
-#N canvas 0 30 798 854 properties 0;
+#N canvas 0 30 798 411 properties 0;
 #X obj 135 175 print propOut;
 #X floatatom 229 75 5 0 0 0 - - -;
 #X obj 280 180 print redirect;
@@ -128,7 +128,7 @@ about its state:;
 #X text 32 105 define an "instrument" as an stateful object with some
 properties:;
 #X text 327 135 <- open abstraction to see details;
-#N canvas 0 30 798 854 UserInterface 0;
+#N canvas 0 30 798 411 UserInterface 0;
 #X obj 97 46 sdObjState_ui \$0-GLOBAL;
 #X restore 557 255 pd UserInterface;
 #X obj 702 408 r test;

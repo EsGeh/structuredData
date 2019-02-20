@@ -1,11 +1,11 @@
-#N canvas 0 30 798 464 10;
+#N canvas 0 30 798 411 10;
 #X obj 339 296 s \$0-fromObj;
 #X obj 469 114 r \$0-fromObj;
 #X obj 339 273 list;
 #X obj 200 201 sdObjTrack pitch;
 #X obj 465 227 sdProperty pitch \$0;
 #X obj 332 141 sdObjState \$1 \$2;
-#X obj 616 223 sdConnectFrom \$1 dest;
+#X obj 543 163 sdConnectFrom \$1 dest;
 #X obj 362 203 sdPropertySym dest \$0;
 #X obj 311 64 inlet;
 #X obj 102 66 r \$0-dest;
@@ -25,6 +25,7 @@
 #X connect 5 1 7 0;
 #X connect 5 2 6 0;
 #X connect 6 0 14 0;
+#X connect 6 0 3 1;
 #X connect 7 0 2 0;
 #X connect 7 1 4 0;
 #X connect 8 0 5 0;
