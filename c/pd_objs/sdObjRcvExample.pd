@@ -27,10 +27,11 @@
 #X obj 197 230 sdObjTrack pitch volume;
 #X obj 487 370 sdProperty volume \$0;
 #X obj 219 143 nbx 3 14 -1e+37 1e+37 0 0 empty empty empty 0 -8 0 10
--191407 -1 -1 1 256;
+-191407 -1 -1 0 256;
 #X text 177 142 volume;
 #X obj 268 31 r \$0-volume;
-#X obj 543 163 sdObjListen \$1 dest pitch volume;
+#X obj 543 163 sdObjListen \$1 dest;
+#X obj 493 239 sdObjGet \$1 pitch volume;
 #X connect 1 0 4 1;
 #X connect 2 0 0 0;
 #X connect 3 1 25 0;
@@ -49,6 +50,7 @@
 #X connect 23 1 24 0;
 #X connect 24 0 22 0;
 #X connect 28 0 26 0;
-#X connect 29 0 11 0;
-#X connect 29 0 24 1;
+#X connect 29 0 30 0;
+#X connect 29 1 11 0;
+#X connect 29 1 24 1;
 #X coords 0 -1 1 1 180 60 1 100 100;

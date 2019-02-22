@@ -23,6 +23,7 @@ data_DATA = \
 	$(PATH_PD_OBJS)/sdObjSaveAll.pd \
 	$(PATH_PD_OBJS)/sdObjListen.pd \
 	$(PATH_PD_OBJS)/sdObjTrack.pd \
+	$(PATH_PD_OBJS)/sdObjGet.pd \
 	$(PATH_PD_OBJS)/sdObjExample.pd \
 	$(PATH_PD_OBJS)/sdObjSndExample.pd \
 	$(PATH_PD_OBJS)/sdObjRcvExample.pd
