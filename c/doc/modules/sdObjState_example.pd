@@ -1,4 +1,4 @@
-#N canvas 896 207 702 145 10;
+#N canvas 0 30 894 854 10;
 #X text 536 234 "generic" gui to read/write objects:;
 #N canvas 0 30 798 854 other 0;
 #X obj 269 270 send, f 18;
