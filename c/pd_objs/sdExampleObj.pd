@@ -1,4 +1,4 @@
-#N canvas 0 30 798 854 10;
+#N canvas 0 30 894 854 10;
 #X obj 144 76 r \$0-pitch;
 #X obj 227 76 r \$0-volume;
 #X obj 410 25 inlet;
@@ -25,7 +25,6 @@
 #X obj 619 373 sdPropertyList envelope \$0;
 #X obj 478 184 sdEventToProperties;
 #X obj 339 158 sdPackFilter info update;
-#X obj 299 181 sdEventToProperties;
 #X connect 0 0 3 0;
 #X connect 1 0 4 0;
 #X connect 2 0 13 0;
@@ -48,7 +47,5 @@
 #X connect 21 0 14 0;
 #X connect 22 0 5 0;
 #X connect 22 1 17 0;
-#X connect 23 0 24 0;
 #X connect 23 1 22 0;
-#X connect 24 1 17 0;
 #X coords 0 -1 1 1 200 60 1 100 100;

@@ -1,4 +1,4 @@
-#N canvas 0 30 798 464 10;
+#N canvas 0 30 894 411 10;
 #X obj 127 22 inlet;
 #X obj 131 148 symbol;
 #X obj 131 125 route \$2;
@@ -18,4 +18,3 @@
 #X connect 7 0 2 0;
 #X connect 8 0 9 0;
 #X connect 10 0 4 0;
-#X connect 10 1 8 0;

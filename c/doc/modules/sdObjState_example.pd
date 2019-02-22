@@ -1,4 +1,4 @@
-#N canvas 0 30 798 854 10;
+#N canvas 0 30 894 854 10;
 #X text 536 234 "generic" gui to read/write objects:;
 #N canvas 0 30 798 854 other 0;
 #X obj 269 270 send, f 18;
@@ -78,9 +78,9 @@ properties:;
 #X text 464 110 read or write the objects properties;
 #X text 464 128 send messages to the object;
 #X restore 557 255 pd UserInterface;
-#X obj 702 408 r test;
+#X obj 79 776 r test;
 #X msg 301 784 list get 3 out 1 test;
-#X obj 702 431 print test;
+#X obj 79 799 print test;
 #X text 175 686 (send current pitch to specific receiver);
 #X msg 178 706 list get 4 pitch out 1 test;
 #X msg 205 590 list start 0;
