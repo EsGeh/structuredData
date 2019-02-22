@@ -102,6 +102,9 @@ properties:;
 #X text 42 295 lets define a receiver to track the instruments state
 ;
 #X text 283 329 ...and a sender to set the instruments state;
+#X obj 607 22 loadbang;
+#X obj 607 68 s \$0-GLOBAL;
+#X msg 607 45 list init 0;
 #X connect 3 0 29 0;
 #X connect 9 0 8 0;
 #X connect 12 0 15 0;
@@ -120,3 +123,5 @@ properties:;
 #X connect 38 0 37 0;
 #X connect 39 0 37 0;
 #X connect 40 0 33 0;
+#X connect 43 0 45 0;
+#X connect 45 0 44 0;

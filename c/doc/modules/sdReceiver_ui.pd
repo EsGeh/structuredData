@@ -2,7 +2,7 @@
 #X obj 343 335 s \$0-fromObj;
 #X obj 469 114 r \$0-fromObj;
 #X obj 343 312 list;
-#X obj 200 201 sdObjTrack pitch;
+#X obj 197 230 sdObjTrack pitch;
 #X obj 447 303 sdProperty pitch \$0;
 #X obj 332 141 sdObjState \$1 \$2;
 #X obj 543 163 sdConnectFrom \$1 dest;
@@ -11,7 +11,7 @@
 #X obj 102 66 r \$0-dest;
 #X symbolatom 133 122 22 0 0 0 dest - -;
 #X obj 185 55 r \$0-pitch;
-#X obj 200 224 s \$1;
+#X obj 197 276 s \$1;
 #X obj 642 265 pack s s;
 #X obj 712 261 sdSymbolBang \$1;
 #X obj 642 312 print -n;
@@ -22,12 +22,14 @@
 #X text 465 326 just "track" the pitch;
 #X text 475 341 (not a real property);
 #X obj 135 144 nbx 3 14 -1e+37 1e+37 0 0 empty empty empty 0 -8 0 10
--191407 -1 -1 0 256;
+-191407 -1 -1 64 256;
 #X text 97 139 pitch;
+#X obj 197 253 sdPack set;
+#X obj 197 184 sdPackFilter init;
 #X connect 1 0 5 1;
 #X connect 2 0 0 0;
-#X connect 3 0 12 0;
-#X connect 5 0 3 0;
+#X connect 3 0 24 0;
+#X connect 5 0 25 0;
 #X connect 5 1 7 0;
 #X connect 5 2 6 0;
 #X connect 6 0 13 0;
@@ -40,4 +42,6 @@
 #X connect 13 0 17 0;
 #X connect 14 0 13 1;
 #X connect 17 0 15 0;
+#X connect 24 0 12 0;
+#X connect 25 1 3 0;
 #X coords 0 -1 1 1 180 60 1 100 100;

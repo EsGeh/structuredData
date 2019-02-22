@@ -106,6 +106,10 @@ void property_on_priv_set_noupdate(
 	t_atom *argv
 );
 
+void property_on_priv_get(
+	t_property* x
+);
+
 // helper:
 
 void property_set(
@@ -215,6 +219,12 @@ void register_propertyMethods(
 		(t_method )property_on_priv_set_noupdate,
 		gensym("priv.set_noupdate"),
 		A_GIMME,
+		0
+	);
+	class_addmethod(
+		class,
+		(t_method )property_on_priv_get,
+		gensym("priv.get"),
 		0
 	);
 }
@@ -660,6 +670,39 @@ void property_on_priv_set_noupdate(
 	);
 	property_output(
 		x
+	);
+}
+
+void property_on_priv_get(
+	t_property* x
+)
+{
+	if( x->send_sym && x->send_sym->s_thing )
+	{
+		int value_count = AtomListGetSize( &x->value );
+		t_atom* outArray = getbytes( sizeof( t_atom ) * value_count );
+		LIST_FORALL_BEGIN(AtomList,AtomEl,t_atom,&x->value,i,pEl)
+			outArray[i] = *(pEl->pData);
+		LIST_FORALL_END(AtomList,AtomEl,t_atom,&x->value,i,pEl)
+		outlet_anything(
+			x->out,
+			x->name,
+			value_count,
+			outArray
+		);
+		typedmess(
+			x->send_sym->s_thing,
+			&s_list,
+			value_count,
+			outArray
+		);
+		freebytes( outArray, sizeof( t_atom ) * value_count );
+	}
+	outlet_anything(
+		x->redirect_out,
+		gensym("priv.get"),
+		0,
+		NULL
 	);
 }
 
