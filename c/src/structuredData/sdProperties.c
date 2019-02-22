@@ -620,7 +620,7 @@ void property_on_priv_set_noupdate(
 )
 {
 	if(
-		x->type == PROPTYPE_SYMBOL && (argc != 1 || argv[1].a_type != A_SYMBOL)
+		x->type == PROPTYPE_SYMBOL && (argc != 1 || argv[0].a_type != A_SYMBOL)
 	)
 	{
 		char name_buf[256];
@@ -637,7 +637,7 @@ void property_on_priv_set_noupdate(
 		return;
 	}
 	if(
-		x->type == PROPTYPE_FLOAT && (argc != 1 || argv[1].a_type != A_FLOAT)
+		x->type == PROPTYPE_FLOAT && (argc != 1 || argv[0].a_type != A_FLOAT)
 	)
 	{
 		char name_buf[256];
