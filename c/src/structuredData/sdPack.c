@@ -588,6 +588,13 @@ void packFilter_input(
 	t_atom *argv
 );
 
+void packFilter_on_set(
+	t_packFilter* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
 t_class* register_packFilter(
 	t_symbol* className
 )
@@ -605,6 +612,14 @@ t_class* register_packFilter(
 		);
 
 	class_addlist( class, packFilter_input );
+
+	class_addmethod(
+			class,
+			(t_method )packFilter_on_set,
+			gensym("set"),
+			A_GIMME,
+			0
+	);
 
 	return class;
 }
@@ -624,10 +639,12 @@ void* packFilter_init(
 		x->acceptedTypes = getbytes( sizeof( t_symbol* ) * 1 );
 		x->acceptedTypes[0] = gensym("");
 
+		/*
 		symbolinlet_new(
 			& x->x_obj,
 			& x->acceptedTypes[0]
 		);
+		*/
 	}
 	else if( argc == 1 )
 	{
@@ -635,10 +652,12 @@ void* packFilter_init(
 		x->acceptedTypes = getbytes( sizeof( t_symbol* ) * 1 );
 		x->acceptedTypes[0] = atom_getsymbol( &argv[0] );
 
+		/*
 		symbolinlet_new(
 			& x->x_obj,
 			& x->acceptedTypes[0]
 		);
+		*/
 	}
 	else
 	{
@@ -649,6 +668,12 @@ void* packFilter_init(
 			x->acceptedTypes[i] = atom_getsymbol( &argv[i] );
 		}
 	}
+	inlet_new(
+		& x->x_obj,
+		& x->x_obj.ob_pd,
+		gensym( "list" ),
+		gensym( "set" )
+	);
 	x->acceptOut =
 		outlet_new( & x->x_obj, &s_list);
 	x->rejectOut =
@@ -707,6 +732,22 @@ void packFilter_input(
 			argc,
 			argv
 		);
+	}
+}
+
+void packFilter_on_set(
+	t_packFilter* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	freebytes( x->acceptedTypes, sizeof( t_symbol* ) * x->acceptedTypesCount );
+	x->acceptedTypesCount = argc;
+	x->acceptedTypes = getbytes( sizeof( t_symbol* ) * argc );
+	for( unsigned int i=0; i<argc; i++)
+	{
+		x->acceptedTypes[i] = atom_getsymbol( &argv[i] );
 	}
 }
 
