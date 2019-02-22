@@ -720,12 +720,6 @@ void property_on_priv_get(
 		LIST_FORALL_BEGIN(AtomList,AtomEl,t_atom,&x->value,i,pEl)
 			outArray[i] = *(pEl->pData);
 		LIST_FORALL_END(AtomList,AtomEl,t_atom,&x->value,i,pEl)
-		outlet_anything(
-			x->out,
-			x->name,
-			value_count,
-			outArray
-		);
 		typedmess(
 			x->send_sym->s_thing,
 			&s_list,
