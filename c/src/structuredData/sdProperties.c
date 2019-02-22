@@ -39,6 +39,7 @@ DECL_LIST(AtomList, AtomEl, t_atom,getbytes,freebytes,freebytes)
 DEF_LIST(AtomList, AtomEl, t_atom,getbytes,freebytes,freebytes)
 
 typedef enum e_property_type { PROPTYPE_FLOAT, PROPTYPE_SYMBOL, PROPTYPE_LIST } t_property_type;
+typedef enum e_init_type { INITTYPE_NONE, INITTYPE_INTERN, INITTYPE_UPDATE } t_init_type;
 
 typedef struct s_property {
   t_object x_obj;
@@ -47,6 +48,7 @@ typedef struct s_property {
 	AtomList value;
 	t_symbol* rcv_sym;
 	t_symbol* send_sym;
+	t_init_type init_type;
 	t_inlet* fromObjIn_in;
 	t_outlet* out;
 	t_outlet* redirect_out;
@@ -107,6 +109,10 @@ void property_on_priv_set_noupdate(
 );
 
 void property_on_priv_get(
+	t_property* x
+);
+
+void property_on_init(
 	t_property* x
 );
 
@@ -225,6 +231,12 @@ void register_propertyMethods(
 		class,
 		(t_method )property_on_priv_get,
 		gensym("priv.get"),
+		0
+	);
+	class_addmethod(
+		class,
+		(t_method )property_on_init,
+		gensym("init"),
 		0
 	);
 }
@@ -398,6 +410,30 @@ int property_initall(
 				SETSYMBOL( init_val, gensym("") );
 		}
 		AtomListAdd( & x->value, init_val );
+	}
+	if( argc >= 4 )
+	{
+		if( atom_getsymbol( &argv[3] ) == gensym("intern") )
+		{
+			x->init_type = INITTYPE_INTERN;
+		}
+		else if( atom_getsymbol( &argv[3] ) == gensym("update") )
+		{
+			x->init_type = INITTYPE_UPDATE;
+		}
+		else
+		{
+			char buf[256];
+			t_atom name;
+			SETSYMBOL( & name, x->name );
+			atom_string( & name, buf, 255 );
+			pd_error( x, "sdProperty %s: wrong type for init value. syntax: '<prop_name> [$0 default init]', init one of: 'intern', 'update'", buf );
+			return 1;
+		}
+	}
+	else
+	{
+		x->init_type = INITTYPE_NONE;
 	}
 
 	x->fromObjIn_in =
@@ -701,6 +737,42 @@ void property_on_priv_get(
 	outlet_anything(
 		x->redirect_out,
 		gensym("priv.get"),
+		0,
+		NULL
+	);
+}
+
+void property_on_init(
+	t_property* x
+)
+{
+	if( x->init_type == INITTYPE_INTERN || x->init_type == INITTYPE_UPDATE )
+	{
+		if( x->send_sym && x->send_sym->s_thing )
+		{
+			int value_count = AtomListGetSize( &x->value );
+			t_atom* outArray = getbytes( sizeof( t_atom ) * value_count );
+			LIST_FORALL_BEGIN(AtomList,AtomEl,t_atom,&x->value,i,pEl)
+				outArray[i] = *(pEl->pData);
+			LIST_FORALL_END(AtomList,AtomEl,t_atom,&x->value,i,pEl)
+			typedmess(
+				x->send_sym->s_thing,
+				&s_list,
+				value_count,
+				outArray
+			);
+			freebytes( outArray, sizeof( t_atom ) * value_count );
+		}
+	}
+	if( x->init_type == INITTYPE_UPDATE )
+	{
+		property_output(
+			x
+		);
+	}
+	outlet_anything(
+		x->redirect_out,
+		gensym("init"),
 		0,
 		NULL
 	);
