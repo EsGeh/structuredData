@@ -70,7 +70,7 @@ about its state:;
 #X text 31 97 define an "instrument" as an stateful object with some
 properties:;
 #X text 327 135 <- open abstraction to see details;
-#N canvas 0 30 798 854 UserInterface 0;
+#N canvas 0 30 894 854 UserInterface 0;
 #X obj 97 46 sdObjState_ui \$0-GLOBAL;
 #X text 444 53 1 click update_ui;
 #X text 444 70 2 select an object;

@@ -1,4 +1,4 @@
-#N canvas 0 30 798 411 10;
+#N canvas 0 30 894 854 10;
 #X obj 127 22 inlet;
 #X obj 131 148 symbol;
 #X obj 517 285 symbol;
@@ -21,6 +21,8 @@
 ;
 #X obj 102 202 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
+#X text 478 216 disconnect from last object;
+#X text 142 220 create connection from object;
 #X connect 0 0 8 0;
 #X connect 1 0 14 0;
 #X connect 2 0 12 0;
