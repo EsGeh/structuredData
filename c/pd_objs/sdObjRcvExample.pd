@@ -20,17 +20,17 @@
 #X text 443 292 just "track" the pitch;
 #X text 453 307 (not a real property);
 #X obj 135 144 nbx 3 14 -1e+37 1e+37 0 0 empty empty empty 0 -8 0 10
--191407 -1 -1 0 256;
+-191407 -1 -1 64 256;
 #X text 97 139 pitch;
 #X obj 197 253 sdPack set;
 #X obj 197 184 sdPackFilter init;
 #X obj 197 230 sdObjTrack pitch volume;
 #X obj 487 370 sdProperty volume \$0;
 #X obj 219 143 nbx 3 14 -1e+37 1e+37 0 0 empty empty empty 0 -8 0 10
--191407 -1 -1 0 256;
+-191407 -1 -1 1 256;
 #X text 177 142 volume;
 #X obj 268 31 r \$0-volume;
-#X obj 543 163 sdObjListen \$1 dest;
+#X obj 543 163 sdObjListen \$1 dest pitch volume;
 #X connect 1 0 4 1;
 #X connect 2 0 0 0;
 #X connect 3 1 25 0;
