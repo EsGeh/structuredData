@@ -1,0 +1,14 @@
+#N canvas 0 30 894 854 10;
+#X declare -path ./modules;
+#X text 10 13 structuredData - Documentation;
+#X obj 542 590 declare -path ./modules;
+#X obj 49 63 sdUtils_doc;
+#X obj 49 210 sdList_doc;
+#X obj 49 277 sdPack_doc;
+#X obj 48 303 sdData_doc;
+#X obj 48 328 sdEvent_doc;
+#X obj 48 413 sdObjState_doc;
+#X text 29 37 basic:;
+#X text 34 184 data:;
+#X text 30 386 obj state:;
+#X obj 49 440 sdObjState_example;
