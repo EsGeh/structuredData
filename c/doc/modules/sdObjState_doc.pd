@@ -1,4 +1,4 @@
-#N canvas 896 30 702 189 10;
+#N canvas 0 605 398 279 10;
 #X obj 48 558 r hurz;
 #X obj 48 581 print hurz;
 #X msg 60 387 list out 1 clear;
@@ -9,7 +9,7 @@
 #X obj 205 579 print dest1;
 #X msg 216 346 list get 4 numProp out 1 dest1;
 #X floatatom 220 412 5 0 0 0 - - -;
-#N canvas 0 30 798 411 test 0;
+#N canvas 0 30 1598 543 test 1;
 #X obj 80 13 inlet;
 #X obj 685 437 sgTest;
 #X obj 267 180 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
@@ -192,7 +192,7 @@ update ( \$2 ( 50 ) ) );
 #X obj 61 560 r \$0-sdPropSym;
 #X obj 626 175 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#N canvas 0 30 798 411 test-get 0;
+#N canvas 0 30 1598 543 test-get 0;
 #X obj 217 472 s \$0-test;
 #X obj 202 537 s \$0-test;
 #X obj 180 603 s \$0-test;
@@ -467,7 +467,7 @@ info ( \$2 ( foo ) ) );
 #X connect 29 0 25 0;
 #X restore 162 517 pd exampleObj;
 #X text 30 129 run automated test (currently broken);
-#N canvas 0 30 894 854 properties 1;
+#N canvas 0 30 1598 543 properties 0;
 #X obj 135 175 print propOut;
 #X floatatom 229 75 5 0 0 0 - - -;
 #X obj 280 180 print redirect;

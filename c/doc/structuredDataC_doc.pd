@@ -1,4 +1,4 @@
-#N canvas 0 30 798 854 10;
+#N canvas 0 30 894 854 10;
 #X declare -path ./modules;
 #X text 469 471 record and playback sgEvents in time;
 #X text 343 40 basic:;
@@ -15,7 +15,7 @@
 #X obj 364 300 sgDataDoc;
 #X obj 364 328 sgEventDoc;
 #X obj 366 155 sgIODoc;
-#N canvas 0 30 942 854 basic 0;
+#N canvas 0 30 798 854 basic 0;
 #X obj 162 306 sgSig2F_ui~;
 #X text 62 426 sgF_ui;
 #X obj 73 497 sgF_ui;
@@ -43,7 +43,7 @@
 #X obj 369 62 sgUtilsDoc;
 #X obj 364 414 sgObjStateDoc;
 #X text 339 501 signal;
-#N canvas 0 30 942 854 signal 0;
+#N canvas 0 30 798 854 signal 0;
 #X obj 164 59 sgF2Sig~;
 #X floatatom 156 25 5 0 0 0 - - -;
 #X floatatom 167 144 5 0 0 0 - - -;

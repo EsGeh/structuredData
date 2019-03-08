@@ -1,4 +1,4 @@
-#N canvas 0 30 846 411 10;
+#N canvas 0 30 894 854 10;
 #X obj 144 76 r \$0-pitch;
 #X obj 227 76 r \$0-volume;
 #X obj 497 271 sgProperty pitch \$0 64;
