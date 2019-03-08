@@ -1,11 +1,12 @@
 # structuredData (sd)
 
-a library for puredata.
+A library for the famous [puredata](https://puredata.info/) music software.
 
 ## purpose
 
 This library shows one flavour of writing abstractions/patches in puredata and how to exchange specifically structured messages between them.
-In more detail: The library describes a standard for ...:
+
+In more detail: The library provides utilities to realize specific design principles in puredata, namely:
 
 - structured messages
 
