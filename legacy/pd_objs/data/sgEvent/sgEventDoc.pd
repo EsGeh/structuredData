@@ -1,4 +1,4 @@
-#N canvas 0 30 798 854 10;
+#N canvas 0 30 894 411 10;
 #X text 89 34 structure of a sgEvent:;
 #X text 44 13 sgEvents are packs with a special structure;
 #X text 115 50 <eventType> ( param0 ( valueX ) param1 ( valueY ) ...

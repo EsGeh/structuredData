@@ -1,4 +1,4 @@
-#N canvas 0 30 894 854 10;
+#N canvas 0 30 798 854 10;
 #X obj 149 166 sdReplace \$0;
 #X msg 174 110 list get 3 out 1 %0-fromAllObjs;
 #X obj 306 290 r \$0-fromAllObjs;
