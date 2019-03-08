@@ -1,4 +1,4 @@
-#N canvas 0 30 894 854 10;
+#N canvas 896 207 702 145 10;
 #X text 32 105 define an "instrument" as an stateful object with 2
 properties:;
 #X text 40 262 lets define a listener which wants to always track the
@@ -63,7 +63,7 @@ instruments state;
 #X obj 198 328 print listener;
 #X text 30 22 This module is just a convention how to build high level
 objects in a patch.;
-#N canvas 0 30 894 854 properties 0;
+#N canvas 0 30 894 854 properties 1;
 #X text 559 159 args: name "\$0" init? loadbang?;
 #X obj 135 152 sgProperty testProp \$0 42;
 #X obj 135 175 print propOut;

@@ -1,10 +1,10 @@
 #N canvas 0 30 894 854 10;
 #X declare -path ./modules;
-#X text 469 471 record and playback sgEvents in time;
+#X text 467 579 record and playback sgEvents in time;
 #X text 343 40 basic:;
 #X text 338 181 data:;
 #X text 360 196 These form a hierarchy of structured messages;
-#X text 340 451 sequencing:;
+#X text 338 559 sequencing:;
 #X text 341 388 obj state:;
 #X text 337 137 read/write array/text from/to files;
 #X obj 369 87 sgMathDoc;
@@ -37,12 +37,12 @@
 #X connect 5 0 2 0;
 #X connect 6 0 2 0;
 #X connect 8 0 0 0;
-#X restore 376 584 pd basic;
-#X obj 365 472 sgSequencingDoc;
-#X text 344 555 gui elements;
+#X restore 374 692 pd basic;
+#X obj 363 580 sgSequencingDoc;
+#X text 342 663 gui elements;
 #X obj 369 62 sgUtilsDoc;
 #X obj 364 414 sgObjStateDoc;
-#X text 339 501 signal;
+#X text 337 609 signal;
 #N canvas 0 30 798 854 signal 0;
 #X obj 164 59 sgF2Sig~;
 #X floatatom 156 25 5 0 0 0 - - -;
@@ -51,7 +51,7 @@
 #X connect 0 0 3 0;
 #X connect 1 0 0 0;
 #X connect 3 0 2 0;
-#X restore 374 530 pd signal;
+#X restore 372 638 pd signal;
 #X text 461 413 standardized way for objects to maintain internal state
 ;
 #X text 10 13 structuredData - Documentation;
@@ -72,3 +72,6 @@
 #X text 136 323 sdEventToMessage;
 #X obj 49 440 sdObjState_example;
 #X text 130 255 MISSING:;
+#X text 364 442 Broken \, and no longer maintained!;
+#X text 364 460 still maintained: the old "properties": sgProperty[Sym|List]
+;
