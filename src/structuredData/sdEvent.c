@@ -437,7 +437,7 @@ void eventAddParam_set(
 		argc < 2
 		|| argv[0].a_type != A_SYMBOL
 		|| argv[1].a_type != A_FLOAT
-		// || (argc-pos) - 2 >= atom_getint( &argv[1] )
+		|| argc != atom_getint( &argv[1] ) + 2
 	)
 	{
 		pd_error(x, "invalid sdPack");
@@ -449,6 +449,7 @@ void eventAddParam_set(
 	x->otherPackCount = argc;
 	//if( argc > 0)
 		x->otherPack = getbytes( sizeof( t_atom ) * argc );
+		x->otherPackCount = argc;
 	for(unsigned int i=0; i < argc; i++)
 	{
 		x->otherPack[i] = argv[i];
@@ -471,30 +472,32 @@ void eventAddParam_input(
 		argc < 2
 		|| argv[0].a_type != A_SYMBOL
 		|| argv[1].a_type != A_FLOAT
-		// || (argc-pos) - 2 >= atom_getint( &argv[1] )
+		|| argc != atom_getint( &argv[1] ) + 2
 	)
 	{
 		pd_error(x, "invalid sdPack");
 		return;
 	}
 	//post("input, argc: %i", argc);
-	t_atom* ret = getbytes( argc + x->otherPackCount );
+	t_int new_size = argc + x->otherPackCount;
+	t_atom* ret = getbytes( sizeof( t_atom ) * new_size );
 	for( unsigned int i=0; i<argc; i++ )
 	{
 		ret[i] = argv[i];
 	}
 	for( unsigned int i=0; i < x->otherPackCount; i++ )
+	{
 		ret[argc+i] = x->otherPack[i];
+	}
 	SETFLOAT( &ret[1], atom_getint( & ret[1] ) + x->otherPackCount);
-	//unsigned int old_size = atom_getint( & ret[1] );
-	//SETFLOAT( &ret[1], old_size + x->otherPackCount);
 
 	outlet_list(
 		x->outlet,
 		& s_list,
-		argc + x->otherPackCount,
+		new_size,
 		ret
 	);
+	freebytes( ret, sizeof( t_atom ) * new_size );
 }
 
 //----------------------------------

@@ -1,4 +1,4 @@
-#N canvas 0 30 798 854 10;
+#N canvas 0 30 894 854 10;
 #X msg 189 131 bang;
 #X msg 76 133 list 1 100 red;
 #X text 26 106 1 from a pack by adding "type" to its parameters:;
@@ -14,7 +14,6 @@
 #X obj 238 264 t a a;
 #X msg 303 350 list volume 1 0.5;
 #X obj 303 327 loadbang;
-#X obj 216 396 print;
 #X obj 216 373 sdEventAddParam;
 #X obj 15 344 sdEventToProperties;
 #X obj 167 294 t a a;
@@ -23,6 +22,7 @@
 #X text 61 36 sdEvents have this kind of structure:;
 #X text 72 55 <eventtype> ( <param1> ( ... ) <param2> ( ... ) ... )
 ;
+#X obj 216 396 print +volume;
 #X connect 0 0 3 0;
 #X connect 1 0 3 0;
 #X connect 3 0 7 0;
@@ -32,12 +32,12 @@
 #X connect 6 2 11 0;
 #X connect 7 0 12 0;
 #X connect 7 1 8 0;
-#X connect 12 0 18 0;
+#X connect 12 0 17 0;
 #X connect 12 1 6 0;
-#X connect 13 0 16 1;
+#X connect 13 0 15 1;
 #X connect 14 0 13 0;
-#X connect 16 0 15 0;
-#X connect 17 0 19 0;
-#X connect 17 1 20 0;
-#X connect 18 0 17 0;
-#X connect 18 1 16 0;
+#X connect 15 0 22 0;
+#X connect 16 0 18 0;
+#X connect 16 1 19 0;
+#X connect 17 0 16 0;
+#X connect 17 1 15 0;
