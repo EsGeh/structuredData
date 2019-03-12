@@ -195,15 +195,6 @@ void unevent_input(
 	t_atom *argv
 );
 
-// utils:
-void unevent_outputAt(
-	t_unevent* x,
-	t_symbol* s, // output operation
-	// what to output
-	int argc,
-	t_atom *argv
-);
-
 t_class* register_unevent(
 	t_symbol* className
 )
@@ -275,59 +266,107 @@ void unevent_input(
 	t_atom *argv
 )
 {
+	if(
+		argc < 2
+		|| argv[0].a_type != A_SYMBOL
+		|| argv[1].a_type != A_FLOAT
+		|| argc != atom_getint( &argv[1] ) + 2
+	)
+	{
+		pd_error(x, "invalid sdEvent");
+		return;
+	}
 	// output the event type:
 	outlet_symbol(
 		x->typeOutlet,
 		atom_getsymbol( & argv[0] )
 	);
-	// output parameters:
-	unsigned int pos = 2;
-	while( pos < argc )
-	{
-		if(
-			argc < 2
-			|| argv[pos+0].a_type != A_SYMBOL
-			|| argv[pos+1].a_type != A_FLOAT
-			// || (argc-pos) - 2 >= atom_getint( &argv[1] )
-		)
-		{
-			pd_error(x, "at pos %i: invalid sdPack", pos);
-			return;
-		}
-		t_symbol* type = atom_getsymbol( &argv[pos+0] );
-		unsigned int count = atom_getint( &argv[pos+1] );
-		unevent_outputAt(
-			x,
-			type,
-			count,
-			& argv[pos+2]
-		);
-		pos += (count + 2) ;
-	}
-}
 
-void unevent_outputAt(
-	t_unevent* x,
-	t_symbol* s, // output operation
-	// what to output
-	int argc,
-	t_atom *argv
-)
-{
-	for(unsigned int i=0; i<x->paramsCount; i++)
+	// find indices where to find the values which to unpack...:
+	// a mapping from    index(x->params) to   index_of_pack_in_incoming_msg (-1, if not found)
+	t_int* param_indices;
+	param_indices = getbytes( sizeof( t_int ) * x->paramsCount );
+	for( int i=0; i< x->paramsCount; i++)
+		param_indices[i] = -1;
+
 	{
-		t_symbol* currentSym = x->params[i];
-		t_outlet* currentOutlet = x->outlets[i];
-		if( currentSym == s || currentSym == gensym("all") )
+		unsigned int pos = 2;
+		while( pos < argc )
 		{
-			outlet_list(
-				currentOutlet,
-				& s_list,
-				argc,
-				argv
-			);
+			if(
+				argc < 2
+				|| argv[pos+0].a_type != A_SYMBOL
+				|| argv[pos+1].a_type != A_FLOAT
+				|| pos + 1 + atom_getint( &argv[pos+1] ) >= argc
+			)
+			{
+				pd_error(x, "at pos %i: invalid sdPack", pos);
+				return;
+			}
+			t_symbol* type = atom_getsymbol( &argv[pos+0] );
+			unsigned int count = atom_getint( &argv[pos+1] );
+			for( int i = 0; i < x->paramsCount; i++ )
+			{
+				if( x->params[i] == type )
+					param_indices[i] = pos;
+			}
+			pos += (count + 2) ;
 		}
 	}
+
+	{
+		// output parameters:
+		for(int i = x->paramsCount-1; i>= 0; i--)
+		{
+			t_symbol* currentSym = x->params[i];
+			t_outlet* currentOutlet = x->outlets[i];
+
+			if( currentSym == gensym("all") )
+			{
+				unsigned int pos = 2;
+				while( pos < argc )
+				{
+					if(
+						argv[pos+0].a_type != A_SYMBOL
+						|| argv[pos+1].a_type != A_FLOAT
+						|| pos + 1 + atom_getint( &argv[pos+1] ) >= argc
+					)
+					{
+						pd_error(x, "at pos %i: invalid sdPack", pos);
+						return;
+					}
+					unsigned int count = atom_getint( &argv[pos+1] );
+
+					outlet_list(
+						currentOutlet,
+						& s_list,
+						atom_getint( & argv[ pos+1 ] ),
+						& argv[ pos+2 ]
+					);
+
+					pos += (count + 2) ;
+				}
+			}
+			else if( param_indices[i] == -1 )
+			{
+				char buf[256];
+				t_atom current_sym_atom;
+				SETSYMBOL( &current_sym_atom, currentSym );
+				atom_string( &current_sym_atom, buf, 256 );
+				pd_error( x, "no such value in event: %s", buf );
+			}
+			else
+			{
+				outlet_list(
+					currentOutlet,
+					& s_list,
+					atom_getint( & argv[ param_indices[i]+1 ] ),
+					& argv[ param_indices[i]+2 ]
+				);
+			}
+		}
+	}
+	freebytes( param_indices, sizeof( t_int ) * x->paramsCount );
 }
 
 //----------------------------------
