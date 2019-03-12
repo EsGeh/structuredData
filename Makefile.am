@@ -26,6 +26,7 @@ data_DATA = \
 	$(PATH_PD_OBJS)/sdObjGet.pd \
 	$(PATH_PD_OBJS)/sdObjExample.pd \
 	$(PATH_PD_OBJS)/sdObjSndExample.pd \
+	$(PATH_PD_OBJS)/sdObjState_ui.pd \
 	$(PATH_PD_OBJS)/sdObjRcvExample.pd
 
 structuredDataC_la_SOURCES = \
