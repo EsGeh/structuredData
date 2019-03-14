@@ -1,0 +1,12 @@
+#N canvas 0 30 846 854 10;
+#X text 10 13 structuredData - Documentation;
+#X text 29 37 basic:;
+#X text 34 184 data:;
+#X text 30 386 obj state:;
+#X obj 49 440 sdObjState_example;
+#X obj 49 63 sdUtils-help;
+#X obj 49 210 sdList-help;
+#X obj 49 277 sdPack-help;
+#X obj 48 303 sdData-help;
+#X obj 48 328 sdEvent-help;
+#X obj 48 413 sdObjState-help;

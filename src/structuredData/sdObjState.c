@@ -110,6 +110,10 @@ t_class* register_objState(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdObjState")
+	);
 
 	// handle events
 	class_addlist( class, objState_input );

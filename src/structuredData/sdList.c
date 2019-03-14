@@ -145,6 +145,10 @@ t_class* register_list(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdList")
+	);
 
 	// manipulate list:
 	class_addmethod(
@@ -787,6 +791,10 @@ t_class* register_listEqual(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdList")
+	);
 
 	// manipulate list:
 	class_addmethod(

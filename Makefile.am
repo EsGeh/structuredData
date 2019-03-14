@@ -26,8 +26,18 @@ data_DATA = \
 	$(PATH_PD_OBJS)/sdObjGet.pd \
 	$(PATH_PD_OBJS)/sdObjExample.pd \
 	$(PATH_PD_OBJS)/sdObjSndExample.pd \
+	$(PATH_PD_OBJS)/sdObjDuplexExample.pd \
 	$(PATH_PD_OBJS)/sdObjState_ui.pd \
-	$(PATH_PD_OBJS)/sdObjRcvExample.pd
+	$(PATH_PD_OBJS)/sdObjRcvExample.pd \
+	$(PATH_PD_OBJS)/sdTest.pd \
+  $(PATH_PD_OBJS)/doc/structuredDataC_doc.pd \
+  $(PATH_PD_OBJS)/doc/modules/sdData-help.pd \
+  $(PATH_PD_OBJS)/doc/modules/sdEvent-help.pd \
+  $(PATH_PD_OBJS)/doc/modules/sdList-help.pd \
+  $(PATH_PD_OBJS)/doc/modules/sdObjState-help.pd \
+  $(PATH_PD_OBJS)/doc/modules/sdObjState_example.pd \
+  $(PATH_PD_OBJS)/doc/modules/sdPack-help.pd \
+  $(PATH_PD_OBJS)/doc/modules/sdUtils-help.pd
 
 structuredDataC_la_SOURCES = \
   $(PATH_CODE)/structuredData.c $(PATH_CODE)/structuredData.h \

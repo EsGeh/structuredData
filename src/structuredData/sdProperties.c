@@ -147,6 +147,10 @@ t_class* register_propertyList(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdObjState")
+	);
 	register_propertyMethods( class );
 
 	return class;
@@ -167,6 +171,10 @@ t_class* register_property(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdObjState")
+	);
 	register_propertyMethods( class );
 
 	return class;
@@ -187,6 +195,10 @@ t_class* register_propertySym(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdObjState")
+	);
 	register_propertyMethods( class );
 
 	return class;

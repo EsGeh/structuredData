@@ -75,6 +75,10 @@ t_class* register_event(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdEvent")
+	);
 
 	class_addlist( class, event_input );
 
@@ -210,6 +214,11 @@ t_class* register_unevent(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdEvent")
+	);
+
 
 	class_addlist( class, unevent_input );
 
@@ -419,6 +428,10 @@ t_class* register_eventAddParam(
 			// creation arguments:
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdEvent")
+	);
 
 	class_addlist( class, eventAddParam_input );
 	class_addmethod(
@@ -572,6 +585,10 @@ t_class* register_eventToProperties(
 			// creation arguments:
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdEvent")
+	);
 
 	class_addlist( class, eventToProperties_input );
 

@@ -139,6 +139,10 @@ t_class* register_data(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdData")
+	);
 
 	class_addbang(class, data_bang);
 	class_addlist(class, data_append);

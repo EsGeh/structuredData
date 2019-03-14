@@ -1,6 +1,9 @@
 #!/bin/fish
 
-source (dirname (readlink -m (status filename)))/utils/cmd_args.fish
+set BASE_DIR (dirname (readlink -m (status filename)))/../..
+set SCRIPTS_DIR (dirname (readlink -m (status filename)))/..
+
+source "$SCRIPTS_DIR/utils/cmd_args.fish"
 
 
 #################################################

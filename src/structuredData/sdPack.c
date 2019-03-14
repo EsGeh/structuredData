@@ -81,6 +81,10 @@ t_class* register_pack(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdPack")
+	);
 
 	class_addlist( class, pack_input );
 
@@ -190,6 +194,10 @@ t_class* register_unpack(
 			// creation arguments:
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdPack")
+	);
 
 	class_addlist( class, unpack_input );
 
@@ -304,6 +312,10 @@ t_class* register_packFromHuman(
 			// creation arguments:
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdPack")
+	);
 
 	class_addlist( class, packFromHuman_input );
 
@@ -610,6 +622,10 @@ t_class* register_packFilter(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdPack")
+	);
 
 	class_addlist( class, packFilter_input );
 
@@ -791,6 +807,10 @@ t_class* register_packToMessage(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdPack")
+	);
 
 	class_addlist( class, packToMessage_input );
 
@@ -887,6 +907,10 @@ t_class* register_packFromMessage(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdPack")
+	);
 
 	class_addlist( class, packFromMessage_inputList );
 	class_addanything( class, packFromMessage_inputAny );

@@ -100,6 +100,10 @@ t_class* register_any(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdUtils")
+	);
 	class_addbang(class, any_bang);
 	class_addanything(class, any_set);
 	return class;
@@ -212,6 +216,10 @@ t_class* register_gate(
 			A_DEFFLOAT,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdUtils")
+	);
 	class_addanything(class, gate_in);
 	return class;
 }
@@ -299,6 +307,10 @@ t_class* register_counter(
 			A_DEFFLOAT,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdUtils")
+	);
 	class_addfloat(class, counter_set);
 	class_addbang(class, counter_bang);
 	return class;
@@ -392,6 +404,10 @@ t_class* register_first(
 			// creation arguments:
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdUtils")
+	);
 	class_addlist(class, first_input);
 	class_addmethod(
 		class,
@@ -491,6 +507,10 @@ t_class* register_symbolIsEq(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdUtils")
+	);
 	class_addsymbol(class, symbolIsEq_compare);
 	return class;
 }
@@ -578,6 +598,10 @@ t_class* register_isEq(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdUtils")
+	);
 	class_addlist(class, isEq_compare);
 	class_addmethod(
 		class,
@@ -700,6 +724,10 @@ t_class* register_filter(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdUtils")
+	);
 	// "methods":
 	class_addlist(class, filter_input);
 	class_addmethod(
@@ -831,6 +859,10 @@ t_class* register_replace(
 			A_GIMME,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdUtils")
+	);
 	// "methods":
 	class_addanything(class, replace_input);
 	return class;
@@ -994,6 +1026,10 @@ t_class* register_setselector(
 			A_SYMBOL,
 			0
 		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdUtils")
+	);
 	// "methods":
 	class_addanything(class, setselector_input);
 	post( "register_setselector" );
