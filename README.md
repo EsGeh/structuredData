@@ -30,12 +30,12 @@ Most objects are written in C, a few are provided as puredata "abstractions".
 
 ## dependencies
 
+- zexy (just needed for the "gui" object)
+
+## build dependencies
+
 - fish shell
 - autotools
-- structuredData
-- other repositories. Please execute:
-
-		$ ./scripts/install_deps.fish
 
 ## installation
 
