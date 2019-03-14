@@ -1,4 +1,6 @@
-/dependencies
+/dependencies/
+/build/
+/doc/
 
 # autotools:
 
@@ -7,8 +9,3 @@
 /autom4te.cache
 /build-aux
 /configure
-
-/build
-/doc/build
-/doc/install
-/doc/install_objs
