@@ -92,7 +92,7 @@ see how the scripts used in chapter "testing" work...!
 ## documentation
 
 The Documentation is provided as puredata example patches.
-You can (only) open it by issueing these commands:
+Right click, select "help" opens an example.
 
 ## testing
 
