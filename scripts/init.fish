@@ -2,7 +2,7 @@
 
 set BASE_DIR (dirname (readlink -m (status filename)))/..
 set SCRIPTS_DIR (dirname (readlink -m (status filename)))
-set DEP_DIR $BASE_DIR/../dependencies
+set DEP_DIR "$BASE_DIR/dependencies"
 
 rm -rf -v $DEP_DIR
 mkdir -p -v $DEP_DIR
