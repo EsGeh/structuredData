@@ -7,9 +7,9 @@
 #X text 349 118 too many args produce an error...:;
 #X obj 76 206 t a a;
 #X obj 129 211 print Event;
-#X obj 518 341 print color;
-#X obj 432 330 print time;
-#X obj 614 340 print eventType;
+#X obj 486 384 print color;
+#X obj 432 407 print time;
+#X obj 690 346 print eventType;
 #X obj 238 264 t a a;
 #X msg 303 350 list volume 1 0.5;
 #X obj 303 327 loadbang;
@@ -22,8 +22,18 @@
 #X text 72 55 <eventtype> ( <param1> ( ... ) <param2> ( ... ) ... )
 ;
 #X obj 216 396 print +volume;
-#X obj 432 307 sdUnEvent time color all;
-#X obj 603 392 print all_values;
+#X obj 541 362 print all_values;
+#X obj 432 307 sdUnEvent time color all exotic_param;
+#X text 471 263 if a value isn't found in the event \, nothing is output
+at the corresponding outlet;
+#X obj 540 538 sdUnEvent;
+#X text 492 513 with no arguments: as if "all" has been specified;
+#X text 522 139 (you can create the event manually);
+#X text 619 538 =;
+#X obj 648 539 sdUnEvent all;
+#X text 637 578 all argument packages;
+#X text 643 559 |;
+#X text 727 552 event type;
 #X connect 0 0 3 0;
 #X connect 1 0 3 0;
 #X connect 3 0 6 0;
@@ -31,7 +41,7 @@
 #X connect 6 0 11 0;
 #X connect 6 1 7 0;
 #X connect 11 0 16 0;
-#X connect 11 1 22 0;
+#X connect 11 1 23 0;
 #X connect 12 0 14 1;
 #X connect 13 0 12 0;
 #X connect 14 0 21 0;
@@ -39,7 +49,7 @@
 #X connect 15 1 18 0;
 #X connect 16 0 15 0;
 #X connect 16 1 14 0;
-#X connect 22 0 9 0;
-#X connect 22 1 8 0;
-#X connect 22 2 23 0;
-#X connect 22 3 10 0;
+#X connect 23 0 9 0;
+#X connect 23 1 8 0;
+#X connect 23 2 22 0;
+#X connect 23 4 10 0;

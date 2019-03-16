@@ -233,25 +233,38 @@ void* unevent_init(
 {
   t_unevent *x = (t_unevent *)pd_new(unevent_class);
 
-	x->paramsCount = argc;
-	x->params = getbytes( sizeof( t_symbol* ) * x->paramsCount );
-	x->outlets = getbytes( sizeof( t_outlet* ) * x->paramsCount );
-	for(unsigned int i=0; i< argc; i++)
+	if( argc == 0 )
 	{
-		if(
-				argv[i].a_type != A_SYMBOL
-		)
-		{
-			char buf[256];
-			atom_string( & argv[1+i] , buf, 255 );
-			pd_error(x, "not a symbol: %s. syntax: param1, param2, ...", buf);
-			unevent_exit( x );
-			return NULL;
-		}
-		x->params[i] = atom_getsymbol( & argv[i] );
+		x->paramsCount = 1;
+		x->params = getbytes( sizeof( t_symbol* ) * x->paramsCount );
+		x->outlets = getbytes( sizeof( t_outlet* ) * x->paramsCount );
+		x->params[0] = gensym("all");
 
-		x->outlets[i] =
+		x->outlets[0] =
 			outlet_new( & x->x_obj, &s_list);
+	}
+	else
+	{
+		x->paramsCount = argc;
+		x->params = getbytes( sizeof( t_symbol* ) * x->paramsCount );
+		x->outlets = getbytes( sizeof( t_outlet* ) * x->paramsCount );
+		for(unsigned int i=0; i< argc; i++)
+		{
+			if(
+					argv[i].a_type != A_SYMBOL
+			)
+			{
+				char buf[256];
+				atom_string( & argv[1+i] , buf, 255 );
+				pd_error(x, "not a symbol: %s. syntax: param1, param2, ...", buf);
+				unevent_exit( x );
+				return NULL;
+			}
+			x->params[i] = atom_getsymbol( & argv[i] );
+
+			x->outlets[i] =
+				outlet_new( & x->x_obj, &s_list);
+		}
 	}
 
 	x->typeOutlet =
@@ -349,8 +362,8 @@ void unevent_input(
 					outlet_list(
 						currentOutlet,
 						& s_list,
-						atom_getint( & argv[ pos+1 ] ),
-						& argv[ pos+2 ]
+						atom_getint( & argv[ pos+1 ] ) + 2,
+						& argv[ pos+0 ]
 					);
 
 					pos += (count + 2) ;
@@ -358,11 +371,14 @@ void unevent_input(
 			}
 			else if( param_indices[i] == -1 )
 			{
+				// if there is no such value, just output nothing (no error)
+				/*
 				char buf[256];
 				t_atom current_sym_atom;
 				SETSYMBOL( &current_sym_atom, currentSym );
 				atom_string( &current_sym_atom, buf, 256 );
 				pd_error( x, "no such value in event: %s", buf );
+				*/
 			}
 			else
 			{
