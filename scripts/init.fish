@@ -85,5 +85,10 @@ else
 	end
 end
 
+if [ $DEP_DIR != $DEP_DIR_DEFAULT ]
+	rm $SCRIPTS_DIR/utils/cmd_args.fish
+	ln -s (readlink -m $DEP_DIR/fishshell-cmd-opts/cmd_args.fish) $SCRIPTS_DIR/utils/cmd_args.fish
+end
+
 cd "$BASE_DIR"
 eval "$SCRIPTS_DIR/utils/run_autotools.fish"
