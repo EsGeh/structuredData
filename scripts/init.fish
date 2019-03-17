@@ -74,12 +74,15 @@ else
 	if [ "$DEP_DIR" = "$DEP_DIR_DEFAULT" ]
 		rm -rf -v $DEP_DIR
 		mkdir -p -v $DEP_DIR
-	end
 
-	cd "$DEP_DIR"
-	git clone git@github.com:EsGeh/fishshell-cmd-opts.git
-	cd fishshell-cmd-opts/
-	git checkout $fishshell_cmd_opts_version
+		cd "$DEP_DIR"
+		# cmd line utils:
+		git clone git@github.com:EsGeh/fishshell-cmd-opts.git
+		cd fishshell-cmd-opts/
+		git checkout $fishshell_cmd_opts_version
+	else
+		echo "WARNING: incompatible versions!"
+	end
 end
 
 cd "$BASE_DIR"
