@@ -36,6 +36,7 @@ Most objects are written in C, a few are provided as puredata "abstractions".
 
 - fish shell
 - autotools
+- git
 
 ## installation
 
