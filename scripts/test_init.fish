@@ -4,7 +4,7 @@ set BASE_DIR (dirname (readlink -m (status filename)))/..
 set SCRIPTS_DIR (dirname (readlink -m (status filename)))
 
 if test ! -e $SCRIPTS_DIR/utils/cmd_args.fish
-	echo "error: structuredData not installed!"
+	echo "error: fishshell-cmd-opts not installed!"
 	exit 1
 end
 
