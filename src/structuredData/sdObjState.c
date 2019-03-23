@@ -1,11 +1,10 @@
 #include "sdObjState.h"
 #include "LinkedList.h"
+#include "DynArray.h"
 
 #include "m_pd.h"
 
 #include <string.h>
-
-#define ACCUML_SIZE 256
 
 
 static t_class* objState_class;
@@ -30,6 +29,10 @@ DEF_LIST(SymList, SymEl, t_symbol,getbytes,freebytes,);
 #pragma GCC diagnostic pop
 
 
+DECL_DYN_ARRAY(AtomBuffer,t_atom,getbytes,freebytes)
+DEF_DYN_ARRAY(AtomBuffer,t_atom,getbytes,freebytes)
+
+
 //----------------------------------
 // objState
 //----------------------------------
@@ -42,8 +45,8 @@ typedef struct s_objState {
 	t_symbol* globalIn;
 	SymList* outList;
 	t_last_method last_method;
-	int accumlPos;
-	t_atom* accumlArray;
+	BOOL enable_accuml;
+	AtomBuffer accumlArray;
 	t_inlet* fromObjIn_in;
 	t_inlet* fromProperties_in;
 	t_outlet* events_to_obj;
@@ -180,9 +183,13 @@ void* objState_init(
 	x->outList = getbytes( sizeof( SymList ) );
 	SymList_init( x->outList );
 
-	x->accumlPos = -1;
-	x->accumlArray = getbytes( sizeof( t_atom ) * ACCUML_SIZE);
-	SETSYMBOL( & x->accumlArray[0], x->objName );
+	x->enable_accuml = 0;
+	AtomBuffer_init( & x->accumlArray );
+	{
+		t_atom obj_name;
+		SETSYMBOL( & obj_name, x->objName );
+		AtomBuffer_append( & x->accumlArray, obj_name );
+	}
 
 	// receive:
 	pd_bind(
@@ -232,7 +239,7 @@ void objState_exit(
 		x->globalIn
 	);
 
-	freebytes( x->accumlArray, sizeof( t_atom ) * ACCUML_SIZE);
+	AtomBuffer_exit( & x->accumlArray );
 	SymList_exit( x->outList );
 	freebytes( x->outList, sizeof( SymList ) );
 }
@@ -593,11 +600,12 @@ void objState_fromProps(
 	t_atom *argv
 )
 {
-	if( x->accumlPos < 0)
+	// syntax: <prop> <val1> ...
+
+	if( ! x-> enable_accuml )
 	{
 		//post("fromProps");
 		// send to all registered "listeners"( = every obj in x->outlist)
-		// <prop> <val1> ...
 
 		// send as event: <package_name> ( <prop> ( <val1> ...  ) )
 		int val_count = argc-1;
@@ -644,22 +652,18 @@ void objState_fromProps(
 	else
 		// accumulate output:
 	{
-		t_atom* accuml = x->accumlArray;
+		// append to buffer: <prop> <val_count> <val1> ...
 		int val_count = argc-1;
-
-		// <property>
-		accuml[ x->accumlPos ] = argv[0];
-		x->accumlPos ++;
-
-		// <property> (
-		SETFLOAT( & accuml[ (x->accumlPos) ], val_count );
-		x->accumlPos ++;
-
+		AtomBuffer_append( & x->accumlArray, argv[0] );
+		{
+			t_atom val_count_atom;
+			SETFLOAT( & val_count_atom, val_count );
+			AtomBuffer_append( & x->accumlArray, val_count_atom);
+		}
 		// <property> ( <val1> ... ) )
 		for( unsigned int i=0; i< val_count; i++ )
 		{
-			x-> accumlArray[ x->accumlPos + i] = argv[ 1+i ];
-			x->accumlPos ++;
+			AtomBuffer_append( & x-> accumlArray, argv[ 1+i ] );
 		}
 	}
 }
@@ -694,7 +698,9 @@ void objState_get(
 
 		if( prop == NULL )
 		{
-			x->accumlPos = 2;
+			//x->accumlPos = 2;
+			AtomBuffer_set_size( & x->accumlArray, 2 );
+			x->enable_accuml = TRUE;
 			// send to obj: "get ( )":
 			outlet_anything(
 				x->toProperties_out,
@@ -702,18 +708,28 @@ void objState_get(
 				0,
 				NULL
 			);
+			
 			// append "pseudo property" <out> ( ... ):
-			int out_size = SymList_get_size( old_outList );
-			SETSYMBOL( & x->accumlArray[ x->accumlPos + 0 ], gensym("out") );
-			SETFLOAT( & x->accumlArray[ x->accumlPos + 1 ], out_size);
+			{
+				t_atom temp;
+				SETSYMBOL( &temp, gensym("out") );
+				AtomBuffer_append( & x->accumlArray, temp );
+			}
+			{
+				int out_size = SymList_get_size( old_outList );
+				t_atom temp;
+				SETFLOAT( &temp, out_size );
+				AtomBuffer_append( & x->accumlArray, temp );
+			}
 			LIST_FORALL_BEGIN(SymList,SymEl,t_symbol,old_outList,i,pEl)
-				SETSYMBOL( & x->accumlArray[ x->accumlPos + 2 + i ], pEl->pData );
+				t_atom temp;
+				SETSYMBOL( &temp, pEl->pData );
+				AtomBuffer_append( & x->accumlArray, temp );
 			LIST_FORALL_END(SymList,SymEl,t_symbol,old_outList,i,pEl)
-			x->accumlPos += ( 2 + out_size);
 
 			// change back outList:
 			objState_flush(x);
-			x->accumlPos = -1;
+			x->enable_accuml = FALSE;
 		}
 		else
 		{
@@ -739,12 +755,21 @@ void objState_flush(
 )
 {
 	//post("fromProps");
-	SETFLOAT( & x->accumlArray[1], x->accumlPos - 2 );
+	SETFLOAT(
+			& AtomBuffer_get_array( & x->accumlArray )[1],
+			AtomBuffer_get_size( & x->accumlArray ) - 2
+	);
+
 	LIST_FORALL_BEGIN(SymList,SymEl,t_symbol,x->outList,i,pEl)
 		if( pEl->pData->s_thing )
 		{
 			//post("sending to %s", pEl->pData->s_name);
-			typedmess( pEl->pData->s_thing, &s_list, x->accumlPos, x->accumlArray );
+			typedmess(
+					pEl->pData->s_thing,
+					&s_list,
+					AtomBuffer_get_size( & x->accumlArray ),
+					AtomBuffer_get_array( & x->accumlArray )
+			);
 		}
 	LIST_FORALL_END(SymList,SymEl,t_symbol,x->outList,i,pEl)
 }
