@@ -381,7 +381,7 @@ int property_initall(
 		x-> rcv_sym =
 			NULL;
 	}
-	AtomListInit( & x->value );
+	AtomList_init( & x->value );
 
 	// type checking:
 	if(
@@ -421,7 +421,7 @@ int property_initall(
 			if( x->type == PROPTYPE_SYMBOL )
 				SETSYMBOL( init_val, gensym("") );
 		}
-		AtomListAdd( & x->value, init_val );
+		AtomList_append( & x->value, init_val );
 	}
 	if( argc >= 4 )
 	{
@@ -471,7 +471,7 @@ void property_exit(
 			x->rcv_sym
 		);
 	}
-	AtomListExit( & x->value );
+	AtomList_exit( & x->value );
 }
 
 void property_on_get(
@@ -727,7 +727,7 @@ void property_on_priv_get(
 {
 	if( x->send_sym && x->send_sym->s_thing )
 	{
-		int value_count = AtomListGetSize( &x->value );
+		int value_count = AtomList_get_size( &x->value );
 		t_atom* outArray = getbytes( sizeof( t_atom ) * value_count );
 		LIST_FORALL_BEGIN(AtomList,AtomEl,t_atom,&x->value,i,pEl)
 			outArray[i] = *(pEl->pData);
@@ -756,7 +756,7 @@ void property_on_init(
 	{
 		if( x->send_sym && x->send_sym->s_thing )
 		{
-			int value_count = AtomListGetSize( &x->value );
+			int value_count = AtomList_get_size( &x->value );
 			t_atom* outArray = getbytes( sizeof( t_atom ) * value_count );
 			LIST_FORALL_BEGIN(AtomList,AtomEl,t_atom,&x->value,i,pEl)
 				outArray[i] = *(pEl->pData);
@@ -791,12 +791,12 @@ void property_set(
 )
 {
 	int new_value_count = argc;
-	AtomListClear( & x->value );
+	AtomList_clear( & x->value );
 	for(int i=0; i < new_value_count; i++)
 	{
 		t_atom* newVal = getbytes( sizeof( t_atom ) );
 		*newVal = argv[i];
-		AtomListAdd( & x->value, newVal );
+		AtomList_append( & x->value, newVal );
 	}
 }
 
@@ -805,7 +805,7 @@ void property_output(
 )
 {
 	// output "<property> <val> ..."
-	int value_count = AtomListGetSize( &x->value );
+	int value_count = AtomList_get_size( &x->value );
 	t_atom* outArray = getbytes( sizeof( t_atom ) * value_count );
 	LIST_FORALL_BEGIN(AtomList,AtomEl,t_atom,&x->value,i,pEl)
 		outArray[i] = *(pEl->pData);

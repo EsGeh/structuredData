@@ -178,7 +178,7 @@ void* objState_init(
 	}
 
 	x->outList = getbytes( sizeof( SymList ) );
-	SymListInit( x->outList );
+	SymList_init( x->outList );
 
 	x->accumlPos = -1;
 	x->accumlArray = getbytes( sizeof( t_atom ) * ACCUML_SIZE);
@@ -233,7 +233,7 @@ void objState_exit(
 	);
 
 	freebytes( x->accumlArray, sizeof( t_atom ) * ACCUML_SIZE);
-	SymListExit( x->outList );
+	SymList_exit( x->outList );
 	freebytes( x->outList, sizeof( SymList ) );
 }
 
@@ -278,9 +278,9 @@ void objState_input(
 				return;
 			}
 			t_symbol* dest = atom_getsymbol( & argv[3] );
-			if( ! SymListGetElement( x->outList, dest, cmp_symbol_ptrs ) )
+			if( ! SymList_get_element( x->outList, dest, cmp_symbol_ptrs ) )
 			{
-				SymListAdd( x->outList, dest );
+				SymList_append( x->outList, dest );
 			}
 		}
 		// out ( del <dest> )
@@ -292,10 +292,10 @@ void objState_input(
 				return;
 			}
 			t_symbol* pDest = atom_getsymbol( & argv[3] );
-			SymEl *pDestEl = SymListGetElement( x->outList, pDest, cmp_symbol_ptrs );
+			SymEl *pDestEl = SymList_get_element( x->outList, pDest, cmp_symbol_ptrs );
 			if( pDestEl )
 			{
-				SymListDel( x->outList, pDestEl );
+				SymList_del( x->outList, pDestEl );
 			}
 		}
 		// out ( clear )
@@ -306,7 +306,7 @@ void objState_input(
 				pd_error(x, "unknown syntax! expected: out ( clear )");
 				return;
 			}
-			SymListClear( x->outList );
+			SymList_clear( x->outList );
 		}
 		else
 		{
@@ -475,9 +475,9 @@ void objState_rawinput(
 			)
 			{
 				t_symbol* dest = atom_getsymbol( & argv[3] );
-				if( ! SymListGetElement( x->outList, dest, cmp_symbol_ptrs ) )
+				if( ! SymList_get_element( x->outList, dest, cmp_symbol_ptrs ) )
 				{
-					SymListAdd( x->outList, dest );
+					SymList_append( x->outList, dest );
 				}
 			}
 
@@ -488,10 +488,10 @@ void objState_rawinput(
 			)
 			{
 				t_symbol* pDest = atom_getsymbol( & argv[3] );
-				SymEl *pDestEl = SymListGetElement( x->outList, pDest, cmp_symbol_ptrs );
+				SymEl *pDestEl = SymList_get_element( x->outList, pDest, cmp_symbol_ptrs );
 				if( pDestEl )
 				{
-					SymListDel( x->outList, pDestEl );
+					SymList_del( x->outList, pDestEl );
 				}
 			}
 
@@ -501,7 +501,7 @@ void objState_rawinput(
 				&& atom_getsymbol( & argv[1] ) == gensym("clear")
 			)
 			{
-				SymListClear( x->outList );
+				SymList_clear( x->outList );
 			}
 			else
 			{
@@ -686,10 +686,10 @@ void objState_get(
 		// (temporarily) change outList:
 		SymList* old_outList = x->outList;
 		x->outList = getbytes( sizeof( SymList ) );
-		SymListInit( x->outList );
+		SymList_init( x->outList );
 		for(unsigned int i=0; i< out_count; i++)
 		{
-			SymListAdd( x->outList, atom_getsymbol( & out[i] ) );
+			SymList_append( x->outList, atom_getsymbol( & out[i] ) );
 		}
 
 		if( prop == NULL )
@@ -703,7 +703,7 @@ void objState_get(
 				NULL
 			);
 			// append "pseudo property" <out> ( ... ):
-			int out_size = SymListGetSize( old_outList );
+			int out_size = SymList_get_size( old_outList );
 			SETSYMBOL( & x->accumlArray[ x->accumlPos + 0 ], gensym("out") );
 			SETFLOAT( & x->accumlArray[ x->accumlPos + 1 ], out_size);
 			LIST_FORALL_BEGIN(SymList,SymEl,t_symbol,old_outList,i,pEl)
@@ -726,7 +726,7 @@ void objState_get(
 				prop
 			);
 		}
-		SymListExit( x->outList );
+		SymList_exit( x->outList );
 		freebytes( x->outList, sizeof( SymList ) );
 		x->outList = old_outList;
 		// unset "accuml":

@@ -249,7 +249,7 @@ void* data_init(
   t_data *x = (t_data *)pd_new(data_class);
 
 
-	PackListInit(& x->packs );
+	PackList_init(& x->packs );
 
   inlet_new(
 		& x->x_obj,
@@ -301,7 +301,7 @@ void data_exit(
 	t_data* x
 )
 {
-	PackListExit( & x->packs );
+	PackList_exit( & x->packs );
 	freebytes( x->outletDescriptions, sizeof( t_symbol* ) * x->outlet_count );
 	freebytes( x->outlets, sizeof( t_outlet* ) * x->outlet_count );
 }
@@ -354,7 +354,7 @@ void data_append(
 			post("%i: %s", pos+i, buf );
 			*/
 		}
-		PackListAdd(& x->packs, newPack );
+		PackList_append(& x->packs, newPack );
 		pos += (count + 2) ;
 	}
 }
@@ -391,7 +391,7 @@ void data_prepend(
 			post("%i: %s", pos+i, buf );
 			*/
 		}
-		PackListPrepend(& x->packs, newPack );
+		PackList_prepend(& x->packs, newPack );
 		pos += (count + 2) ;
 	}
 }
@@ -400,7 +400,7 @@ void data_clear(
 	t_data *x
 )
 {
-	PackListClear( & x->packs );
+	PackList_clear( & x->packs );
 }
 
 void data_filterPacksAccept(
@@ -410,9 +410,9 @@ void data_filterPacksAccept(
 	t_atom *argv
 )
 {
-	if( ! PackListIsEmpty( & x->packs ) )
+	if( ! PackList_is_empty( & x->packs ) )
 	{
-		PackEl* pEl = PackListGetFirst( & x->packs );
+		PackEl* pEl = PackList_get_first( & x->packs );
 		do
 		{
 			t_atom* packName = & (pEl->pData->atoms[0]);
@@ -430,10 +430,10 @@ void data_filterPacksAccept(
 					break;
 				}
 			}
-			PackEl* next = PackListGetNext( & x->packs, pEl );
+			PackEl* next = PackList_get_next( & x->packs, pEl );
 			if( !accept )
 			{
-				PackListDel( & x->packs, pEl );
+				PackList_del( & x->packs, pEl );
 				//post( "rejected!" );
 			}
 			pEl = next;
@@ -449,9 +449,9 @@ void data_filterPacksReject(
 	t_atom *argv
 )
 {
-	if( ! PackListIsEmpty( & x->packs ) )
+	if( ! PackList_is_empty( & x->packs ) )
 	{
-		PackEl* pEl = PackListGetFirst( & x->packs );
+		PackEl* pEl = PackList_get_first( & x->packs );
 		do
 		{
 			t_atom* packName = & (pEl->pData->atoms[0]);
@@ -469,10 +469,10 @@ void data_filterPacksReject(
 					break;
 				}
 			}
-			PackEl* next = PackListGetNext( & x->packs, pEl );
+			PackEl* next = PackList_get_next( & x->packs, pEl );
 			if( !accept )
 			{
-				PackListDel( & x->packs, pEl );
+				PackList_del( & x->packs, pEl );
 				//post( "rejected!" );
 			}
 			pEl = next;
@@ -518,9 +518,9 @@ void data_pop(
 	t_data *x
 )
 {
-	if( !PackListIsEmpty( & x -> packs ) )
+	if( !PackList_is_empty( & x -> packs ) )
 	{
-		PackEl* el = PackListGetFirst( & x -> packs );
+		PackEl* el = PackList_get_first( & x -> packs );
 		unsigned int count = atom_getint( &el->pData->atoms[1] ) + 2;
 		data_outputAt(
 			x,
@@ -528,7 +528,7 @@ void data_pop(
 			count,
 			el->pData->atoms
 		);
-		PackListDel( & x -> packs, el );
+		PackList_del( & x -> packs, el );
 	}
 }
 
@@ -536,9 +536,9 @@ void data_popRev(
 	t_data *x
 )
 {
-	if( !PackListIsEmpty( & x -> packs ) )
+	if( !PackList_is_empty( & x -> packs ) )
 	{
-		PackEl* el = PackListGetLast( & x -> packs );
+		PackEl* el = PackList_get_last( & x -> packs );
 		unsigned int count = atom_getint( &el->pData->atoms[1] ) + 2;
 		data_outputAt(
 			x,
@@ -546,7 +546,7 @@ void data_popRev(
 			count,
 			el->pData->atoms
 		);
-		PackListDel( & x -> packs, el );
+		PackList_del( & x -> packs, el );
 	}
 }
 
