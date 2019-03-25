@@ -47,8 +47,9 @@ typedef struct s_objState {
 	t_last_method last_method;
 	BOOL enable_accuml;
 	AtomBuffer accumlArray;
-	t_inlet* fromObjIn_in;
+	t_inlet* toObj_in;
 	t_inlet* fromProperties_in;
+	t_inlet* objEvents_in;
 	t_outlet* events_to_obj;
 	t_outlet* toProperties_out;
 	t_outlet* obj_out;
@@ -78,6 +79,13 @@ void objState_rawinput(
 );
 
 void objState_fromProps(
+	t_objState* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+void objState_sendEvent(
 	t_objState* x,
 	t_symbol *s,
 	int argc,
@@ -135,6 +143,15 @@ t_class* register_objState(
 		class,
 		(t_method )objState_fromProps,
 		gensym("fromProps"),
+		A_GIMME,
+		0
+	);
+
+	// send events
+	class_addmethod(
+		class,
+		(t_method )objState_sendEvent,
+		gensym("send"),
 		A_GIMME,
 		0
 	);
@@ -203,7 +220,7 @@ void* objState_init(
 		x->globalIn
 	);
 
-	x->fromObjIn_in =
+	x->toObj_in =
 		x->x_obj.ob_inlet;
 
 	x->fromProperties_in =
@@ -212,6 +229,14 @@ void* objState_init(
 			& x->x_obj.ob_pd,
 			&s_list,
 			gensym("fromProps")
+		);
+
+	x->objEvents_in =
+		inlet_new(
+			& x->x_obj,
+			& x->x_obj.ob_pd,
+			&s_list,
+			gensym("send")
 		);
 
 	x->events_to_obj =
@@ -400,9 +425,13 @@ void objState_input(
 	}
 
 	// set ( <property> ( val1 [...] ) ... )      (...: for list properties)
+	// or
+	// set_no_out ( <property> ( val1 [...] ) ... )      (...: for list properties)
 	//   (you can set several properties at once...)
 	else if(
 		atom_getsymbol( & argv[0] ) == gensym("set")
+		|| 
+		atom_getsymbol( & argv[0] ) == gensym("set_no_out")
 	)
 	{
 		x->last_method = LAST_METHOD_SET;
@@ -424,7 +453,7 @@ void objState_input(
 			}
 			outlet_anything(
 				x->toProperties_out,
-				gensym("set"),
+				atom_getsymbol( & argv[0] ),
 				currentSize+1,
 				toSend
 			);
@@ -627,24 +656,11 @@ void objState_fromProps(
 			{
 				output_buf[4+i] = argv[1+i];
 			}
-
-			LIST_FORALL_BEGIN(SymList,SymEl,t_symbol,x->outList,iOut,pEl)
-				if( pEl->pData->s_thing )
-				{
-					// send event:
-					typedmess(
-							pEl->pData->s_thing,
-							&s_list,
-							val_count + 4,
-							output_buf
-						);
-				}
-			LIST_FORALL_END(SymList,SymEl,t_symbol,x->outList,iOut,pEl)
-			outlet_list(
-				x->obj_out,
-				&s_list,
-				val_count + 4,
-				output_buf
+			objState_sendEvent(
+					x,
+					s,
+					val_count + 4,
+					output_buf
 			);
 		}
 		freebytes( output_buf, sizeof( t_atom ) * (val_count + 4) );
@@ -666,6 +682,34 @@ void objState_fromProps(
 			AtomBuffer_append( & x-> accumlArray, argv[ 1+i ] );
 		}
 	}
+}
+
+void objState_sendEvent(
+	t_objState* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+
+		LIST_FORALL_BEGIN(SymList,SymEl,t_symbol,x->outList,iOut,pEl)
+			if( pEl->pData->s_thing )
+			{
+				// send event:
+				typedmess(
+						pEl->pData->s_thing,
+						&s_list,
+						argc,
+						argv
+					);
+			}
+		LIST_FORALL_END(SymList,SymEl,t_symbol,x->outList,iOut,pEl)
+		outlet_list(
+			x->obj_out,
+			&s_list,
+			argc,
+			argv
+		);
 }
 
 void objState_get(

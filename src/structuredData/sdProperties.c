@@ -94,6 +94,13 @@ void property_on_set(
 	t_atom *argv
 );
 
+void property_on_set_no_out(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
 void property_on_priv_set(
 	t_property* x,
 	t_symbol *s,
@@ -220,6 +227,14 @@ void register_propertyMethods(
 		class,
 		(t_method )property_on_set,
 		gensym("set"),
+		A_GIMME,
+		0
+	);
+
+	class_addmethod(
+		class,
+		(t_method )property_on_set_no_out,
+		gensym("set_no_out"),
 		A_GIMME,
 		0
 	);
@@ -597,6 +612,91 @@ void property_on_set(
 		property_output(
 			x
 		);
+	}
+	else
+	{
+		// redirect to other properties:
+		outlet_anything(
+			x->redirect_out,
+			s,
+			argc,
+			argv
+		);
+	}
+}
+
+void property_on_set_no_out(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	// set <property> <val1> <val2> ...
+
+	if(
+		argc >= 1
+		&& atom_getsymbol( &argv[0] ) == x->name
+	)
+	{
+
+		if(
+		 x->type == PROPTYPE_SYMBOL
+		)
+		{
+			if( argc != 2 || (argc == 2 && argv[1].a_type != A_SYMBOL ) )
+			{
+				char name_buf[256];
+				t_atom name;
+				SETSYMBOL( & name, x->name );
+				atom_string( & name, name_buf, 255 );
+				pd_error( x, "error in sdPropertySym %s: type error! expected 'set <prop_name> <symbol>'", name_buf );
+				return;
+			}
+		}
+		else if(
+		 x->type == PROPTYPE_FLOAT
+		)
+		{
+			if( argc != 2 || (argc == 2 && argv[1].a_type != A_FLOAT ) )
+			{
+				char name_buf[256];
+				t_atom name;
+				SETSYMBOL( & name, x->name );
+				atom_string( & name, name_buf, 255 );
+				pd_error( x, "error in sdProperty %s: type error! expected 'set <prop_name> <float>'", name_buf );
+				return;
+			}
+		}
+		else if(
+		 x->type == PROPTYPE_LIST
+		)
+		{
+			if( argc == 0 )
+			{
+				char name_buf[256];
+				t_atom name;
+				SETSYMBOL( & name, x->name );
+				atom_string( & name, name_buf, 255 );
+				pd_error( x, "error in sdPropertyList %s: type error! expected 'set <prop_name> <val1> ...'", name_buf );
+				return;
+			}
+		}
+
+		property_set(
+				x,
+				argc-1,
+				& argv[1]
+		);
+		if( x->send_sym && x->send_sym->s_thing )
+		{
+			typedmess(
+				x->send_sym->s_thing,
+				&s_list,
+				argc-1,
+				& argv[1]
+			);
+		}
 	}
 	else
 	{

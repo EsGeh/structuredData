@@ -1,6 +1,6 @@
-#N canvas 0 30 798 854 10;
+#N canvas 0 30 846 854 10;
 #X text 536 234 "generic" gui to read/write objects:;
-#N canvas 0 30 798 854 other 0;
+#N canvas 0 30 846 854 other 0;
 #X obj 269 270 send, f 18;
 #X obj 434 170 loadbang;
 #X obj 242 164 sdPackFromHuman;
@@ -68,7 +68,7 @@ about its state:;
 #X text 31 97 define an "instrument" as an stateful object with some
 properties:;
 #X text 327 135 <- open abstraction to see details;
-#N canvas 0 30 798 854 UserInterface 0;
+#N canvas 0 30 846 411 UserInterface 0;
 #X obj 97 46 sdObjState_ui \$0-GLOBAL;
 #X text 444 53 1 click update_ui;
 #X text 444 70 2 select an object;
@@ -110,6 +110,7 @@ properties:;
 #X obj 71 387 sdObjRcvExample \$0-receiver \$0-GLOBAL;
 #X obj 334 427 sdObjSndExample \$0-sender \$0-GLOBAL;
 #X text 580 324 ...or an object which does both;
+#X text 412 533 DEPRECATED:;
 #X connect 3 0 27 0;
 #X connect 9 0 8 0;
 #X connect 11 0 14 0;
