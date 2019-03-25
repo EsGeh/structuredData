@@ -1,4 +1,4 @@
-#N canvas 848 30 750 189 10;
+#N canvas 0 30 846 854 10;
 #X obj 48 558 r hurz;
 #X obj 48 581 print hurz;
 #X msg 60 387 list out 1 clear;
@@ -372,7 +372,7 @@ get notDefined );
 #X connect 29 0 25 0;
 #X restore 162 517 pd exampleObj;
 #X text 30 129 run automated test (currently broken);
-#N canvas 0 30 846 854 properties 1;
+#N canvas 0 30 846 854 properties 0;
 #X obj 135 175 print propOut;
 #X floatatom 229 75 5 0 0 0 - - -;
 #X obj 280 180 print redirect;
@@ -443,6 +443,8 @@ it!);
 #X text 12 9 This module is just a convention how to build high level
 objects in a patch.;
 #X text 29 61 how do "properties" work:;
+#X obj 536 91 sdObjState_example;
+#X text 522 69 usage example;
 #X connect 0 0 1 0;
 #X connect 2 0 21 0;
 #X connect 3 0 21 0;

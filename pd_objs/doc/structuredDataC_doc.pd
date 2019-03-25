@@ -3,7 +3,6 @@
 #X text 29 37 basic:;
 #X text 34 184 data:;
 #X text 30 386 obj state:;
-#X obj 49 440 sdObjState_example;
 #X obj 49 63 sdUtils-help;
 #X obj 49 210 sdList-help;
 #X obj 49 277 sdPack-help;
