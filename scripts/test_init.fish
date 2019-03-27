@@ -39,7 +39,7 @@ if test (count $argv) != 0
 end
 
 and begin
-	set cmd "$SCRIPTS_DIR/build.fish --prefix '$doc_dir' build install"
+	set cmd "$SCRIPTS_DIR/build.fish --debug --prefix '$doc_dir' build install"
 	echo "executing: '$cmd'"
 	eval "$cmd"
 end

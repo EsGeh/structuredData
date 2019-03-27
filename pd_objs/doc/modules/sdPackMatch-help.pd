@@ -47,7 +47,7 @@ bound to "val", f 30;
 #X msg 40 121 list pack ( );
 #X msg 184 151 list p ( );
 #X msg 194 176 list p ( x );
-#X msg 379 215 clear \, add pattern1 pack ( * );
+#X msg 383 187 clear \, add pattern1 pack ( * );
 #X msg 384 105 clear \, add pattern1 pack ( ) \, add pattern2 pack
 ( x );
 #X msg 385 144 clear \, add pattern3 ? ( ) \, add pattern4 ? ( x )
@@ -59,7 +59,7 @@ bound to "val", f 30;
 -1 -1;
 #X msg 198 537 list p ( );
 #X msg 208 562 list p ( x );
-#X msg 393 601 clear \, add pattern1 pack ( * );
+#X msg 400 579 clear \, add pattern1 pack ( * );
 #X msg 54 507 list p1 ( ) p2 ( );
 #X msg 398 491 clear \, add pat1 p1 ( ) p2 ( ) \, add pat2 p1 ( x )
 p2 ( y );
@@ -74,6 +74,11 @@ p2 ( y );
 #X obj 280 711 print reject;
 #X obj 366 712 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
+#X msg 393 234 clear \, add pattern1 * pack ( );
+#X msg 399 619 clear \, add pattern1 * p2 ( ) \, add pattern2 * p1
+( );
+#X msg 400 654 clear \, add pattern1 * p2 ( ) p1 ( );
+#X msg 92 469 list p1 ( ) p2 ( ) p3 ( x );
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 1 0 3 0;
@@ -100,13 +105,16 @@ p2 ( y );
 #X connect 21 0 12 0;
 #X connect 22 0 9 0;
 #X connect 23 0 19 0;
+#X connect 28 0 1 0;
+#X connect 29 0 12 0;
+#X connect 30 0 12 0;
+#X connect 31 0 11 0;
 #X restore 61 183 pd packs;
 #X msg 308 205 * a b c;
 #X text 443 206 invalid!;
 #X msg 308 165 * a ( b ) c ( d );
 #X text 441 155 any sequence of packs containing the packs a ( b )
 and c ( d ) in any order, f 38;
-#X text 170 165 not yet implemented:;
 #X text 169 317 not yet implemented:;
 #X text 172 387 not yet implemented:;
 #X text 173 467 not yet implemented:;

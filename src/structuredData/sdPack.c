@@ -1,6 +1,7 @@
 #include "sdPack.h"
 #include "LinkedList.h"
 #include "Buffer.h"
+#include "DynArray.h"
 #include "Global.h"
 
 
@@ -1034,10 +1035,32 @@ typedef struct
 #define FREE_PATTTERN_INFO(x,size) \
 { \
 	AtomBuf_exit( & x->pattern ); \
+	freebytes( x, size ); \
 }
 
 DECL_LIST(PatternList, PatternEl, PatternInfo, getbytes, freebytes, FREE_PATTTERN_INFO)
 DEF_LIST(PatternList, PatternEl, PatternInfo, getbytes, freebytes, FREE_PATTTERN_INFO)
+
+/*
+DECL_DYN_ARRAY(AtomDynArray, t_atom, getbytes, freebytes)
+DEF_DYN_ARRAY(AtomDynArray, t_atom, getbytes, freebytes)
+
+#define FREE_ATOM_BUF(x,size) \
+{ \
+	AtomDynArray_exit( x ); \
+}
+
+DECL_LIST(AtomBufList, AtomBufListEl, AtomDynArray, getbytes, freebytes, FREE_ATOM_BUF)
+DEF_LIST(AtomBufList, AtomBufListEl, AtomDynArray, getbytes, freebytes, FREE_ATOM_BUF)
+*/
+
+typedef struct {
+	int pattern_pos;
+	int pattern_size;
+} SubPatternInfo;
+
+DECL_LIST(SubPatternsList, SubPatternsListEl, SubPatternInfo, getbytes, freebytes, freebytes)
+DEF_LIST(SubPatternsList, SubPatternsListEl, SubPatternInfo, getbytes, freebytes, freebytes)
 
 typedef struct s_packMatch {
   t_object x_obj;
@@ -1092,7 +1115,45 @@ BOOL match_rec(
 		int* pattern_pos,
 		t_atom* argv,
 		int size,
-		int* pos
+		int* pos,
+		int rec_depth
+);
+
+// DEBUG OUTPUT HELPERS:
+void match_db_print(
+		t_packMatch* x,
+		t_symbol* pattern_name,
+		t_atom* pattern,
+		int pattern_size,
+		int* pattern_pos,
+		t_atom* argv,
+		int size,
+		int* pos,
+		int rec_depth,
+		char* msg
+);
+void match_db_print_start(
+		t_packMatch* x,
+		t_symbol* pattern_name,
+		t_atom* pattern,
+		int pattern_size,
+		int* pattern_pos,
+		t_atom* argv,
+		int size,
+		int* pos,
+		int rec_depth
+);
+void match_error(
+		t_packMatch* x,
+		t_symbol* pattern_name,
+		t_atom* pattern,
+		int pattern_size,
+		int* pattern_pos,
+		t_atom* argv,
+		int size,
+		int* pos,
+		int rec_depth,
+		char* msg
 );
 
 t_class* register_packMatch(
@@ -1236,7 +1297,8 @@ BOOL match(
 		pattern_pos,
 		argv,
 		size,
-		pos
+		pos,
+		0
 	);
 
 	if(
@@ -1267,13 +1329,16 @@ BOOL match_rec(
 		int* pattern_pos,
 		t_atom* argv,
 		int size,
-		int* pos
+		int* pos,
+		int rec_depth
 )
 {
-	DB_PRINT(
-			"start: pattern (%i, %i), input (%i, %i)",
-			*pattern_pos, pattern_size,
-			*pos, size
+	match_db_print_start(
+			x,
+			pattern_name,
+			pattern, pattern_size, pattern_pos,
+			argv, size, pos,
+			rec_depth
 	);
 
 	// match NON strict:
@@ -1285,18 +1350,188 @@ BOOL match_rec(
 	{
 		// eat '*'
 		(*pattern_pos) ++;
-		// ARBITRARY CONTENT:
-		while(
-			*pos < size
+
+		if( 
+			(*pattern_pos) >= pattern_size
+			||
+			atom_getsymbol( &pattern[ (*pattern_pos) + 1] ) == gensym(")")
 		)
 		{
-			(*pos) ++;
+			// ARBITRARY CONTENT:
+			while(
+				*pos < size
+			)
+			{
+				(*pos) ++;
+			}
 		}
-		DB_PRINT(
-				"done: pattern (%i, %i), input (%i, %i)",
-				*pattern_pos, pattern_size,
-				*pos, size
-		);
+		else
+		{
+			// make shure the input contains certain packages
+
+			// 1. read all packages in the pattern:
+			SubPatternsList expected_packages;
+			SubPatternsList_init ( & expected_packages );
+			while(
+				(*pattern_pos) < pattern_size
+				&&
+				atom_getsymbol( &pattern[*pattern_pos] ) != gensym(")")
+			)
+			{
+				SubPatternInfo* subPatternInfo = getbytes( sizeof( SubPatternInfo ) );
+				SubPatternsList_append(
+						& expected_packages,
+						subPatternInfo
+				);
+				int depth = 0;
+
+				// 'pack' '(' ...
+				if(
+					(*pattern_pos) + 1 < pattern_size
+					&&
+					pattern[ (*pattern_pos) + 0 ].a_type == A_SYMBOL
+					&&
+					atom_getsymbol( &pattern[ (*pattern_pos) + 1 ]) == gensym("(")
+				)
+				{
+					subPatternInfo->pattern_pos =
+							(*pattern_pos);
+					depth = 1;
+
+					(*pattern_pos) += 2;
+					while(
+						(*pattern_pos) < pattern_size
+						&&
+						depth > 0
+					)
+					{
+						if( 
+								atom_getsymbol( & pattern[ (*pattern_pos) + 0 ] ) == gensym( "(" )
+						)
+						{
+							depth++;
+						}
+						else if( 
+								atom_getsymbol( & pattern[ (*pattern_pos) + 0 ] ) == gensym( ")" )
+						)
+						{
+							depth--;
+						}
+						(*pattern_pos) ++;
+					}
+					if( depth > 0 && *pattern_pos >= pattern_size )
+					{
+						char buf[256];
+						t_atom pattern_name_atom;
+						SETSYMBOL( & pattern_name_atom, pattern_name );
+						atom_string( &pattern_name_atom, buf, 256 );
+						match_error(
+								x,
+								pattern_name,
+								pattern, pattern_size, pattern_pos,
+								argv, size, pos,
+								rec_depth,
+								"invalid pack!"
+						);
+						SubPatternsList_exit( & expected_packages );
+						return FALSE;
+					}
+				}
+				else
+				{
+					char buf[256];
+					t_atom pattern_name_atom;
+					SETSYMBOL( & pattern_name_atom, pattern_name );
+					atom_string( &pattern_name_atom, buf, 256 );
+					match_error(
+							x,
+							pattern_name,
+							pattern, pattern_size, pattern_pos,
+							argv, size, pos,
+							rec_depth,
+							"invalid pack!"
+					);
+					SubPatternsList_exit( & expected_packages );
+					return FALSE;
+				}
+				subPatternInfo->pattern_size =
+					(*pattern_pos);
+			}
+
+			// 2. try to find all patterns in the input:
+			{
+				int matched = 0;
+				while(
+						*pos < size
+				)
+				{
+					// read the input packet wise:
+					if(
+							*pos + 1 >= size
+							||
+							argv[ (*pos) + 0 ].a_type != A_SYMBOL
+							||
+							argv[ (*pos) + 1].a_type != A_FLOAT
+							||
+							(*pos) + 1 + atom_getint( & argv[ *pos ] ) >= size
+					)
+					{
+						match_db_print(
+								x,
+								pattern_name,
+								pattern, pattern_size, pattern_pos,
+								argv, size, pos,
+								rec_depth,
+								"FAIL: input: invalid packet"
+						);
+
+						SubPatternsList_exit( & expected_packages );
+						return FALSE;
+					}
+					int pack_size = 
+							atom_getint( & argv[ *pos ] );
+					int pos_temp = (*pos);
+					// check if this is an expected packet:
+					LIST_FORALL_BEGIN(SubPatternsList, SubPatternsListEl, SubPatternInfo, &expected_packages, i, pEl)
+						SubPatternInfo* subPatternInfo = pEl->pData;
+						int current_pat_pos = subPatternInfo->pattern_pos;
+						pos_temp = (*pos);
+						if(
+								match_rec(
+										x,
+										pattern_name,
+										pattern,
+										subPatternInfo->pattern_size,
+										&current_pat_pos,
+										argv,
+										pos_temp + 2 + pack_size,
+										&pos_temp,
+										rec_depth+1
+								)
+						)
+						{
+							matched ++;
+						}
+					LIST_FORALL_END(SubPatternsList, SubPatternsListEl, SubPatternInfo, &expected_packages, i, pEl)
+					(*pos) += (2 + pack_size);
+				}
+				if( matched != SubPatternsList_get_size( & expected_packages ) )
+				{
+					match_db_print(
+							x,
+							pattern_name,
+							pattern, pattern_size, pattern_pos,
+							argv, size, pos,
+							rec_depth,
+							"FAIL: packets missing in input"
+					);
+
+					SubPatternsList_exit( & expected_packages );
+					return FALSE;
+				}
+			}
+			SubPatternsList_exit( & expected_packages );
+		}
 	}
 
 	// match strict:
@@ -1333,14 +1568,17 @@ BOOL match_rec(
 					atom_string( & argv[*pos], buf, 256 );
 					char buf_pat[256];
 					atom_string( & pattern[*pattern_pos], buf_pat, 256 );
-					DB_PRINT(
-							"ERROR: %s != %s",
-							buf,
-							buf_pat
+					match_db_print(
+							x,
+							pattern_name,
+							pattern, pattern_size, pattern_pos,
+							argv, size, pos,
+							rec_depth,
+							"FAIL: !="
 					);
-						(*pos) ++;
-						(*pattern_pos) ++;
-						return FALSE;
+					(*pos) ++;
+					(*pattern_pos) ++;
+					return FALSE;
 				}
 				// dbg print
 				{
@@ -1348,16 +1586,18 @@ BOOL match_rec(
 					atom_string( & argv[*pos], buf, 256 );
 					char buf_pat[256];
 					atom_string( & pattern[*pattern_pos], buf_pat, 256 );
-					DB_PRINT(
-							"%s == %s",
-							buf,
-							buf_pat
+					match_db_print(
+							x,
+							pattern_name,
+							pattern, pattern_size, pattern_pos,
+							argv, size, pos,
+							rec_depth,
+							"=="
 					);
 				}
 				(*pos) ++;
 				(*pattern_pos) ++;
 			}
-			DB_PRINT( "(" );
 			// '('
 			if(
 				*pattern_pos < pattern_size
@@ -1367,6 +1607,15 @@ BOOL match_rec(
 			{
 				if( argv[*pos].a_type != A_FLOAT )
 				{
+					match_db_print(
+							x,
+							pattern_name,
+							pattern, pattern_size, pattern_pos,
+							argv, size, pos,
+							rec_depth,
+							"FAIL"
+					);
+
 					return FALSE;
 				}
 				int content_size = 
@@ -1385,10 +1634,20 @@ BOOL match_rec(
 							pattern_pos,
 							argv,
 							(*pos) + content_size,
-							pos
+							pos,
+							rec_depth+1
 					)
 				)
 				{
+					match_db_print(
+							x,
+							pattern_name,
+							pattern, pattern_size, pattern_pos,
+							argv, size, pos,
+							rec_depth,
+							"FAIL: (subpattern fail)"
+					);
+
 					return FALSE;
 				}
 				if( 
@@ -1399,10 +1658,13 @@ BOOL match_rec(
 					t_atom pattern_name_atom;
 					SETSYMBOL( & pattern_name_atom, pattern_name );
 					atom_string( &pattern_name_atom, buf, 256 );
-					DB_PRINT(
-							"ERROR in pattern %s at pos %i: ')' expected, found end of input",
-							buf,
-							*pattern_pos
+					match_db_print(
+							x,
+							pattern_name,
+							pattern, pattern_size, pattern_pos,
+							argv, size, pos,
+							rec_depth,
+							"FAIL: eof"
 					);
 					return FALSE;
 				}
@@ -1412,10 +1674,13 @@ BOOL match_rec(
 					t_atom pattern_name_atom;
 					SETSYMBOL( & pattern_name_atom, pattern_name );
 					atom_string( &pattern_name_atom, buf_pat, 256 );
-					DB_PRINT(
-							"ERROR in pattern %s at pos %i: ')' expected, found end of input",
-							buf_pat,
-							*pattern_pos
+					match_db_print(
+							x,
+							pattern_name,
+							pattern, pattern_size, pattern_pos,
+							argv, size, pos,
+							rec_depth,
+							"FAIL: eof"
 					);
 					return FALSE;
 				}
@@ -1425,22 +1690,16 @@ BOOL match_rec(
 			}
 		}
 
-		DB_PRINT(
-				"done: pattern (%i, %i), input (%i, %i)",
-				*pattern_pos, pattern_size,
-				*pos, size
-		);
 		// some input wasn't matched!:
 		if( (*pos) < size )
 		{
-			char buf_pat_name[256];
-			t_atom pattern_name_atom;
-			SETSYMBOL( & pattern_name_atom, pattern_name );
-			atom_string( &pattern_name_atom, buf_pat_name, 256 );
-			DB_PRINT(
-					"ERROR in pattern %s at pos %i: unmatched rest input!",
-					buf_pat_name,
-					*pattern_pos
+			match_db_print(
+					x,
+					pattern_name,
+					pattern, pattern_size, pattern_pos,
+					argv, size, pos,
+					rec_depth,
+					"FAIL: input rest"
 			);
 			return FALSE;
 		}
@@ -1452,19 +1711,27 @@ BOOL match_rec(
 				atom_getsymbol( &pattern[*pattern_pos] ) != gensym(")")
 		)
 		{
-			char buf_pat_name[256];
-			t_atom pattern_name_atom;
-			SETSYMBOL( & pattern_name_atom, pattern_name );
-			atom_string( &pattern_name_atom, buf_pat_name, 256 );
-			DB_PRINT(
-					"ERROR in pattern %s at pos %i: no match for rest of the pattern!",
-					buf_pat_name,
-					*pattern_pos
+			match_db_print(
+					x,
+					pattern_name,
+					pattern, pattern_size, pattern_pos,
+					argv, size, pos,
+					rec_depth,
+					"FAIL: pattern rest"
 			);
 			return FALSE;
 		}
 
 	}
+
+	match_db_print(
+			x,
+			pattern_name,
+			pattern, pattern_size, pattern_pos,
+			argv, size, pos,
+			rec_depth,
+			"SUCCESS"
+	);
 
 	return TRUE;
 
@@ -1497,5 +1764,197 @@ void packMatch_patterns_clear(
 {
 	PatternList_clear(
 			& x->patterns
+	);
+}
+
+void match_db_print(
+		t_packMatch* x,
+		t_symbol* pattern_name,
+		t_atom* pattern,
+		int pattern_size,
+		int* pattern_pos,
+		t_atom* argv,
+		int size,
+		int* pos,
+		int rec_depth,
+		char* msg
+)
+{
+	char pattern_name_buf[1024];
+	{
+		t_atom pattern_name_atom;
+		SETSYMBOL( & pattern_name_atom, pattern_name );
+		atom_string( &pattern_name_atom, pattern_name_buf, 1024 );
+	}
+	char pattern_current_buf[1024];
+	{
+		sprintf( pattern_current_buf, "'");
+		if( *pattern_pos < pattern_size )
+		{
+			t_atom* current = & pattern[ *pattern_pos ];
+			char current_buf[1024];
+			atom_string( current, current_buf, 1024 );
+			strcat(
+					pattern_current_buf,
+					current_buf
+			);
+		}
+		strcat(
+				pattern_current_buf,
+				"'"
+		);
+	}
+	char input_current_buf[1024];
+	{
+		sprintf( input_current_buf, "'");
+		if( *pos < size )
+		{
+			t_atom* current = & argv[ *pos ];
+			char current_buf[1024];
+			atom_string( current, current_buf, 1024 );
+			strcat(
+					input_current_buf,
+					current_buf
+			);
+		}
+		strcat(
+				input_current_buf,
+				"'"
+		);
+	}
+
+	char indent_buf[256];
+	sprintf( indent_buf, "");
+	for(int i=0; i<rec_depth; i++)
+	{
+		strcat(indent_buf, "-");
+	}
+
+	DB_PRINT(
+			"%spattern %s:(%i,%i: %s) input (%i,%i: %s): %s",
+			indent_buf,
+			pattern_name_buf,
+			*pattern_pos, pattern_size,
+			pattern_current_buf,
+			*pos, size,
+			input_current_buf,
+			msg
+	);
+}
+
+void match_db_print_start(
+		t_packMatch* x,
+		t_symbol* pattern_name,
+		t_atom* pattern,
+		int pattern_size,
+		int* pattern_pos,
+		t_atom* argv,
+		int size,
+		int* pos,
+		int rec_depth
+)
+{
+	char pattern_name_buf[1024];
+	{
+		t_atom pattern_name_atom;
+		SETSYMBOL( & pattern_name_atom, pattern_name );
+		atom_string( &pattern_name_atom, pattern_name_buf, 1024 );
+	}
+	char pattern_buf[1024];
+	{
+		sprintf( pattern_buf, "'");
+		for(int i=(*pattern_pos); i< pattern_size; i++)
+		{
+			t_atom* current = & pattern[ i ];
+			char current_buf[1024];
+			atom_string( current, current_buf, 1024 );
+			if( i != 0 )
+				strcat(
+						pattern_buf,
+						" "
+				);
+			strcat(
+					pattern_buf,
+					current_buf
+			);
+		}
+		strcat(
+				pattern_buf,
+				"'"
+		);
+	}
+	char arg_buf[1024];
+	{
+		sprintf( arg_buf, "'");
+		for(int i=(*pos); i< size; i++)
+		{
+			t_atom* current = & argv[ i ];
+			char current_buf[1024];
+			atom_string( current, current_buf, 1024 );
+			if( i != 0 )
+				strcat(
+						arg_buf,
+						" "
+				);
+			strcat(
+					arg_buf,
+					current_buf
+			);
+		}
+		strcat(
+				arg_buf,
+				"'"
+		);
+	}
+	char indent_buf[256];
+	sprintf( indent_buf, "");
+	for(int i=0; i<rec_depth; i++)
+	{
+		strcat(indent_buf, "-");
+	}
+	DB_PRINT(
+			"%spattern %s:(%i,%i: %s) input (%i,%i: %s): start",
+			indent_buf,
+			pattern_name_buf,
+			*pattern_pos,
+			pattern_size,
+			pattern_buf,
+			*pos,
+			size,
+			arg_buf
+	);
+}
+
+void match_error(
+		t_packMatch* x,
+		t_symbol* pattern_name,
+		t_atom* pattern,
+		int pattern_size,
+		int* pattern_pos,
+		t_atom* argv,
+		int size,
+		int* pos,
+		int rec_depth,
+		char* msg
+)
+{
+	char pattern_name_buf[256];
+	{
+		t_atom pattern_name_atom;
+		SETSYMBOL( & pattern_name_atom, pattern_name );
+		atom_string( &pattern_name_atom, pattern_name_buf, 256 );
+	}
+	char indent_buf[256];
+	sprintf( indent_buf, "");
+	for(int i=0; i<rec_depth; i++)
+	{
+		strcat(indent_buf, "-");
+	}
+	pd_error( x,
+			"%spattern %s: ERROR at pos %i: %s",
+			indent_buf,
+			pattern_name_buf,
+			*pattern_pos,
+			msg
 	);
 }
