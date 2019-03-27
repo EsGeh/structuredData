@@ -6,6 +6,13 @@
 #include "m_pd.h"
 
 
+#ifndef DEBUG
+	#define DB_PRINT(message, ...)
+#else
+	#define DB_PRINT(message, ...)\
+	post(message, ## __VA_ARGS__)
+#endif
+
 INLINE int compareAtoms(t_atom* atoml, t_atom* atomr)
 {
 	if(atoml -> a_type == A_SYMBOL)

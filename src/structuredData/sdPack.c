@@ -1,4 +1,9 @@
 #include "sdPack.h"
+#include "LinkedList.h"
+#include "Buffer.h"
+#include "Global.h"
+
+
 #include <string.h>
 
 #include "m_pd.h"
@@ -10,6 +15,7 @@ static t_class* packFromHuman_class;
 static t_class* packFilter_class;;
 static t_class* packToMessage_class;;
 static t_class* packFromMessage_class;;
+static t_class* packMatch_class;;
 
 t_class* register_pack(
 	t_symbol* className
@@ -29,6 +35,9 @@ t_class* register_packToMessage(
 t_class* register_packFromMessage(
 	t_symbol* className
 );
+t_class* register_packMatch(
+	t_symbol* className
+);
 
 void sdPack_setup()
 {
@@ -38,6 +47,7 @@ void sdPack_setup()
 	packFilter_class = register_packFilter( gensym("sdPackFilter") );
 	packToMessage_class = register_packToMessage( gensym("sdPackToMessage") );
 	packFromMessage_class = register_packFromMessage( gensym("sdPackFromMessage") );
+	packMatch_class = register_packMatch( gensym("sdPackMatch") );
 }
 
 //----------------------------------
@@ -1003,4 +1013,489 @@ void packFromMessage_inputAny(
 		ret
 	);
 	freebytes( ret, sizeof( t_atom ) * (argc+2) );
+}
+
+//----------------------------------
+// packMatch
+//----------------------------------
+
+DECL_LIST(AtomList, AtomEl, t_atom, getbytes, freebytes, freebytes)
+DEF_LIST(AtomList, AtomEl, t_atom, getbytes, freebytes, freebytes)
+
+DECL_BUFFER(AtomBuf, t_atom, getbytes, freebytes)
+DEF_BUFFER(AtomBuf, t_atom, getbytes, freebytes)
+
+typedef struct
+{
+	t_symbol* name;
+	AtomBuf pattern;
+} PatternInfo;
+
+#define FREE_PATTTERN_INFO(x,size) \
+{ \
+	AtomBuf_exit( & x->pattern ); \
+}
+
+DECL_LIST(PatternList, PatternEl, PatternInfo, getbytes, freebytes, FREE_PATTTERN_INFO)
+DEF_LIST(PatternList, PatternEl, PatternInfo, getbytes, freebytes, FREE_PATTTERN_INFO)
+
+typedef struct s_packMatch {
+  t_object x_obj;
+	PatternList patterns;
+	t_outlet* outlet;
+	t_outlet* outlet_reject;
+} t_packMatch;
+
+void* packMatch_init(
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+void packMatch_exit(
+	struct s_packMatch* x
+);
+
+void packMatch_patterns_add(
+	t_packMatch* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+void packMatch_patterns_clear(
+	t_packMatch* x
+);
+
+void packMatch_input(
+	t_packMatch* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+BOOL match(
+		t_packMatch* x,
+		t_symbol* pattern_name,
+		t_atom* pattern,
+		int pattern_size,
+		int* pattern_pos,
+		t_atom* argv,
+		int size,
+		int* pos
+);
+
+BOOL match_rec(
+		t_packMatch* x,
+		t_symbol* pattern_name,
+		t_atom* pattern,
+		int pattern_size,
+		int* pattern_pos,
+		t_atom* argv,
+		int size,
+		int* pos
+);
+
+t_class* register_packMatch(
+	t_symbol* className
+)
+{
+	t_class* class =
+		class_new(
+			className,
+			(t_newmethod )packMatch_init, // constructor
+			(t_method )packMatch_exit, // destructor
+			sizeof(t_packMatch),
+			CLASS_DEFAULT, // graphical repr ?
+			// creation arguments:
+			A_GIMME,
+			0
+		);
+	class_sethelpsymbol(
+			class,
+			gensym("sdPackMatch")
+	);
+
+	class_addlist( class, packMatch_input );
+
+	class_addmethod(
+			class,
+			(t_method )packMatch_patterns_add,
+			gensym("add"),
+			A_GIMME,
+			0
+	);
+
+	class_addmethod(
+			class,
+			(t_method )packMatch_patterns_clear,
+			gensym("clear"),
+			A_GIMME,
+			0
+	);
+
+	return class;
+}
+
+void* packMatch_init(
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+  t_packMatch *x = (t_packMatch *)pd_new(packMatch_class);
+
+	PatternList_init( & x-> patterns );
+
+	if( argc > 0  )
+	{
+		pd_error(x, "too many arguments!");
+		return NULL;
+	}
+	x->outlet =
+		outlet_new( & x->x_obj, &s_list);
+	x -> outlet_reject =
+		outlet_new( & x->x_obj, &s_list);
+
+  return (void *)x;
+}
+
+void packMatch_exit(
+	t_packMatch* x
+)
+{
+	PatternList_exit( & x-> patterns );
+}
+
+void packMatch_input(
+	t_packMatch* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	BOOL match_found = FALSE;
+	LIST_FORALL_BEGIN(PatternList, PatternEl, PatternInfo, & x->patterns, i_pattern, patternEl)
+		int pattern_pos = 0;
+		int pos = 0;
+		PatternInfo* patternInfo = patternEl->pData;
+		if(
+				match(
+						x,
+						patternInfo->name,
+						AtomBuf_get_array( &patternInfo->pattern ),
+						AtomBuf_get_size( &patternInfo->pattern ),
+						&pattern_pos,
+						argv,
+						argc,
+						&pos
+				)
+		)
+		{
+			AtomBuf ret;
+			AtomBuf_init( & ret, argc + 2 );
+			SETSYMBOL( & AtomBuf_get_array( & ret )[0], patternInfo->name );
+			SETFLOAT( & AtomBuf_get_array( & ret )[1], argc );
+			memcpy(
+				& AtomBuf_get_array( & ret )[2],
+				argv,
+				argc * sizeof( t_atom )
+			);
+			match_found = TRUE;
+			outlet_list(
+				x->outlet,
+				& s_list,
+				argc + 2,
+				AtomBuf_get_array( & ret )
+			);
+			AtomBuf_exit( & ret );
+			//return;
+		}
+	LIST_FORALL_END(PatternList, PatternEl, PatternInfo, & x->patterns, i_pattern, patternEl)
+	if( !match_found )
+	outlet_bang(
+			x->outlet_reject
+	);
+}
+
+BOOL match(
+		t_packMatch* x,
+		t_symbol* pattern_name,
+		t_atom* pattern,
+		int pattern_size,
+		int* pattern_pos,
+		t_atom* argv,
+		int size,
+		int* pos
+)
+{
+	BOOL ret = match_rec(
+		x,
+		pattern_name,
+		pattern,
+		pattern_size,
+		pattern_pos,
+		argv,
+		size,
+		pos
+	);
+
+	if(
+			ret
+			&& (*pattern_pos) < pattern_size
+	)
+	{
+		char buf[256];
+		t_atom pattern_name_atom;
+		SETSYMBOL( & pattern_name_atom, pattern_name );
+		atom_string( &pattern_name_atom, buf, 256 );
+		DB_PRINT(
+				"ERROR in pattern %s at pos %i: unmatched rest!",
+				buf,
+				(*pos)
+		);
+		return FALSE;
+	}
+
+	return ret;
+}
+
+BOOL match_rec(
+		t_packMatch* x,
+		t_symbol* pattern_name,
+		t_atom* pattern,
+		int pattern_size,
+		int* pattern_pos,
+		t_atom* argv,
+		int size,
+		int* pos
+)
+{
+	DB_PRINT(
+			"start: pattern (%i, %i), input (%i, %i)",
+			*pattern_pos, pattern_size,
+			*pos, size
+	);
+
+	// match NON strict:
+	if(
+			(*pattern_pos) < pattern_size
+			&&
+			atom_getsymbol( &pattern[*pattern_pos] ) == gensym("*")
+	)
+	{
+		// eat '*'
+		(*pattern_pos) ++;
+		// ARBITRARY CONTENT:
+		while(
+			*pos < size
+		)
+		{
+			(*pos) ++;
+		}
+		DB_PRINT(
+				"done: pattern (%i, %i), input (%i, %i)",
+				*pattern_pos, pattern_size,
+				*pos, size
+		);
+	}
+
+	// match strict:
+	else
+	{
+
+		while(
+			*pattern_pos < pattern_size
+			&&
+			atom_getsymbol( &pattern[*pattern_pos] ) != gensym(")")
+			&&
+			*pos < size
+		)
+		{
+
+			// ARBITRARY CONTENT:
+			while(
+				*pattern_pos < pattern_size
+				&&
+				atom_getsymbol( &pattern[*pattern_pos] ) != gensym("(")
+				&&
+				atom_getsymbol( &pattern[*pattern_pos] ) != gensym(")")
+				&&
+				*pos < size
+			)
+			{
+				if(
+						atom_getsymbol( & pattern[*pattern_pos] ) != gensym( "?" )
+						&&
+						!compareAtoms( & argv[*pos], & pattern[*pattern_pos] ) 
+				)
+				{
+					char buf[256];
+					atom_string( & argv[*pos], buf, 256 );
+					char buf_pat[256];
+					atom_string( & pattern[*pattern_pos], buf_pat, 256 );
+					DB_PRINT(
+							"ERROR: %s != %s",
+							buf,
+							buf_pat
+					);
+						(*pos) ++;
+						(*pattern_pos) ++;
+						return FALSE;
+				}
+				// dbg print
+				{
+					char buf[256];
+					atom_string( & argv[*pos], buf, 256 );
+					char buf_pat[256];
+					atom_string( & pattern[*pattern_pos], buf_pat, 256 );
+					DB_PRINT(
+							"%s == %s",
+							buf,
+							buf_pat
+					);
+				}
+				(*pos) ++;
+				(*pattern_pos) ++;
+			}
+			DB_PRINT( "(" );
+			// '('
+			if(
+				*pattern_pos < pattern_size
+				&&
+				atom_getsymbol( &pattern[*pattern_pos] ) == gensym("(")
+			)
+			{
+				if( argv[*pos].a_type != A_FLOAT )
+				{
+					return FALSE;
+				}
+				int content_size = 
+					atom_getint( & argv[*pos] );
+
+				// eat '(':
+				(*pos) ++;
+				(*pattern_pos) ++;
+
+				if(
+					! match_rec(
+							x,
+							pattern_name,
+							pattern,
+							pattern_size,
+							pattern_pos,
+							argv,
+							(*pos) + content_size,
+							pos
+					)
+				)
+				{
+					return FALSE;
+				}
+				if( 
+					*pattern_pos >= pattern_size
+				)
+				{
+					char buf[256];
+					t_atom pattern_name_atom;
+					SETSYMBOL( & pattern_name_atom, pattern_name );
+					atom_string( &pattern_name_atom, buf, 256 );
+					DB_PRINT(
+							"ERROR in pattern %s at pos %i: ')' expected, found end of input",
+							buf,
+							*pattern_pos
+					);
+					return FALSE;
+				}
+				else if( atom_getsymbol( &pattern[*pattern_pos] ) != gensym(")") )
+				{
+					char buf_pat[256];
+					t_atom pattern_name_atom;
+					SETSYMBOL( & pattern_name_atom, pattern_name );
+					atom_string( &pattern_name_atom, buf_pat, 256 );
+					DB_PRINT(
+							"ERROR in pattern %s at pos %i: ')' expected, found end of input",
+							buf_pat,
+							*pattern_pos
+					);
+					return FALSE;
+				}
+
+				// eat ')':
+				(*pattern_pos) ++;
+			}
+		}
+
+		DB_PRINT(
+				"done: pattern (%i, %i), input (%i, %i)",
+				*pattern_pos, pattern_size,
+				*pos, size
+		);
+		// some input wasn't matched!:
+		if( (*pos) < size )
+		{
+			char buf_pat_name[256];
+			t_atom pattern_name_atom;
+			SETSYMBOL( & pattern_name_atom, pattern_name );
+			atom_string( &pattern_name_atom, buf_pat_name, 256 );
+			DB_PRINT(
+					"ERROR in pattern %s at pos %i: unmatched rest input!",
+					buf_pat_name,
+					*pattern_pos
+			);
+			return FALSE;
+		}
+
+		// no match for rest input
+		if(
+				(*pattern_pos) < pattern_size
+				&&
+				atom_getsymbol( &pattern[*pattern_pos] ) != gensym(")")
+		)
+		{
+			char buf_pat_name[256];
+			t_atom pattern_name_atom;
+			SETSYMBOL( & pattern_name_atom, pattern_name );
+			atom_string( &pattern_name_atom, buf_pat_name, 256 );
+			DB_PRINT(
+					"ERROR in pattern %s at pos %i: no match for rest of the pattern!",
+					buf_pat_name,
+					*pattern_pos
+			);
+			return FALSE;
+		}
+
+	}
+
+	return TRUE;
+
+}
+
+void packMatch_patterns_add(
+	t_packMatch* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	PatternInfo* info = getbytes( sizeof( PatternInfo ) );
+	info->name = atom_getsymbol( &argv[0] );
+	AtomBuf_init( & info->pattern, argc - 1);
+	memcpy(
+			AtomBuf_get_array( & info->pattern ),
+			& argv[1],
+			sizeof( t_atom ) * (argc-1)
+	);
+	PatternList_append(
+			& x->patterns,
+			info
+	);
+}
+
+void packMatch_patterns_clear(
+	t_packMatch* x
+)
+{
+	PatternList_clear(
+			& x->patterns
+	);
 }

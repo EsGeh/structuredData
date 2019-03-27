@@ -1,0 +1,117 @@
+#N canvas 800 30 798 189 10;
+#N canvas 0 30 798 854 basic 0;
+#X msg 144 85 list x;
+#X obj 131 127 sdPackFromHuman;
+#X obj 230 177 sdPackMatch;
+#X obj 230 200 print;
+#X obj 176 211 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X msg 100 86 list;
+#X msg 197 86 list y;
+#X msg 382 107 clear \, add pat3 ? \, add pat4 *;
+#X msg 381 79 clear \, add pat1 \, add pat2 x;
+#X obj 381 56 loadbang;
+#X obj 294 202 print reject;
+#X obj 380 203 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X connect 0 0 1 0;
+#X connect 1 0 2 0;
+#X connect 2 0 3 0;
+#X connect 2 0 4 0;
+#X connect 2 1 10 0;
+#X connect 2 1 11 0;
+#X connect 5 0 1 0;
+#X connect 6 0 1 0;
+#X connect 7 0 2 0;
+#X connect 8 0 2 0;
+#X connect 9 0 8 0;
+#X restore 60 40 pd basic;
+#X msg 307 318 pack ( param ( ?val ) );
+#X msg 309 82 ?;
+#X msg 310 111 *;
+#X msg 308 255 pack ( * );
+#X text 439 80 single atom;
+#X text 443 108 match arbitrary list;
+#X text 441 252 pack with arbitrary content;
+#X text 466 297 val can be any atom \, its value is matched into and
+bound to "val", f 30;
+#X msg 306 389 pack ( * val ( ?val ) );
+#X text 277 28 sdPack pattern syntax:;
+#N canvas 0 30 798 854 packs 1;
+#X obj 102 250 sdPackFromHuman;
+#X obj 201 300 sdPackMatch;
+#X obj 201 323 print;
+#X obj 147 334 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X msg 77 176 list pack ( x );
+#X msg 40 121 list pack ( );
+#X msg 184 151 list p ( );
+#X msg 194 176 list p ( x );
+#X msg 379 215 clear \, add pattern1 pack ( * );
+#X msg 384 105 clear \, add pattern1 pack ( ) \, add pattern2 pack
+( x );
+#X msg 385 144 clear \, add pattern3 ? ( ) \, add pattern4 ? ( x )
+;
+#X obj 116 636 sdPackFromHuman;
+#X obj 215 686 sdPackMatch;
+#X obj 215 709 print;
+#X obj 161 720 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X msg 198 537 list p ( );
+#X msg 208 562 list p ( x );
+#X msg 393 601 clear \, add pattern1 pack ( * );
+#X msg 54 507 list p1 ( ) p2 ( );
+#X msg 398 491 clear \, add pat1 p1 ( ) p2 ( ) \, add pat2 p1 ( x )
+p2 ( y );
+#X msg 46 541 list p1 ( x ) p2 ( y );
+#X msg 399 531 clear \, add pattern3 ? ( x ) ? ( ? ) \, add pattern4
+? ( x );
+#X obj 386 82 loadbang;
+#X obj 400 468 loadbang;
+#X obj 263 323 print reject;
+#X obj 349 324 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 280 711 print reject;
+#X obj 366 712 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X connect 0 0 1 0;
+#X connect 1 0 2 0;
+#X connect 1 0 3 0;
+#X connect 1 1 24 0;
+#X connect 1 1 25 0;
+#X connect 4 0 0 0;
+#X connect 5 0 0 0;
+#X connect 6 0 0 0;
+#X connect 7 0 0 0;
+#X connect 8 0 1 0;
+#X connect 9 0 1 0;
+#X connect 10 0 1 0;
+#X connect 11 0 12 0;
+#X connect 12 0 13 0;
+#X connect 12 0 14 0;
+#X connect 12 1 26 0;
+#X connect 12 1 27 0;
+#X connect 15 0 11 0;
+#X connect 16 0 11 0;
+#X connect 17 0 12 0;
+#X connect 18 0 11 0;
+#X connect 19 0 12 0;
+#X connect 20 0 11 0;
+#X connect 21 0 12 0;
+#X connect 22 0 9 0;
+#X connect 23 0 19 0;
+#X restore 61 183 pd packs;
+#X msg 308 205 * a b c;
+#X text 443 206 invalid!;
+#X msg 308 165 * a ( b ) c ( d );
+#X text 441 155 any sequence of packs containing the packs a ( b )
+and c ( d ) in any order, f 38;
+#X text 170 165 not yet implemented:;
+#X text 169 317 not yet implemented:;
+#X text 172 387 not yet implemented:;
+#X text 173 467 not yet implemented:;
+#X text 467 368 pack must contain a "val" package \, but consist of
+other arbitrary content. "val" is matched and bound., f 33;
+#X msg 307 470 analog ( content#[ * #] index ( * ) );
+#X text 549 463 match any analog pack containing an index pack and
+bind any content in despite the index pack, f 36;
