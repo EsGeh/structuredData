@@ -8,6 +8,7 @@ set doc_dir $BASE_DIR/doc
 
 pd -noaudio \
 	-noprefs \
+	-stderr \
 	-lib zexy \
 	-path "$doc_dir" \
 	-lib "structuredDataC" \
