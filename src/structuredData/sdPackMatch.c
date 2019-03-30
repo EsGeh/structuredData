@@ -134,23 +134,26 @@ BOOL match(
 		RuntimeInfo* rt
 );
 
+// actually try to match the input with the pattern
 BOOL match_rec(
 		RuntimeInfo* rt
 );
 
+// ************************
 // lexer:
+// ************************
 
 typedef enum e_pattern_atom_type {
 	FLOAT,
 	SYMBOL,
-	LEFT_PARENT,
-	RIGHT_PARENT,
-	ANY_SYM,
-	ANY_SYM_BIND,
-	START_BIND,
-	END_BIND,
-	STAR,
-	END
+	LEFT_PARENT, // (
+	RIGHT_PARENT, // )
+	ANY_SYM, // ?
+	ANY_SYM_BIND, // ?<bind>
+	START_BIND, // <bind>#[
+	END_BIND, // #]
+	STAR, // *
+	END // eof
 } t_pattern_atom_type;
 
 // of which kind is the current pattern token?
@@ -579,6 +582,7 @@ BOOL match(
 	return ret;
 }
 
+// actually try to match the input with the pattern
 BOOL match_rec(
 		RuntimeInfo* rt
 )
@@ -1185,6 +1189,10 @@ BOOL match_rec(
 	return TRUE;
 
 }
+
+// ************************
+// lexer:
+// ************************
 
 // of which kind is the current pattern token?
 t_pattern_atom_type lexer_pattern_peek(
