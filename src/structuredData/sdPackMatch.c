@@ -25,11 +25,16 @@ void sdPackMatch_setup()
 // packMatch
 //----------------------------------
 
+// primitive container types:
+
 DECL_BUFFER(AtomBuf, t_atom, getbytes, freebytes)
 DEF_BUFFER(AtomBuf, t_atom, getbytes, freebytes)
 
 DECL_BUFFER(CharBuf, char, getbytes, freebytes)
 DEF_BUFFER(CharBuf, char, getbytes, freebytes)
+
+DECL_DYN_ARRAY(AtomDynArray, t_atom, getbytes, freebytes)
+DEF_DYN_ARRAY(AtomDynArray, t_atom, getbytes, freebytes)
 
 typedef struct
 {
@@ -46,16 +51,7 @@ typedef struct
 DECL_LIST(PatternList, PatternEl, PatternInfo, getbytes, freebytes, FREE_PATTTERN_INFO)
 DEF_LIST(PatternList, PatternEl, PatternInfo, getbytes, freebytes, FREE_PATTTERN_INFO)
 
-DECL_DYN_ARRAY(AtomDynArray, t_atom, getbytes, freebytes)
-DEF_DYN_ARRAY(AtomDynArray, t_atom, getbytes, freebytes)
-
-typedef struct {
-	int pattern_pos;
-	int pattern_size;
-} SubPatternInfo;
-
-DECL_LIST(SubPatternsList, SubPatternsListEl, SubPatternInfo, getbytes, freebytes, freebytes)
-DEF_LIST(SubPatternsList, SubPatternsListEl, SubPatternInfo, getbytes, freebytes, freebytes)
+// the actual pd object:
 
 typedef struct s_packMatch {
   t_object x_obj;
@@ -91,7 +87,25 @@ void packMatch_input(
 	t_atom *argv
 );
 
-// 
+// internal utility types:
+
+// needed for "pack mode"
+typedef struct {
+	int pattern_pos;
+	int pattern_size;
+	CharBuf bind_sym;
+} SubPatternInfo;
+
+#define FREE_SUBPATTERN_INFO( x, size) \
+{ \
+	CharBuf_exit( & x-> bind_sym ); \
+	freebytes( x, size ); \
+}
+
+DECL_LIST(SubPatternsList, SubPatternsListEl, SubPatternInfo, getbytes, freebytes, FREE_SUBPATTERN_INFO)
+DEF_LIST(SubPatternsList, SubPatternsListEl, SubPatternInfo, getbytes, freebytes, FREE_SUBPATTERN_INFO)
+
+// all the variables needed during "runtime":
 typedef struct s_RuntimeInfo {
 	t_packMatch* x;
 	t_symbol* pattern_name;
@@ -114,6 +128,8 @@ typedef struct s_RuntimeInfo {
 	
 	int rec_depth;
 } RuntimeInfo;
+
+
 
 BOOL match(
 		RuntimeInfo* rt
@@ -182,6 +198,18 @@ BOOL lexer_input_next_tok(
 		RuntimeInfo* rt,
 		BOOL bind
 );
+
+// start matching on a certain symbol:
+BOOL lexer_set_start_bind(
+		RuntimeInfo* rt,
+		char* bind_sym
+);
+
+// end matching
+BOOL lexer_set_end_bind(
+		RuntimeInfo* rt
+);
+
 
 // DEBUG OUTPUT HELPERS:
 
@@ -549,26 +577,37 @@ BOOL match_rec(
 			"start"
 	);
 
-	lexer_match_start_bind( rt );
-
 	// match NON strict:
 	if(
+			// "* ..."
 			lexer_pattern_peek( rt, 0) == STAR
+			|| 
+			// "<bind>#[ * ..."
+			( lexer_pattern_peek( rt, 0) == START_BIND && lexer_pattern_peek( rt, 1) == STAR )
 	)
 	{
-		// eat '*'
-		if(
-				!lexer_pattern_next_tok(
-					rt,
-					STAR
-				)
-		)
-			return FALSE;
-
-		;
 
 		// if '*' was the last symbol in the pattern:
 		if(
+			// "* eof" || "* )" || ...
+			lexer_pattern_peek( rt, 0) == STAR
+				&& (
+					(lexer_pattern_peek( rt, 1) == END || lexer_pattern_peek( rt, 1) == RIGHT_PARENT)
+					||
+					( lexer_pattern_peek( rt, 1) == START_BIND || lexer_pattern_peek( rt, 1) == END_BIND )
+						&& (lexer_pattern_peek( rt, 2) == END || lexer_pattern_peek( rt, 2) == RIGHT_PARENT)
+				)
+			||
+			// "? * eof" || ? "* )"  || ...
+			lexer_pattern_peek( rt, 1) == STAR
+				&& (
+					(lexer_pattern_peek( rt, 2) == END || lexer_pattern_peek( rt, 2) == RIGHT_PARENT)
+					||
+					( lexer_pattern_peek( rt, 2) == START_BIND || lexer_pattern_peek( rt, 2) == END_BIND )
+						&& (lexer_pattern_peek( rt, 3) == END || lexer_pattern_peek( rt, 3) == RIGHT_PARENT)
+				)
+			/*
+			 * this was after * was eaten:
 			lexer_pattern_peek( rt, 0) == END
 			||
 			lexer_pattern_peek( rt, 0) == RIGHT_PARENT
@@ -580,12 +619,31 @@ BOOL match_rec(
 				 lexer_pattern_peek( rt, 1) == RIGHT_PARENT
 				)
 			)
+			*/
 		)
 		{
 			match_db_print(
 					rt,
 					"* arbitrary mode!"
 			);
+
+			// eat '<bind>#['
+			if(
+				!lexer_match_start_bind( rt )
+			)
+				return FALSE;
+
+			// now we know the input begins with '*' ...
+
+			// eat '*'
+			if(
+					!lexer_pattern_next_tok(
+						rt,
+						STAR
+					)
+			)
+				return FALSE;
+
 			// ARBITRARY CONTENT:
 			while(
 				rt->input_pos < rt->input_size
@@ -599,15 +657,61 @@ BOOL match_rec(
 				)
 					return FALSE;
 			}
-			lexer_match_end_bind( rt );
+			if( rt->bind_start_level == rt->rec_depth )
+			{
+				if(
+						lexer_pattern_peek( rt, 0 ) != END_BIND
+				)
+				{
+					match_error(
+							rt,
+							"#] expected!"
+					);
+					return FALSE;
+				}
+			}
+			if(
+				!lexer_match_end_bind( rt )
+			)
+				return FALSE;
 		}
 		// make shure the input contains certain packages
 		else
 		{
+			// we know '<bind>#[ * ...' or '* ...'
 			match_db_print(
 					rt,
 					"* pack mode!"
 			);
+
+			CharBuf bind_arbitrary_sym;
+			CharBuf_init( & bind_arbitrary_sym, 1024);
+			CharBuf_get_array( & bind_arbitrary_sym )[0] = '\0';
+
+			// #[ ...
+			if( lexer_pattern_peek( rt, 0 ) == START_BIND )
+			{
+				if( !lexer_match_start_bind( rt ) )
+					return FALSE;
+				strcat(
+					CharBuf_get_array( & bind_arbitrary_sym ),
+					CharBuf_get_array( & rt->bind_sym )
+				);
+			}
+			// '* ...'
+			if( !lexer_pattern_next_tok_any( rt ) )
+				return FALSE;
+			// '#] ...'
+			if( lexer_pattern_peek( rt, 0 ) == END_BIND )
+			{
+				if( !lexer_match_end_bind( rt ) )
+					return FALSE;
+				// pop the dummy bind_sym...
+				AtomDynArray_set_size(
+					& rt->bind_ret,
+					AtomDynArray_get_size( & rt->bind_ret ) - 2
+				);
+			}
 
 			// 1. read all packages in the pattern:
 			SubPatternsList expected_packages;
@@ -616,25 +720,58 @@ BOOL match_rec(
 					lexer_pattern_peek( rt, 0) != END
 					&&
 					lexer_pattern_peek( rt, 0) != RIGHT_PARENT
-					&&
-					lexer_pattern_peek( rt, 0) != END_BIND
 			)
 			{
+				if( !lexer_match_start_bind( rt ) ) return FALSE;
+				match_db_print(
+						rt,
+						"parsing next pack, sym: %s",
+						CharBuf_get_array( & rt->bind_sym )
+				);
+
 				SubPatternInfo* subPatternInfo = getbytes( sizeof( SubPatternInfo ) );
+				subPatternInfo->pattern_pos =
+						rt->pattern_pos;
+				CharBuf_init( &subPatternInfo->bind_sym, 1024 );
+				strcpy(
+						CharBuf_get_array( &subPatternInfo->bind_sym ) ,
+						"" 
+				);
+
 				SubPatternsList_append(
 						& expected_packages,
 						subPatternInfo
 				);
 				int depth = 0;
-				subPatternInfo->pattern_pos =
-						rt->pattern_pos;
-
-				if(
-						lexer_pattern_peek( rt, 0 ) == START_BIND
+				if( rt->bind_start_pos != -1 )
+				{
+					strcpy(
+							CharBuf_get_array( &subPatternInfo->bind_sym ) ,
+							CharBuf_get_array( &rt->bind_sym )
+					);
+				}
+				/*
+				else
+				{
+					match_error(
+							rt,
+							"internal ERROR!"
+					);
+					return FALSE;
+				}
+				else if(
+					!strcmp(
+						CharBuf_get_aray( & bind_arbitrary_sym ),
+						""
+					)
 				)
 				{
-					lexer_pattern_next_tok_any( rt );
+					strcpy(
+							CharBuf_get_array( &subPatternInfo->bind_sym ) ,
+							CharBuf_get_array( &bind_arbitrary_sym ) ,
+					);
 				}
+				*/
 
 				// <symbol> (
 				if( 
@@ -689,19 +826,23 @@ BOOL match_rec(
 					SubPatternsList_exit( & expected_packages );
 					return FALSE;
 				}
-				// if there was no #[ opened in the beginning, we consider it part of the subpattern:
-				if( rt->bind_start_level != rt->rec_depth )
-				{
-					if(
-							lexer_pattern_peek( rt, 0 ) == END_BIND
-					)
-						lexer_pattern_next_tok(
-								rt, END_BIND
-						);
-				}
 
 				subPatternInfo->pattern_size =
 					rt->pattern_pos;
+
+				// #] ...
+				if(
+						lexer_pattern_peek( rt, 0 ) == END_BIND
+				)
+				{
+					if( !lexer_match_end_bind( rt ) ) return FALSE;
+					// pop the dummy bind_sym...
+					AtomDynArray_set_size(
+						& rt->bind_ret,
+						AtomDynArray_get_size( & rt->bind_ret ) - 2
+					);
+				}
+
 			}
 			match_db_print(
 					rt,
@@ -715,9 +856,10 @@ BOOL match_rec(
 				SubPatternInfo* subPatternInfo = pEl->pData;
 				match_db_print(
 						rt,
-						"pack: pos: %i, size: %i",
+						"pack: pos: %i, size: %i, bind: %s",
 						subPatternInfo->pattern_pos,
-						subPatternInfo->pattern_size
+						subPatternInfo->pattern_size,
+						CharBuf_get_array( & subPatternInfo->bind_sym )
 				);
 				pEl = SubPatternsList_get_next(
 						& expected_packages,
@@ -750,6 +892,11 @@ BOOL match_rec(
 						SubPatternsList_exit( & expected_packages );
 						return FALSE;
 					}
+					match_db_print(
+							rt,
+							"parsing input pack..."
+					);
+
 					int pack_size = 
 							atom_getint( & rt->input[ rt->input_pos + 1 ] );
 					//int pos_temp = rt->input_pos;
@@ -769,11 +916,32 @@ BOOL match_rec(
 						rt_temp.pattern_size = subPatternInfo->pattern_size;
 						rt_temp.input_size = rt->input_pos + 2 + pack_size;
 						if(
+								strcmp( CharBuf_get_array( & subPatternInfo->bind_sym ), "" )
+						)
+						{
+							if(
+									! lexer_set_start_bind(
+										& rt_temp,
+										CharBuf_get_array( & subPatternInfo->bind_sym )
+									)
+							)
+								return FALSE;
+							/*
+							rt_temp.bind_start_level = rt->rec_depth;
+							rt_temp.bind_start_pos = 0;
+							strcpy(
+								CharBuf_get_array( & rt_temp.bind_sym ),
+								CharBuf_get_array( & subPatternInfo->bind_sym )
+							);
+							*/
+						}
+						if(
 								match_rec(
 									&rt_temp
 								)
 						)
 						{
+							if( ! lexer_set_end_bind( & rt_temp ) ) return FALSE;
 							for( int i=0; i< AtomDynArray_get_size( & rt_temp.bind_ret ); i++)
 							{
 								AtomDynArray_append(
@@ -797,6 +965,37 @@ BOOL match_rec(
 									pEl
 							);
 						}
+						AtomDynArray_exit( & rt_temp.bind_ret );
+					}
+
+					BOOL
+						temp_binding =
+							rt->bind_start_pos == -1
+							&&
+							!matched
+							&&
+							strcmp( CharBuf_get_array( & bind_arbitrary_sym ), "" )
+							;
+					if( temp_binding )
+					{
+						match_db_print(
+							rt,
+							"temp binding..."
+						);
+						if(
+							! lexer_set_start_bind(
+									rt,
+									CharBuf_get_array( & bind_arbitrary_sym )
+							)
+						)
+						{
+							match_error(
+								rt,
+								"internal error!"
+							);
+							SubPatternsList_exit( & expected_packages );
+							return FALSE;
+						}
 					}
 					//rt->input_pos += (2 + pack_size);
 					for(int i=0; i< (2+pack_size); i++)
@@ -804,10 +1003,24 @@ BOOL match_rec(
 						if(
 								! lexer_input_next_tok(
 									rt,
-									!matched
+									!matched // don't bind!
 								)
 						)
 							return FALSE;
+					}
+					if( temp_binding )
+					{
+						if(
+							!lexer_set_end_bind( rt )
+						)
+						{
+							match_error(
+								rt,
+								"internal error!"
+							);
+							SubPatternsList_exit( & expected_packages );
+							return FALSE;
+						}
 					}
 				}
 				if( !SubPatternsList_is_empty( & expected_packages ) )
@@ -982,10 +1195,12 @@ t_pattern_atom_type lexer_pattern_peek(
 	else if( atom_getsymbol( &rt->pattern[ pattern_pos ] ) == gensym(")") )
 		return RIGHT_PARENT;
 
+	/*
 	CharBuf_get_array( & rt->bind_sym )[0] = '\0';
+	*/
 
 	char buf[CharBuf_get_size( & rt->bind_sym )];
-	atom_string( & rt->pattern[ rt->pattern_pos], buf, CharBuf_get_size( & rt->bind_sym ) );
+	atom_string( & rt->pattern[ pattern_pos], buf, CharBuf_get_size( & rt->bind_sym ) );
 	int len = strlen( buf );
 	int pos_sep = (strchr( buf, '#' ) - buf);
 	// '?'
@@ -996,7 +1211,7 @@ t_pattern_atom_type lexer_pattern_peek(
 	// ?<bind_sym>
 	else if( len >= 1 && buf[0] == '?' )
 	{
-		strcat( CharBuf_get_array( & rt->bind_sym ) , & buf[1] );
+		//strcat( CharBuf_get_array( & rt->bind_sym ) , & buf[1] );
 		return ANY_SYM_BIND;
 	}
 	// <bind_sym>#[
@@ -1005,8 +1220,8 @@ t_pattern_atom_type lexer_pattern_peek(
 			&& buf[pos_sep+1] == '['
 	)
 	{
-		buf[pos_sep] = '\0';
-		strcat( CharBuf_get_array( & rt->bind_sym ) , buf );
+		//buf[pos_sep] = '\0';
+		//strcat( CharBuf_get_array( & rt->bind_sym ) , buf );
 		return START_BIND;
 	}
 	// #]
@@ -1018,7 +1233,7 @@ t_pattern_atom_type lexer_pattern_peek(
 	{
 		return END_BIND;
 	}
-	else if( rt->pattern[ rt->pattern_pos ].a_type == A_FLOAT )
+	else if( rt->pattern[ pattern_pos ].a_type == A_FLOAT )
 	{
 		return FLOAT;
 	}
@@ -1207,8 +1422,11 @@ BOOL lexer_match_next_any(
 						"<bind>?"
 				);
 				{
+					char buf[1024];
+					atom_string( & rt->pattern[ rt->pattern_pos], buf, 1024);
+
 					t_atom append;
-					SETSYMBOL( & append, gensym( CharBuf_get_array( & rt->bind_sym ) ) );
+					SETSYMBOL( & append, gensym( & buf[1] ) );
 					AtomDynArray_append(
 							& rt->bind_ret,
 							append
@@ -1232,6 +1450,12 @@ BOOL lexer_match_next_any(
 			break;
 			case START_BIND:
 			{
+				match_error(
+						rt,
+						"bind found! internal error!"
+				);
+				return FALSE;
+				/*
 				match_db_print(
 						rt,
 						"<bind>#["
@@ -1262,6 +1486,7 @@ BOOL lexer_match_next_any(
 						)
 				)
 					return FALSE;
+				*/
 			}
 			break;
 			case END_BIND:
@@ -1298,12 +1523,9 @@ BOOL lexer_match_start_bind(
 {
 	t_pattern_atom_type pattern_peek = lexer_pattern_peek( rt, 0 );
 
-
 	if( pattern_peek == START_BIND )
 	{
-		if(
-				rt->bind_start_pos != -1
-		)
+		if( rt->bind_start_pos != -1 )
 		{
 			match_error(
 					rt,
@@ -1311,29 +1533,18 @@ BOOL lexer_match_start_bind(
 			);
 			return FALSE;
 		}
-		match_db_print(
+		char buf[CharBuf_get_size( & rt->bind_sym )];
+		atom_string( & rt->pattern[ rt->pattern_pos], buf, CharBuf_get_size( & rt->bind_sym ) );
+		int len = strlen( buf );
+		int pos_sep = (strchr( buf, '#' ) - buf);
+		buf[pos_sep] = '\0';
+		if(
+			!lexer_set_start_bind(
 				rt,
-				"<bind>#["
-		);
-		rt->bind_start_pos =
-			AtomDynArray_get_size( & rt -> bind_ret );
-		rt->bind_start_level = rt->rec_depth;
-		{
-			t_atom append;
-			SETSYMBOL( & append, gensym( CharBuf_get_array( & rt->bind_sym ) ) );
-			AtomDynArray_append(
-					& rt->bind_ret,
-					append
-			);
-		}
-		{
-			t_atom append;
-			SETFLOAT( & append, 0 );
-			AtomDynArray_append(
-					& rt->bind_ret,
-					append
-			);
-		}
+				buf
+			)
+		)
+			return FALSE;
 		rt->pattern_pos ++;
 		/*
 		if(
@@ -1348,6 +1559,45 @@ BOOL lexer_match_start_bind(
 	return TRUE;
 }
 
+BOOL lexer_set_start_bind(
+		RuntimeInfo* rt,
+		char* bind_sym
+)
+{
+	if( rt->bind_start_pos == -1 )
+	{
+		match_db_print(
+				rt,
+				"%s#[",
+				bind_sym
+		);
+		strcpy(
+				CharBuf_get_array( & rt-> bind_sym ),
+				bind_sym
+		);
+		rt->bind_start_pos =
+			AtomDynArray_get_size( & rt -> bind_ret );
+		rt->bind_start_level = rt->rec_depth;
+		{
+			t_atom append;
+			SETSYMBOL( & append, gensym( bind_sym ) );
+			AtomDynArray_append(
+					& rt->bind_ret,
+					append
+			);
+		}
+		{
+			t_atom append;
+			SETFLOAT( & append, 0 );
+			AtomDynArray_append(
+					& rt->bind_ret,
+					append
+			);
+		}
+	}
+	return TRUE;
+}
+
 BOOL lexer_match_end_bind(
 		RuntimeInfo* rt
 )
@@ -1358,11 +1608,6 @@ BOOL lexer_match_end_bind(
 	{
 			case END_BIND:
 			{
-				match_db_print(
-						rt,
-						"#]"
-				);
-				//
 				if(  rt->bind_start_pos == -1 )
 				{
 					match_error(
@@ -1371,26 +1616,15 @@ BOOL lexer_match_end_bind(
 					);
 					return FALSE;
 				}
-				//
-				if( rt->bind_start_level != rt->rec_depth )
-				{
-					match_error(
-							rt,
-							"ERROR in pattern: '#[' was opened on level %i, but #] on level %i!",
-							rt->bind_start_level, rt->rec_depth
-					);
-					return FALSE;
-				}
 				match_db_print(
 						rt,
-						"stop bind"
+						"#]"
 				);
-				SETFLOAT(
-						& AtomDynArray_get_array( & rt->bind_ret )[ rt->bind_start_pos + 1 ],
-						AtomDynArray_get_size( & rt->bind_ret ) - rt->bind_start_pos - 2
-				);
-				rt->bind_start_pos = -1;
-				rt->bind_start_level = -1;
+				//
+				if(
+					!lexer_set_end_bind( rt )
+				)
+					return FALSE;
 				rt->pattern_pos ++;
 			}
 			break;
@@ -1400,6 +1634,38 @@ BOOL lexer_match_end_bind(
 	};
 	return TRUE;
 }
+
+BOOL lexer_set_end_bind(
+		RuntimeInfo* rt
+)
+{
+	//
+	if(  rt->bind_start_pos != -1 )
+	{
+		if( rt->bind_start_level != rt->rec_depth )
+		{
+			match_error(
+					rt,
+					"ERROR in pattern: '#[' was opened on level %i, but #] on level %i!",
+					rt->bind_start_level, rt->rec_depth
+			);
+			return FALSE;
+		}
+		match_db_print(
+				rt,
+				"stop bind: %i",
+				AtomDynArray_get_size( & rt->bind_ret )
+		);
+		SETFLOAT(
+				& AtomDynArray_get_array( & rt->bind_ret )[ rt->bind_start_pos + 1 ],
+				AtomDynArray_get_size( & rt->bind_ret ) - rt->bind_start_pos - 2
+		);
+		rt->bind_start_pos = -1;
+		rt->bind_start_level = -1;
+	}
+	return TRUE;
+}
+
 
 BOOL lexer_input_next_tok(
 		RuntimeInfo* rt,
