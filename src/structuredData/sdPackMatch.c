@@ -130,7 +130,6 @@ typedef struct s_RuntimeInfo {
 } RuntimeInfo;
 
 
-
 BOOL match(
 		RuntimeInfo* rt
 );
@@ -154,64 +153,76 @@ typedef enum e_pattern_atom_type {
 	END
 } t_pattern_atom_type;
 
-// utility mainly for debug output:
-void pattern_atom_type_to_str(
-		t_pattern_atom_type type,
-		char* buf,
-		int buf_size
-);
-
+// of which kind is the current pattern token?
 t_pattern_atom_type lexer_pattern_peek(
 		RuntimeInfo* rt,
-		int pos
+		int ahead // 0: current, 1,2,3 ...: look ahead
 );
 
+// ignorantly consume next pattern token of a specific kind
 BOOL lexer_pattern_next_tok(
 		RuntimeInfo* rt,
 		t_pattern_atom_type expected
 );
 
+// ignorantly consume next pattern token
 BOOL lexer_pattern_next_tok_any(
 		RuntimeInfo* rt
 );
 
+// try to read next input symbol of a specific kind (raise an error otherwise)
+// take into account the current pattern,
+// maybe advance pattern position too.
 BOOL lexer_match_next(
 		RuntimeInfo* rt,
 		BOOL anything,
 		t_pattern_atom_type expected_symbol
 );
 
+// read next input symbol, taking into account the current pattern,
+// also advance through the pattern
 BOOL lexer_match_next_any(
 		RuntimeInfo* rt,
-		BOOL anything
+		BOOL anything // "* mode" - don't consider pattern
 );
 
+// ignorantly advance input
+BOOL lexer_input_next_tok(
+		RuntimeInfo* rt,
+		BOOL bind // consider binding
+);
+
+// if input == "<bind>#[ ..." match "<bind>#["
+// and start binding input to "<bind>"
 BOOL lexer_match_start_bind(
 		RuntimeInfo* rt
 );
 
+// if input == "#] ...", match "#]"
+// and stop binding input
 BOOL lexer_match_end_bind(
 		RuntimeInfo* rt
 );
 
-BOOL lexer_input_next_tok(
-		RuntimeInfo* rt,
-		BOOL bind
-);
+// lower level:
 
-// start matching on a certain symbol:
+// start binding input to some symbol
 BOOL lexer_set_start_bind(
 		RuntimeInfo* rt,
-		char* bind_sym
+		char* bind_sym // bind to this symbol
 );
 
-// end matching
+// stop binding input
 BOOL lexer_set_end_bind(
 		RuntimeInfo* rt
 );
 
-
-// DEBUG OUTPUT HELPERS:
+// utility mainly for debug output:
+void pattern_atom_type_to_str(
+		t_pattern_atom_type type,
+		char* buf,
+		int buf_size
+);
 
 t_class* register_packMatch(
 	t_symbol* className
@@ -1175,9 +1186,10 @@ BOOL match_rec(
 
 }
 
+// of which kind is the current pattern token?
 t_pattern_atom_type lexer_pattern_peek(
 		RuntimeInfo* rt,
-		int ahead
+		int ahead // 0: current, 1,2,3 ...: look ahead
 )
 {
 	int pattern_pos = rt->pattern_pos;
@@ -1243,6 +1255,7 @@ t_pattern_atom_type lexer_pattern_peek(
 	}
 }
 
+// ignorantly consume next pattern token of a specific kind
 BOOL lexer_pattern_next_tok(
 		RuntimeInfo* rt,
 		t_pattern_atom_type expected
@@ -1275,6 +1288,7 @@ BOOL lexer_pattern_next_tok(
 	);
 }
 
+// ignorantly consume next pattern token
 BOOL lexer_pattern_next_tok_any(
 		RuntimeInfo* rt
 )
@@ -1294,6 +1308,9 @@ BOOL lexer_pattern_next_tok_any(
 	return TRUE;
 }
 
+// try to read next input symbol of a specific kind (raise an error otherwise)
+// take into account the current pattern,
+// maybe advance pattern position too.
 BOOL lexer_match_next(
 		RuntimeInfo* rt,
 		BOOL anything,
@@ -1326,9 +1343,11 @@ BOOL lexer_match_next(
 	);
 }
 
+// read next input symbol, taking into account the current pattern,
+// also advance through the pattern
 BOOL lexer_match_next_any(
 		RuntimeInfo* rt,
-		BOOL anything
+		BOOL anything // "* mode" - don't consider pattern
 )
 {
 	t_pattern_atom_type pattern_peek = lexer_pattern_peek( rt, 0 );
@@ -1455,45 +1474,13 @@ BOOL lexer_match_next_any(
 						"bind found! internal error!"
 				);
 				return FALSE;
-				/*
-				match_db_print(
-						rt,
-						"<bind>#["
-				);
-				rt->bind_start_pos =
-					AtomDynArray_get_size( & rt->bind_ret );
-				{
-					t_atom append;
-					SETSYMBOL( & append, gensym( CharBuf_get_array( & rt->bind_sym) ) );
-					AtomDynArray_append(
-							& rt->bind_ret,
-							append
-					);
-				}
-				{
-					t_atom append;
-					SETFLOAT( & append, 0 );
-					AtomDynArray_append(
-							& rt->bind_ret,
-							append
-					);
-				}
-				rt->pattern_pos ++;
-				if(
-						!lexer_match_next_any(
-							rt,
-							anything
-						)
-				)
-					return FALSE;
-				*/
 			}
 			break;
 			case END_BIND:
 			{
 				match_error(
 						rt,
-						"#] found!"
+						"#] found! internal error!"
 				);
 				return FALSE;
 			}
@@ -1501,14 +1488,14 @@ BOOL lexer_match_next_any(
 			case STAR:
 				match_error(
 						rt,
-						"*!"
+						"* found! internal error!"
 				);
 				return FALSE;
 			break;
 			case END:
 				match_error(
 						rt,
-						"#] found!"
+						"eof!"
 				);
 				return FALSE;
 			break;
@@ -1517,6 +1504,41 @@ BOOL lexer_match_next_any(
 	return TRUE;
 }
 
+// ignorantly advance input
+BOOL lexer_input_next_tok(
+		RuntimeInfo* rt,
+		BOOL bind // consider binding
+)
+{
+	if( rt->input_pos >= rt->input_size )
+	{
+		match_error(
+				rt,
+				"EOF"
+		);
+		return FALSE;
+	}
+	if(
+			bind
+			&& rt->bind_start_pos != -1
+	)
+	{
+		match_db_print(
+				rt,
+				"binding"
+		);
+		AtomDynArray_append(
+				& rt->bind_ret,
+				rt->input[ rt->input_pos ]
+		);
+
+	}
+	rt->input_pos ++;
+	return TRUE;
+}
+
+// if input == "<bind>#[ ..." match "<bind>#["
+// and start binding input to "<bind>"
 BOOL lexer_match_start_bind(
 		RuntimeInfo* rt
 )
@@ -1535,7 +1557,6 @@ BOOL lexer_match_start_bind(
 		}
 		char buf[CharBuf_get_size( & rt->bind_sym )];
 		atom_string( & rt->pattern[ rt->pattern_pos], buf, CharBuf_get_size( & rt->bind_sym ) );
-		int len = strlen( buf );
 		int pos_sep = (strchr( buf, '#' ) - buf);
 		buf[pos_sep] = '\0';
 		if(
@@ -1546,58 +1567,12 @@ BOOL lexer_match_start_bind(
 		)
 			return FALSE;
 		rt->pattern_pos ++;
-		/*
-		if(
-				!lexer_match_next_any(
-					rt,
-					FALSE
-				)
-		)
-			return FALSE;
-		*/
 	};
 	return TRUE;
 }
 
-BOOL lexer_set_start_bind(
-		RuntimeInfo* rt,
-		char* bind_sym
-)
-{
-	if( rt->bind_start_pos == -1 )
-	{
-		match_db_print(
-				rt,
-				"%s#[",
-				bind_sym
-		);
-		strcpy(
-				CharBuf_get_array( & rt-> bind_sym ),
-				bind_sym
-		);
-		rt->bind_start_pos =
-			AtomDynArray_get_size( & rt -> bind_ret );
-		rt->bind_start_level = rt->rec_depth;
-		{
-			t_atom append;
-			SETSYMBOL( & append, gensym( bind_sym ) );
-			AtomDynArray_append(
-					& rt->bind_ret,
-					append
-			);
-		}
-		{
-			t_atom append;
-			SETFLOAT( & append, 0 );
-			AtomDynArray_append(
-					& rt->bind_ret,
-					append
-			);
-		}
-	}
-	return TRUE;
-}
-
+// if input == "#] ...", match "#]"
+// and stop binding input
 BOOL lexer_match_end_bind(
 		RuntimeInfo* rt
 )
@@ -1635,6 +1610,49 @@ BOOL lexer_match_end_bind(
 	return TRUE;
 }
 
+// lower level:
+
+// start binding input to some symbol
+BOOL lexer_set_start_bind(
+		RuntimeInfo* rt,
+		char* bind_sym // bind to this symbol
+)
+{
+	if( rt->bind_start_pos == -1 )
+	{
+		match_db_print(
+				rt,
+				"%s#[",
+				bind_sym
+		);
+		strcpy(
+				CharBuf_get_array( & rt-> bind_sym ),
+				bind_sym
+		);
+		rt->bind_start_pos =
+			AtomDynArray_get_size( & rt -> bind_ret );
+		rt->bind_start_level = rt->rec_depth;
+		{
+			t_atom append;
+			SETSYMBOL( & append, gensym( bind_sym ) );
+			AtomDynArray_append(
+					& rt->bind_ret,
+					append
+			);
+		}
+		{
+			t_atom append;
+			SETFLOAT( & append, 0 );
+			AtomDynArray_append(
+					& rt->bind_ret,
+					append
+			);
+		}
+	}
+	return TRUE;
+}
+
+// stop binding input
 BOOL lexer_set_end_bind(
 		RuntimeInfo* rt
 )
@@ -1666,38 +1684,6 @@ BOOL lexer_set_end_bind(
 	return TRUE;
 }
 
-
-BOOL lexer_input_next_tok(
-		RuntimeInfo* rt,
-		BOOL bind
-)
-{
-	if( rt->input_pos >= rt->input_size )
-	{
-		match_error(
-				rt,
-				"EOF"
-		);
-		return FALSE;
-	}
-	if(
-			bind
-			&& rt->bind_start_pos != -1
-	)
-	{
-		match_db_print(
-				rt,
-				"binding"
-		);
-		AtomDynArray_append(
-				& rt->bind_ret,
-				rt->input[ rt->input_pos ]
-		);
-
-	}
-	rt->input_pos ++;
-	return TRUE;
-}
 
 void pattern_atom_type_to_str(
 		t_pattern_atom_type type,
