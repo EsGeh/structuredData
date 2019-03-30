@@ -146,16 +146,29 @@ BOOL arbitrary_mode(
 		RuntimeInfo* rt
 );
 
+// in strict mode, we require the input to match exactly to the pattern.
+// stuff between " ( ... ) " is checked recursively
+BOOL strict_mode(
+		RuntimeInfo* rt
+);
+
 // in pack mode, we require the input to contain certain packages
 // ( in any order ):
 BOOL pack_mode(
 		RuntimeInfo* rt
 );
 
-// in strict mode, we require the input to match exactly to the pattern.
-// stuff between " ( ... ) " is checked recursively
-BOOL strict_mode(
-		RuntimeInfo* rt
+// pack mode utilities:
+
+BOOL pack_mode_read_pattern(
+		RuntimeInfo* rt,
+		SubPatternsList* expected_packages
+);
+
+BOOL pack_mode_match_input(
+		RuntimeInfo* rt,
+		SubPatternsList* expected_packages,
+		char* bind_arbitrary_sym  // if != "": bind non required packs to this symbol
 );
 
 // ************************
@@ -725,335 +738,6 @@ BOOL arbitrary_mode(
 	return TRUE;
 }
 
-// in pack mode, we require the input to contain certain packages
-// ( in any order ):
-BOOL pack_mode(
-		RuntimeInfo* rt
-)
-{
-	// we know '<bind>#[ * ...' or '* ...'
-	CharBuf bind_arbitrary_sym;
-	CharBuf_init( & bind_arbitrary_sym, 1024);
-	CharBuf_get_array( & bind_arbitrary_sym )[0] = '\0';
-
-	// #[ ...
-	if( lexer_pattern_peek( rt, 0 ) == START_BIND )
-	{
-		if( !lexer_match_start_bind( rt ) )
-			return FALSE;
-		strcat(
-			CharBuf_get_array( & bind_arbitrary_sym ),
-			CharBuf_get_array( & rt->bind_sym )
-		);
-	}
-	// '* ...'
-	if( !lexer_pattern_next_tok_any( rt ) )
-		return FALSE;
-	// '#] ...'
-	if( lexer_pattern_peek( rt, 0 ) == END_BIND )
-	{
-		if( !lexer_match_end_bind( rt ) )
-			return FALSE;
-		// pop the dummy bind_sym...
-		AtomDynArray_set_size(
-			& rt->bind_ret,
-			AtomDynArray_get_size( & rt->bind_ret ) - 2
-		);
-	}
-
-	// 1. read all packages in the pattern:
-	SubPatternsList expected_packages;
-	SubPatternsList_init ( & expected_packages );
-	while(
-			lexer_pattern_peek( rt, 0) != END
-			&&
-			lexer_pattern_peek( rt, 0) != RIGHT_PARENT
-	)
-	{
-		if( !lexer_match_start_bind( rt ) ) return FALSE;
-		match_db_print(
-				rt,
-				"parsing next pack, sym: %s",
-				CharBuf_get_array( & rt->bind_sym )
-		);
-
-		SubPatternInfo* subPatternInfo = getbytes( sizeof( SubPatternInfo ) );
-		subPatternInfo->pattern_pos =
-				rt->pattern_pos;
-		CharBuf_init( &subPatternInfo->bind_sym, 1024 );
-		strcpy(
-				CharBuf_get_array( &subPatternInfo->bind_sym ) ,
-				"" 
-		);
-
-		SubPatternsList_append(
-				& expected_packages,
-				subPatternInfo
-		);
-		int depth = 0;
-		if( rt->bind_start_pos != -1 )
-		{
-			strcpy(
-					CharBuf_get_array( &subPatternInfo->bind_sym ) ,
-					CharBuf_get_array( &rt->bind_sym )
-			);
-		}
-
-		// <symbol> (
-		if( 
-			!lexer_pattern_next_tok(
-				rt,
-				SYMBOL
-			)
-		)
-			return FALSE;
-		if( 
-			!lexer_pattern_next_tok(
-				rt,
-				LEFT_PARENT
-			)
-		)
-			return FALSE;
-
-		depth = 1;
-		while(
-			lexer_pattern_peek( rt, 0) != END
-			&&
-			depth > 0
-		)
-		{
-			if(
-				lexer_pattern_peek( rt, 0) == LEFT_PARENT
-			)
-			{
-				depth++;
-			}
-			else if( 
-				lexer_pattern_peek( rt, 0) == RIGHT_PARENT
-			)
-			{
-				depth--;
-			}
-			if(
-				!lexer_pattern_next_tok_any( rt )
-			)
-				return FALSE;
-		}
-		// missing corresponding ')':
-		if(
-			depth > 0
-			&& lexer_pattern_peek( rt, 0) == END
-		)
-		{
-			match_error(
-					rt,
-					"invalid pack: missing ')'"
-			);
-			SubPatternsList_exit( & expected_packages );
-			return FALSE;
-		}
-
-		subPatternInfo->pattern_size =
-			rt->pattern_pos;
-
-		// #] ...
-		if(
-				lexer_pattern_peek( rt, 0 ) == END_BIND
-		)
-		{
-			if( !lexer_match_end_bind( rt ) ) return FALSE;
-			// pop the dummy bind_sym...
-			AtomDynArray_set_size(
-				& rt->bind_ret,
-				AtomDynArray_get_size( & rt->bind_ret ) - 2
-			);
-		}
-
-	}
-	match_db_print(
-			rt,
-			"done reading pattern"
-	);
-	
-	// debug print:
-	SubPatternsListEl* pEl = SubPatternsList_get_first( &expected_packages );
-	while( pEl != NULL )
-	{
-		SubPatternInfo* subPatternInfo = pEl->pData;
-		match_db_print(
-				rt,
-				"pack: pos: %i, size: %i, bind: %s",
-				subPatternInfo->pattern_pos,
-				subPatternInfo->pattern_size,
-				CharBuf_get_array( & subPatternInfo->bind_sym )
-		);
-		pEl = SubPatternsList_get_next(
-				& expected_packages,
-				pEl
-		);
-	}
-
-	// 2. try to find all patterns in the input:
-	{
-		while(
-				rt->input_pos < rt->input_size
-		)
-		{
-			// read the input packet wise:
-			if(
-					rt->input_pos + 1 >= rt->input_size
-					||
-					rt->input[ rt->input_pos + 0 ].a_type != A_SYMBOL
-					||
-					rt->input[ rt->input_pos + 1].a_type != A_FLOAT
-					||
-					rt->input_pos + 1 + atom_getint( & rt->input[ rt->input_pos ] ) >= rt->input_size
-			)
-			{
-				match_db_print(
-						rt,
-						"FAIL: input: invalid packet"
-				);
-
-				SubPatternsList_exit( & expected_packages );
-				return FALSE;
-			}
-			match_db_print(
-					rt,
-					"parsing input pack..."
-			);
-
-			int pack_size = 
-					atom_getint( & rt->input[ rt->input_pos + 1 ] );
-
-			SubPatternsListEl* pEl = SubPatternsList_get_first( &expected_packages );
-			RuntimeInfo rt_temp;
-			memcpy( &rt_temp, rt, sizeof( RuntimeInfo ) );
-
-			rt_temp.rec_depth ++;
-			BOOL matched = FALSE;
-			while( pEl != NULL )
-			{
-				AtomDynArray_init( & rt_temp.bind_ret );
-				SubPatternInfo* subPatternInfo = pEl->pData;
-				rt_temp.pattern_pos = subPatternInfo->pattern_pos;
-				rt_temp.pattern_size = subPatternInfo->pattern_size;
-				rt_temp.input_size = rt->input_pos + 2 + pack_size;
-				if(
-						strcmp( CharBuf_get_array( & subPatternInfo->bind_sym ), "" )
-				)
-				{
-					if(
-							! lexer_set_start_bind(
-								& rt_temp,
-								CharBuf_get_array( & subPatternInfo->bind_sym )
-							)
-					)
-						return FALSE;
-				}
-				if(
-						match_rec(
-							&rt_temp
-						)
-				)
-				{
-					if( ! lexer_set_end_bind( & rt_temp ) ) return FALSE;
-					for( int i=0; i< AtomDynArray_get_size( & rt_temp.bind_ret ); i++)
-					{
-						AtomDynArray_append(
-							& rt-> bind_ret,
-							AtomDynArray_get_array( & rt_temp.bind_ret )[ i ]
-						);
-					}
-					AtomDynArray_exit( & rt_temp.bind_ret );
-
-					SubPatternsList_del(
-							& expected_packages,
-							pEl
-					);
-					matched = TRUE;
-					break;
-				}
-				else
-				{
-					pEl = SubPatternsList_get_next(
-							& expected_packages,
-							pEl
-					);
-				}
-				AtomDynArray_exit( & rt_temp.bind_ret );
-			}
-
-			BOOL
-				temp_binding =
-					rt->bind_start_pos == -1
-					&&
-					!matched
-					&&
-					strcmp( CharBuf_get_array( & bind_arbitrary_sym ), "" )
-					;
-			if( temp_binding )
-			{
-				match_db_print(
-					rt,
-					"temp binding..."
-				);
-				if(
-					! lexer_set_start_bind(
-							rt,
-							CharBuf_get_array( & bind_arbitrary_sym )
-					)
-				)
-				{
-					match_error(
-						rt,
-						"internal error!"
-					);
-					SubPatternsList_exit( & expected_packages );
-					return FALSE;
-				}
-			}
-			//rt->input_pos += (2 + pack_size);
-			for(int i=0; i< (2+pack_size); i++)
-			{
-				if(
-						! lexer_input_next_tok(
-							rt,
-							!matched // don't bind!
-						)
-				)
-					return FALSE;
-			}
-			if( temp_binding )
-			{
-				if(
-					!lexer_set_end_bind( rt )
-				)
-				{
-					match_error(
-						rt,
-						"internal error!"
-					);
-					SubPatternsList_exit( & expected_packages );
-					return FALSE;
-				}
-			}
-		}
-		if( !SubPatternsList_is_empty( & expected_packages ) )
-		{
-			match_db_print(
-					rt,
-					"FAIL: packets missing in input"
-			);
-
-			SubPatternsList_exit( & expected_packages );
-			return FALSE;
-		}
-	}
-
-	SubPatternsList_exit( & expected_packages );
-	return TRUE;
-}
 
 // in strict mode, we require the input to match exactly to the pattern.
 // stuff between " ( ... ) " is checked recursively
@@ -1173,6 +857,353 @@ BOOL strict_mode(
 				rt,
 				"FAIL: pattern rest"
 		);
+		return FALSE;
+	}
+	return TRUE;
+}
+
+// in pack mode, we require the input to contain certain packages
+// ( in any order ):
+BOOL pack_mode(
+		RuntimeInfo* rt
+)
+{
+	// we know '<bind>#[ * ...' or '* ...'
+	CharBuf bind_arbitrary_sym;
+	CharBuf_init( & bind_arbitrary_sym, 1024);
+	CharBuf_get_array( & bind_arbitrary_sym )[0] = '\0';
+
+	// #[ ...
+	if( lexer_pattern_peek( rt, 0 ) == START_BIND )
+	{
+		if( !lexer_match_start_bind( rt ) )
+			return FALSE;
+		strcat(
+			CharBuf_get_array( & bind_arbitrary_sym ),
+			CharBuf_get_array( & rt->bind_sym )
+		);
+	}
+	// '* ...'
+	if( !lexer_pattern_next_tok_any( rt ) )
+		return FALSE;
+	// '#] ...'
+	if( lexer_pattern_peek( rt, 0 ) == END_BIND )
+	{
+		if( !lexer_match_end_bind( rt ) )
+			return FALSE;
+		// pop the dummy bind_sym...
+		AtomDynArray_set_size(
+			& rt->bind_ret,
+			AtomDynArray_get_size( & rt->bind_ret ) - 2
+		);
+	}
+
+	// 1. read all packages in the pattern:
+	SubPatternsList expected_packages;
+	SubPatternsList_init ( & expected_packages );
+	if( !pack_mode_read_pattern( rt, & expected_packages ) ) return FALSE;
+	match_db_print(
+			rt,
+			"done reading pattern"
+	);
+	
+	// debug print:
+	SubPatternsListEl* pEl = SubPatternsList_get_first( &expected_packages );
+	while( pEl != NULL )
+	{
+		SubPatternInfo* subPatternInfo = pEl->pData;
+		match_db_print(
+				rt,
+				"pack: pos: %i, size: %i, bind: %s",
+				subPatternInfo->pattern_pos,
+				subPatternInfo->pattern_size,
+				CharBuf_get_array( & subPatternInfo->bind_sym )
+		);
+		pEl = SubPatternsList_get_next(
+				& expected_packages,
+				pEl
+		);
+	}
+
+	// 2. try to find all patterns in the input:
+	if( !pack_mode_match_input( rt, & expected_packages, CharBuf_get_array( & bind_arbitrary_sym ) ) ) return FALSE;
+
+	SubPatternsList_exit( & expected_packages );
+	return TRUE;
+}
+
+BOOL pack_mode_read_pattern(
+		RuntimeInfo* rt,
+		SubPatternsList* expected_packages
+)
+{
+	while(
+			lexer_pattern_peek( rt, 0) != END
+			&&
+			lexer_pattern_peek( rt, 0) != RIGHT_PARENT
+	)
+	{
+		if( !lexer_match_start_bind( rt ) ) return FALSE;
+		match_db_print(
+				rt,
+				"parsing next pack, sym: %s",
+				CharBuf_get_array( & rt->bind_sym )
+		);
+
+		SubPatternInfo* subPatternInfo = getbytes( sizeof( SubPatternInfo ) );
+		subPatternInfo->pattern_pos =
+				rt->pattern_pos;
+		CharBuf_init( &subPatternInfo->bind_sym, 1024 );
+		strcpy(
+				CharBuf_get_array( &subPatternInfo->bind_sym ) ,
+				"" 
+		);
+
+		SubPatternsList_append(
+				expected_packages,
+				subPatternInfo
+		);
+		int depth = 0;
+		if( rt->bind_start_pos != -1 )
+		{
+			strcpy(
+					CharBuf_get_array( &subPatternInfo->bind_sym ) ,
+					CharBuf_get_array( &rt->bind_sym )
+			);
+		}
+
+		// <symbol> (
+		if( 
+			!lexer_pattern_next_tok(
+				rt,
+				SYMBOL
+			)
+		)
+			return FALSE;
+		if( 
+			!lexer_pattern_next_tok(
+				rt,
+				LEFT_PARENT
+			)
+		)
+			return FALSE;
+
+		depth = 1;
+		while(
+			lexer_pattern_peek( rt, 0) != END
+			&&
+			depth > 0
+		)
+		{
+			if(
+				lexer_pattern_peek( rt, 0) == LEFT_PARENT
+			)
+			{
+				depth++;
+			}
+			else if( 
+				lexer_pattern_peek( rt, 0) == RIGHT_PARENT
+			)
+			{
+				depth--;
+			}
+			if(
+				!lexer_pattern_next_tok_any( rt )
+			)
+				return FALSE;
+		}
+		// missing corresponding ')':
+		if(
+			depth > 0
+			&& lexer_pattern_peek( rt, 0) == END
+		)
+		{
+			match_error(
+					rt,
+					"invalid pack: missing ')'"
+			);
+			SubPatternsList_exit( expected_packages );
+			return FALSE;
+		}
+
+		subPatternInfo->pattern_size =
+			rt->pattern_pos;
+
+		// #] ...
+		if(
+				lexer_pattern_peek( rt, 0 ) == END_BIND
+		)
+		{
+			if( !lexer_match_end_bind( rt ) ) return FALSE;
+			// pop the dummy bind_sym...
+			AtomDynArray_set_size(
+				& rt->bind_ret,
+				AtomDynArray_get_size( & rt->bind_ret ) - 2
+			);
+		}
+
+	}
+	return TRUE;
+}
+
+BOOL pack_mode_match_input(
+		RuntimeInfo* rt,
+		SubPatternsList* expected_packages,
+		char* bind_arbitrary_sym  // if != "": bind non required packs to this symbol
+)
+{
+	while(
+			rt->input_pos < rt->input_size
+	)
+	{
+		// read the input packet wise:
+		if(
+				rt->input_pos + 1 >= rt->input_size
+				||
+				rt->input[ rt->input_pos + 0 ].a_type != A_SYMBOL
+				||
+				rt->input[ rt->input_pos + 1].a_type != A_FLOAT
+				||
+				rt->input_pos + 1 + atom_getint( & rt->input[ rt->input_pos ] ) >= rt->input_size
+		)
+		{
+			match_db_print(
+					rt,
+					"FAIL: input: invalid packet"
+			);
+
+			SubPatternsList_exit( expected_packages );
+			return FALSE;
+		}
+		match_db_print(
+				rt,
+				"parsing input pack..."
+		);
+
+		int pack_size = 
+				atom_getint( & rt->input[ rt->input_pos + 1 ] );
+
+		SubPatternsListEl* pEl = SubPatternsList_get_first( expected_packages );
+		RuntimeInfo rt_temp;
+		memcpy( &rt_temp, rt, sizeof( RuntimeInfo ) );
+
+		rt_temp.rec_depth ++;
+		BOOL matched = FALSE;
+		while( pEl != NULL )
+		{
+			AtomDynArray_init( & rt_temp.bind_ret );
+			SubPatternInfo* subPatternInfo = pEl->pData;
+			rt_temp.pattern_pos = subPatternInfo->pattern_pos;
+			rt_temp.pattern_size = subPatternInfo->pattern_size;
+			rt_temp.input_size = rt->input_pos + 2 + pack_size;
+			if(
+					strcmp( CharBuf_get_array( & subPatternInfo->bind_sym ), "" )
+			)
+			{
+				if(
+						! lexer_set_start_bind(
+							& rt_temp,
+							CharBuf_get_array( & subPatternInfo->bind_sym )
+						)
+				)
+					return FALSE;
+			}
+			if(
+					match_rec(
+						&rt_temp
+					)
+			)
+			{
+				if( ! lexer_set_end_bind( & rt_temp ) ) return FALSE;
+				for( int i=0; i< AtomDynArray_get_size( & rt_temp.bind_ret ); i++)
+				{
+					AtomDynArray_append(
+						& rt-> bind_ret,
+						AtomDynArray_get_array( & rt_temp.bind_ret )[ i ]
+					);
+				}
+				AtomDynArray_exit( & rt_temp.bind_ret );
+
+				SubPatternsList_del(
+						expected_packages,
+						pEl
+				);
+				matched = TRUE;
+				break;
+			}
+			else
+			{
+				pEl = SubPatternsList_get_next(
+						expected_packages,
+						pEl
+				);
+			}
+			AtomDynArray_exit( & rt_temp.bind_ret );
+		}
+
+		BOOL
+			temp_binding =
+				rt->bind_start_pos == -1
+				&&
+				!matched
+				&&
+				strcmp( bind_arbitrary_sym, "" )
+				;
+		if( temp_binding )
+		{
+			match_db_print(
+				rt,
+				"temp binding..."
+			);
+			if(
+				! lexer_set_start_bind(
+						rt,
+						bind_arbitrary_sym
+				)
+			)
+			{
+				match_error(
+					rt,
+					"internal error!"
+				);
+				SubPatternsList_exit( expected_packages );
+				return FALSE;
+			}
+		}
+		//rt->input_pos += (2 + pack_size);
+		for(int i=0; i< (2+pack_size); i++)
+		{
+			if(
+					! lexer_input_next_tok(
+						rt,
+						!matched // don't bind!
+					)
+			)
+				return FALSE;
+		}
+		if( temp_binding )
+		{
+			if(
+				!lexer_set_end_bind( rt )
+			)
+			{
+				match_error(
+					rt,
+					"internal error!"
+				);
+				SubPatternsList_exit( expected_packages );
+				return FALSE;
+			}
+		}
+	}
+	if( !SubPatternsList_is_empty( expected_packages ) )
+	{
+		match_db_print(
+				rt,
+				"FAIL: packets missing in input"
+		);
+
+		SubPatternsList_exit( expected_packages );
 		return FALSE;
 	}
 	return TRUE;
