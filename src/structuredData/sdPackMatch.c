@@ -257,6 +257,12 @@ BOOL lexer_set_end_bind(
 		RuntimeInfo* rt
 );
 
+// ignorantly append to bind return list
+void lexer_append_to_bind(
+		RuntimeInfo* rt,
+		t_atom* a
+);
+
 // utility mainly for debug output:
 void pattern_atom_type_to_str(
 		t_pattern_atom_type type,
@@ -493,6 +499,29 @@ void packMatch_input(
 				"'" \
 		); \
 	} \
+	char bind_buf[1024]; \
+	{ \
+		sprintf( bind_buf, "'"); \
+		for(int i=0; i< AtomDynArray_get_size( & rt->bind_ret ); i++) \
+		{ \
+			t_atom* current = & AtomDynArray_get_array( & rt->bind_ret )[i]; \
+			char current_buf[1024]; \
+			atom_string( current, current_buf, 1024 ); \
+			if( i != 0 ) \
+				strcat( \
+						bind_buf, \
+						" " \
+				); \
+			strcat( \
+					bind_buf, \
+					current_buf \
+			); \
+		} \
+		strcat( \
+				bind_buf, \
+				"'" \
+		); \
+	} \
  \
 	char indent_buf[256]; \
 	indent_buf[0] ='\0'; \
@@ -504,11 +533,12 @@ void packMatch_input(
 	sprintf( msg_filled, msg, ## __VA_ARGS__ ); \
  \
 	DB_PRINT( \
-			"%s%s, input (%i,%i): %s, pattern (%i,%i): %s: %s", \
+			"%s%s, input (%i,%i): %s, pattern (%i,%i): %s, bind: %s: %s", \
 			indent_buf, \
 			pattern_name_buf, \
 			rt->input_pos, rt->input_size, input_buf, \
 			rt->pattern_pos, rt->pattern_size, pattern_buf, \
+			bind_buf, \
 			msg_filled \
 	); \
 }
@@ -1094,10 +1124,20 @@ BOOL pack_mode_match_input(
 		memcpy( &rt_temp, rt, sizeof( RuntimeInfo ) );
 
 		rt_temp.rec_depth ++;
+		rt_temp.bind_start_pos = -1;
+		rt_temp.bind_start_level = -1;
 		BOOL matched = FALSE;
 		while( pEl != NULL )
 		{
 			AtomDynArray_init( & rt_temp.bind_ret );
+			AtomDynArray_append(
+					& rt_temp.bind_ret, 
+					AtomDynArray_get_array( &rt->bind_ret )[0]
+			);
+			AtomDynArray_append(
+					& rt_temp.bind_ret, 
+					AtomDynArray_get_array( &rt->bind_ret )[1]
+			);
 			SubPatternInfo* subPatternInfo = pEl->pData;
 			rt_temp.pattern_pos = subPatternInfo->pattern_pos;
 			rt_temp.pattern_size = subPatternInfo->pattern_size;
@@ -1154,6 +1194,14 @@ BOOL pack_mode_match_input(
 				;
 		memcpy( &rt_temp, rt, sizeof( RuntimeInfo ) );
 		AtomDynArray_init( & rt_temp.bind_ret );
+		AtomDynArray_append(
+				& rt_temp.bind_ret, 
+				AtomDynArray_get_array( &rt->bind_ret )[0]
+		);
+		AtomDynArray_append(
+				& rt_temp.bind_ret, 
+				AtomDynArray_get_array( &rt->bind_ret )[1]
+		);
 		if( temp_binding )
 		{
 			match_db_print(
@@ -1235,7 +1283,7 @@ void pack_mode_merge_bound_symbols(
 	t_atom* new_bound_array = AtomDynArray_get_array( & new_bound_symbols );
 	int new_bound_size = AtomDynArray_get_size( & new_bound_symbols );
 	if(
-			new_bound_size <= 2
+			new_bound_size <= 4
 	)
 		return;
 
@@ -1248,7 +1296,7 @@ void pack_mode_merge_bound_symbols(
 		t_symbol* pack_type = atom_getsymbol( & already_bound_array[pos+0] );
 		int pack_size = atom_getint( & already_bound_array[pos+1] );
 		{
-			if( pack_type == atom_getsymbol( & new_bound_array[0] ) )
+			if( pack_type == atom_getsymbol( & new_bound_array[2] ) )
 			{
 				match_db_print(
 						rt,
@@ -1258,7 +1306,7 @@ void pack_mode_merge_bound_symbols(
 					AtomDynArray_get_size( & rt->bind_ret );
 				AtomDynArray_set_size(
 						& rt->bind_ret,
-						old_size + new_bound_size - 2
+						old_size + new_bound_size - 2 - 2
 				);
 
 				int insert_pos =
@@ -1277,19 +1325,19 @@ void pack_mode_merge_bound_symbols(
 				// append new_bound_array:
 				memcpy(
 					& AtomDynArray_get_array( & rt->bind_ret )[ insert_pos ],
-					& new_bound_array[2],
-					(new_bound_size - 2) * sizeof( t_atom )
+					& new_bound_array[4],
+					(new_bound_size -2 - 2) * sizeof( t_atom )
 				);
 				// update size:
 				SETFLOAT(
 						& AtomDynArray_get_array( & rt->bind_ret )[ pos+1 ],
 						atom_getint( 
 							& AtomDynArray_get_array( & rt->bind_ret )[ pos+1 ]
-						) + new_bound_size - 2
+						) + new_bound_size - 2 - 2
 				);
 				// append remainder:
 				memcpy(
-					& AtomDynArray_get_array( & rt->bind_ret )[ insert_pos + new_bound_size - 2],
+					& AtomDynArray_get_array( & rt->bind_ret )[ insert_pos + new_bound_size - 2 - 2],
 					remainder,
 					remainder_size * sizeof( t_atom )
 				);
@@ -1300,6 +1348,7 @@ void pack_mode_merge_bound_symbols(
 
 		pos += (2+pack_size);
 	}
+
 	match_db_print(
 			rt,
 			"nothing found, appending:"
@@ -1307,8 +1356,14 @@ void pack_mode_merge_bound_symbols(
 
 	// if no pack in already bound input found, just append:
 	
-	for( int i=0; i< AtomDynArray_get_size( & new_bound_symbols ); i++)
+	for( int i=2; i< AtomDynArray_get_size( & new_bound_symbols ); i++)
 	{
+		/*
+		lexer_append_to_bind(
+				rt,
+				& AtomDynArray_get_array( & new_bound_symbols )[ i ]
+		);
+		*/
 		AtomDynArray_append(
 			& rt-> bind_ret,
 			AtomDynArray_get_array( & new_bound_symbols )[ i ]
@@ -1508,11 +1563,7 @@ BOOL lexer_match_next_any(
 				rt,
 				"binding"
 		);
-		AtomDynArray_append(
-				& rt->bind_ret,
-				rt->input[ rt->input_pos ]
-		);
-
+		lexer_append_to_bind( rt, & rt->input[ rt->input_pos ] );
 	}
 
 	if( anything )
@@ -1657,15 +1708,8 @@ BOOL lexer_input_next_tok(
 			&& rt->bind_start_pos != -1
 	)
 	{
-		match_db_print(
-				rt,
-				"binding"
-		);
-		AtomDynArray_append(
-				& rt->bind_ret,
-				rt->input[ rt->input_pos ]
-		);
 
+		lexer_append_to_bind( rt, & rt->input[ rt->input_pos ] );
 	}
 	rt->input_pos ++;
 	return TRUE;
@@ -1693,6 +1737,11 @@ BOOL lexer_match_start_bind(
 		atom_string( & rt->pattern[ rt->pattern_pos], buf, CharBuf_get_size( & rt->bind_sym ) );
 		int pos_sep = (strchr( buf, '#' ) - buf);
 		buf[pos_sep] = '\0';
+		match_db_print(
+				rt,
+				"%s#[",
+				buf
+		);
 		if(
 			!lexer_set_start_bind(
 				rt,
@@ -1756,7 +1805,7 @@ BOOL lexer_set_start_bind(
 	{
 		match_db_print(
 				rt,
-				"%s#[",
+				"start binding to %s",
 				bind_sym
 		);
 		strcpy(
@@ -1808,14 +1857,38 @@ BOOL lexer_set_end_bind(
 				"stop bind: %i",
 				AtomDynArray_get_size( & rt->bind_ret )
 		);
-		SETFLOAT(
-				& AtomDynArray_get_array( & rt->bind_ret )[ rt->bind_start_pos + 1 ],
-				AtomDynArray_get_size( & rt->bind_ret ) - rt->bind_start_pos - 2
-		);
 		rt->bind_start_pos = -1;
 		rt->bind_start_level = -1;
 	}
 	return TRUE;
+}
+
+// ignorantly append to bind return list
+void lexer_append_to_bind(
+		RuntimeInfo* rt,
+		t_atom* a
+)
+{
+	if(  rt->bind_start_pos == -1 )
+	{
+		match_error(
+				rt,
+				"ERROR \"lexer_append_to_bind\" called but not in bind mode"
+		);
+		return FALSE;
+	}
+	match_db_print(
+			rt,
+			"binding"
+	);
+	AtomDynArray_append(
+			& rt->bind_ret,
+			*a
+	);
+	SETFLOAT(
+			& AtomDynArray_get_array( & rt->bind_ret )[ rt->bind_start_pos + 1 ],
+			AtomDynArray_get_size( & rt->bind_ret ) - rt->bind_start_pos - 2
+	);
 }
 
 
