@@ -171,6 +171,11 @@ BOOL pack_mode_match_input(
 		char* bind_arbitrary_sym  // if != "": bind non required packs to this symbol
 );
 
+void pack_mode_merge_bound_symbols(
+		RuntimeInfo* rt,
+		AtomDynArray new_bound_symbols
+);
+
 // ************************
 // lexer:
 // ************************
@@ -926,7 +931,8 @@ BOOL pack_mode(
 	}
 
 	// 2. try to find all patterns in the input:
-	if( !pack_mode_match_input( rt, & expected_packages, CharBuf_get_array( & bind_arbitrary_sym ) ) ) return FALSE;
+	if( !pack_mode_match_input( rt, & expected_packages, CharBuf_get_array( & bind_arbitrary_sym ) ) )
+		return FALSE;
 
 	SubPatternsList_exit( & expected_packages );
 	return TRUE;
@@ -1115,13 +1121,10 @@ BOOL pack_mode_match_input(
 			)
 			{
 				if( ! lexer_set_end_bind( & rt_temp ) ) return FALSE;
-				for( int i=0; i< AtomDynArray_get_size( & rt_temp.bind_ret ); i++)
-				{
-					AtomDynArray_append(
-						& rt-> bind_ret,
-						AtomDynArray_get_array( & rt_temp.bind_ret )[ i ]
-					);
-				}
+				pack_mode_merge_bound_symbols(
+						rt,
+						rt_temp.bind_ret
+				);
 				AtomDynArray_exit( & rt_temp.bind_ret );
 
 				SubPatternsList_del(
@@ -1149,6 +1152,8 @@ BOOL pack_mode_match_input(
 				&&
 				strcmp( bind_arbitrary_sym, "" )
 				;
+		memcpy( &rt_temp, rt, sizeof( RuntimeInfo ) );
+		AtomDynArray_init( & rt_temp.bind_ret );
 		if( temp_binding )
 		{
 			match_db_print(
@@ -1157,7 +1162,7 @@ BOOL pack_mode_match_input(
 			);
 			if(
 				! lexer_set_start_bind(
-						rt,
+						& rt_temp,
 						bind_arbitrary_sym
 				)
 			)
@@ -1166,16 +1171,16 @@ BOOL pack_mode_match_input(
 					rt,
 					"internal error!"
 				);
+				AtomDynArray_exit( & rt_temp.bind_ret );
 				SubPatternsList_exit( expected_packages );
 				return FALSE;
 			}
 		}
-		//rt->input_pos += (2 + pack_size);
 		for(int i=0; i< (2+pack_size); i++)
 		{
 			if(
 					! lexer_input_next_tok(
-						rt,
+						& rt_temp,
 						!matched // don't bind!
 					)
 			)
@@ -1184,17 +1189,25 @@ BOOL pack_mode_match_input(
 		if( temp_binding )
 		{
 			if(
-				!lexer_set_end_bind( rt )
+				!lexer_set_end_bind( &rt_temp )
 			)
 			{
 				match_error(
 					rt,
 					"internal error!"
 				);
+				AtomDynArray_exit( & rt_temp.bind_ret );
 				SubPatternsList_exit( expected_packages );
 				return FALSE;
 			}
 		}
+		pack_mode_merge_bound_symbols(
+				rt,
+				rt_temp.bind_ret
+		);
+		rt->input_pos = rt_temp.input_pos;
+		rt->pattern_pos = rt_temp.pattern_pos;
+		AtomDynArray_exit( & rt_temp.bind_ret );
 	}
 	if( !SubPatternsList_is_empty( expected_packages ) )
 	{
@@ -1207,6 +1220,100 @@ BOOL pack_mode_match_input(
 		return FALSE;
 	}
 	return TRUE;
+}
+
+void pack_mode_merge_bound_symbols(
+		RuntimeInfo* rt,
+		AtomDynArray new_bound_symbols
+)
+{
+		match_db_print(
+				rt,
+				"appending..."
+		);
+
+	t_atom* new_bound_array = AtomDynArray_get_array( & new_bound_symbols );
+	int new_bound_size = AtomDynArray_get_size( & new_bound_symbols );
+	if(
+			new_bound_size <= 2
+	)
+		return;
+
+	// scan already bound input if it contains s.t bound to the same symbol:
+	int pos = 2;
+	t_atom* already_bound_array = AtomDynArray_get_array( & rt->bind_ret );
+	while( pos < AtomDynArray_get_size( & rt->bind_ret ) )
+	{
+		// walk pack wise:
+		t_symbol* pack_type = atom_getsymbol( & already_bound_array[pos+0] );
+		int pack_size = atom_getint( & already_bound_array[pos+1] );
+		{
+			if( pack_type == atom_getsymbol( & new_bound_array[0] ) )
+			{
+				match_db_print(
+						rt,
+						"found existing!"
+				);
+				int old_size =
+					AtomDynArray_get_size( & rt->bind_ret );
+				AtomDynArray_set_size(
+						& rt->bind_ret,
+						old_size + new_bound_size - 2
+				);
+
+				int insert_pos =
+					(pos+2+pack_size);
+				int remainder_size =
+					old_size - insert_pos;
+				// shift following content to the right:
+				t_atom* remainder = getbytes( sizeof( t_atom ) * remainder_size );
+				{
+					memcpy(
+							remainder,
+							&already_bound_array[insert_pos],
+							remainder_size * sizeof( t_atom )
+					);
+				}
+				// append new_bound_array:
+				memcpy(
+					& AtomDynArray_get_array( & rt->bind_ret )[ insert_pos ],
+					& new_bound_array[2],
+					(new_bound_size - 2) * sizeof( t_atom )
+				);
+				// update size:
+				SETFLOAT(
+						& AtomDynArray_get_array( & rt->bind_ret )[ pos+1 ],
+						atom_getint( 
+							& AtomDynArray_get_array( & rt->bind_ret )[ pos+1 ]
+						) + new_bound_size - 2
+				);
+				// append remainder:
+				memcpy(
+					& AtomDynArray_get_array( & rt->bind_ret )[ insert_pos + new_bound_size - 2],
+					remainder,
+					remainder_size * sizeof( t_atom )
+				);
+				freebytes( remainder, sizeof( t_atom ) * remainder_size );
+				return;
+			}
+		}
+
+		pos += (2+pack_size);
+	}
+	match_db_print(
+			rt,
+			"nothing found, appending:"
+	);
+
+	// if no pack in already bound input found, just append:
+	
+	for( int i=0; i< AtomDynArray_get_size( & new_bound_symbols ); i++)
+	{
+		AtomDynArray_append(
+			& rt-> bind_ret,
+			AtomDynArray_get_array( & new_bound_symbols )[ i ]
+		);
+	}
 }
 
 // ************************
