@@ -25,14 +25,6 @@ void sdList_setup() {
 // list
 //----------------------------------
 
-#define DECL_LIST_STD(LIST,ELEMENT,DATA)\
-	DECL_LIST(LIST,ELEMENT,DATA,getbytes,freebytes,freebytes)
-#define DEF_LIST_STD(LIST,ELEMENT,DATA)\
-	DEF_LIST(LIST,ELEMENT,DATA,getbytes,freebytes,freebytes)
-
-DECL_LIST_STD(AtomList, AtomEl, t_atom)
-DEF_LIST_STD(AtomList, AtomEl, t_atom);
-
 
 typedef struct s_list {
   t_object x_obj;
@@ -396,7 +388,7 @@ void list_del(
 	if( index >= 0 )
 	{
 		unsigned int index_int = (unsigned int )index;
-		AtomEl* pEl = AtomList_get_first( & x->atoms );
+		AtomListEl* pEl = AtomList_get_first( & x->atoms );
 		for( unsigned int i=0; i<count; i++ )
 		{
 			if( i == index_int )
@@ -410,7 +402,7 @@ void list_del(
 	else
 	{
 		int index_int = count + (int )index;
-		AtomEl* pEl = AtomList_get_last( & x->atoms );
+		AtomListEl* pEl = AtomList_get_last( & x->atoms );
 		for( int i=count-1; i>=0; i-- )
 		{
 			if( i == index_int )
@@ -437,7 +429,7 @@ void list_bang(t_list *x)
 	unsigned int count = AtomList_get_size( & x->atoms );
 	atoms_array =
 		getbytes( sizeof( t_atom) * count);
-	AtomEl* pEl = AtomList_get_first( & x->atoms );
+	AtomListEl* pEl = AtomList_get_first( & x->atoms );
 	for( unsigned int i=0; i<count; i++ )
 	{
 		atoms_array[i] = * (pEl->pData) ;
@@ -467,7 +459,7 @@ void list_pop(
 {
 	if( !AtomList_is_empty( & x -> atoms ) )
 	{
-		AtomEl* el = AtomList_get_first( & x -> atoms );
+		AtomListEl* el = AtomList_get_first( & x -> atoms );
 		list_outputAt(
 			x,
 			gensym("pop"),
@@ -484,7 +476,7 @@ void list_popRev(
 {
 	if( !AtomList_is_empty( & x -> atoms ) )
 	{
-		AtomEl* el = AtomList_get_last( & x -> atoms );
+		AtomListEl* el = AtomList_get_last( & x -> atoms );
 		list_outputAt(
 			x,
 			gensym("popRev"),
@@ -500,7 +492,7 @@ void list_serialize(
 )
 {
 	unsigned int count = AtomList_get_size( & x->atoms );
-	AtomEl* pEl = AtomList_get_first( & x->atoms );
+	AtomListEl* pEl = AtomList_get_first( & x->atoms );
 	for( unsigned int i=0; i<count; i++ )
 	{
 		list_outputAt(
@@ -518,7 +510,7 @@ void list_serializeRev(
 )
 {
 	unsigned int count = AtomList_get_size( & x->atoms );
-	AtomEl* pEl = AtomList_get_last( & x->atoms );
+	AtomListEl* pEl = AtomList_get_last( & x->atoms );
 	for( unsigned int i=0; i<count; i++ )
 	{
 		list_outputAt(
@@ -540,7 +532,7 @@ void list_get(
 	if( index >= 0 )
 	{
 		unsigned int index_int = (unsigned int )index;
-		AtomEl* pEl = AtomList_get_first( & x->atoms );
+		AtomListEl* pEl = AtomList_get_first( & x->atoms );
 		for( unsigned int i=0; i<count; i++ )
 		{
 			if( i == index_int )
@@ -559,7 +551,7 @@ void list_get(
 	else
 	{
 		int index_int = count + (int )index;
-		AtomEl* pEl = AtomList_get_last( & x->atoms );
+		AtomListEl* pEl = AtomList_get_last( & x->atoms );
 		for( int i=count-1; i>=0; i-- )
 		{
 			if( i == index_int )
@@ -591,10 +583,10 @@ void list_find(
 	}
 
 	t_atom ret;
-	AtomEl* pElStart = AtomList_get_first( & x->atoms );
+	AtomListEl* pElStart = AtomList_get_first( & x->atoms );
 	for( int i=0; i<AtomList_get_size( & x->atoms ) - argc + 1; i++ )
 	{
-		AtomEl* pEl = pElStart;
+		AtomListEl* pEl = pElStart;
 		int isSame = 1;
 		for( int j=0; j<argc; j++ )
 		{
@@ -646,10 +638,10 @@ void list_findAll(
 	ret = getbytes( sizeof( t_atom ) * AtomList_get_size( & x->atoms ) );
 
 
-	AtomEl* pElStart = AtomList_get_first( & x->atoms );
+	AtomListEl* pElStart = AtomList_get_first( & x->atoms );
 	for( int i=0; i<AtomList_get_size( & x->atoms ) - argc + 1; i++ )
 	{
-		AtomEl* pEl = pElStart;
+		AtomListEl* pEl = pElStart;
 		int isSame = 1;
 		for( int j=0; j<argc; j++ )
 		{
@@ -697,7 +689,7 @@ void list_equal(
 		);
 		return;
 	}
-	LIST_FORALL_BEGIN(AtomList,AtomEl,t_atom,& x->atoms,i,pEl)
+	LIST_FORALL_BEGIN(AtomList,AtomListEl,t_atom,& x->atoms,i,pEl)
 		SETFLOAT( &ret, 0);
 		if( ! compareAtoms( pEl->pData, &argv[i] ) )
 		{
@@ -708,7 +700,7 @@ void list_equal(
 				&ret
 			);
 		}
-	LIST_FORALL_END(AtomList,AtomEl,t_atom,& x->atoms,i,pEl)
+	LIST_FORALL_END(AtomList,AtomListEl,t_atom,& x->atoms,i,pEl)
 
 	SETFLOAT( &ret, 1);
 	list_outputAt(
@@ -882,7 +874,7 @@ void listEqual_exec(
 		);
 		return;
 	}
-	LIST_FORALL_BEGIN(AtomList,AtomEl,t_atom,& x->atoms,i,pEl)
+	LIST_FORALL_BEGIN(AtomList,AtomListEl,t_atom,& x->atoms,i,pEl)
 		if( ! compareAtoms( pEl->pData, &argv[i] ) )
 		{
 			outlet_float(
@@ -891,7 +883,7 @@ void listEqual_exec(
 			);
 			return;
 		}
-	LIST_FORALL_END(AtomList,AtomEl,t_atom,& x->atoms,i,pEl)
+	LIST_FORALL_END(AtomList,AtomListEl,t_atom,& x->atoms,i,pEl)
 	outlet_float(
 		x->outlet,
 		1

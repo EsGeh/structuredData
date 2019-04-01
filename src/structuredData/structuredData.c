@@ -1,5 +1,6 @@
 #include "structuredData.h"
 #include "Global.h"
+#include "sdScriptObj.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -61,6 +62,8 @@ void structuredDataC_setup()
 	sdEvent_setup();
 	sdProperties_setup();
 	sdObjState_setup();
+
+	sdScript_setup();
 }
 
 //----------------------------------

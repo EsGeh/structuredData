@@ -1,0 +1,280 @@
+#N canvas 0 30 798 854 10;
+#X obj 153 304 print OUT;
+#X obj 161 227 r \$0-execScript;
+#X obj 161 250 t b l;
+#N canvas 0 30 798 854 basic 0;
+#X obj 70 331 outlet;
+#X text 282 260 test basic syntax;
+#X msg 91 56 list bla ( 7 );
+#X text 186 118 try to call a function with wrong number of parameters:
+;
+#X text 133 77 standard parameter passing:;
+#X text 227 156 Print can take a variable number of parameters:;
+#X text 89 35 try invocing a command that does not exist;
+#X obj 731 114 s \$0-execScript;
+#X msg 731 92 list Print ( #[ dirty ( ( ( #] ) Out ( );
+#X text 697 64 escaping function names and "(" \, ")":;
+#X text 249 195 Out ( [<selector>] ) dumps what has been printed so
+far \, optionally prepended by some "selector";
+#X msg 249 227 list Print ( some_msg ) Out ( ) Print ( some_msg ) Out
+( sel );
+#X msg 134 98 list Print ( + ( 2 3 ) ) Out ( );
+#X msg 186 138 list + ( 2 3 4 );
+#X msg 228 175 list Print ( Hallo + ( 1 7 ) ) Print ( test ) Out (
+);
+#X msg 281 278 list Print ( + ( 2 3 ) ) Print ( * ( 2 3 ) ) Print (
+Holla! ) Out ( );
+#X connect 2 0 0 0;
+#X connect 8 0 7 0;
+#X connect 11 0 0 0;
+#X connect 12 0 0 0;
+#X connect 13 0 0 0;
+#X connect 14 0 0 0;
+#X connect 15 0 0 0;
+#X restore 396 43 pd basic;
+#X obj 396 65 s \$0-execScript;
+#N canvas 0 30 798 854 Variables 0;
+#X text 75 39 test using variables:;
+#X text 156 90 test using variables as lists:;
+#X text 208 143 try reading a variable that does not exist;
+#X text 260 186 Inc increments its parameter (Dec decreases it);
+#X obj 54 607 outlet;
+#X msg 228 357 list Var ( list 7 8 9 ) Print ( Get ( list ) ) Set (
+list 1 2 3 ) Print ( Pack ( paket Get ( list ) ) ) Out ( );
+#X msg 309 408 list Var ( list -1 -2 -3 ) Print ( GetA ( list -1 )
+) SetA ( list 1 100 ) Print ( Get ( list ) ) Out ( );
+#X text 306 389 test using variables as lists:;
+#X msg 362 462 list Print ( Get ( list ) ) Out ( );
+#X text 358 442 try reading a variable that does not exist;
+#X msg 413 504 list Var ( var 4 ) Print ( Inc ( var ) Get ( var ) )
+Out ( );
+#X text 410 485 Inc increments its parameter (Dec decreases it);
+#X msg 78 58 list Var ( list 7 8 9 ) Print ( $ ( list ) ) = ( list
+1 2 3 ) Print ( Pack ( paket $ ( list ) ) ) Out ( );
+#X msg 159 109 list Var ( list -1 -2 -3 ) Print ( $[] ( list -1 ) )
+=[] ( list 1 100 ) Print ( $ ( list ) ) Out ( );
+#X msg 212 163 list Print ( $ ( list ) ) Out ( );
+#X msg 263 205 list Var ( var 4 ) Print ( +1 ( var ) $ ( var ) ) Out
+( );
+#X text 287 310 old (deprecated syntax):;
+#X connect 5 0 4 0;
+#X connect 6 0 4 0;
+#X connect 8 0 4 0;
+#X connect 10 0 4 0;
+#X connect 12 0 4 0;
+#X connect 13 0 4 0;
+#X connect 14 0 4 0;
+#X connect 15 0 4 0;
+#X restore 395 206 pd Variables;
+#N canvas 0 30 798 854 Sets 0;
+#X msg 349 309 list Var ( set SetOp ( 1 2 3 union 1 8 9 ) ) Print (
+set Get ( set ) ) Print ( contains? Contains ( 100 Get ( set ) ) )
+Out ( );
+#X msg 397 376 list Print ( SetOp ( 0 1 2 3 4 5 6 7 8 9 10 11 minus
+1 3 7 ) ) Out ( );
+#X text 349 279 set operations syntax: SetOp ( s0 s1 ... <op> t0 t1
+... ) \; <op> one of "union" \, "minus" \, "contains";
+#X text 64 105 sets are lists. You can apply set operations on lists.
+If they have duplicates \, sort them out by using "Setify" first.;
+#X msg 282 224 list If ( Card ( 1 2 3 ) Print ( list contains something!
+) ) If ( ! ( Card ( ) ) Print ( the second doesnt! ) ) Out ( );
+#X msg 400 526 list Print ( CalcTransp ( 0 1 6 7 | 0 1 6 7 ) ) Out
+( );
+#X text 398 496 given two sets s and t "CalcTransp" calculates all
+values \, so that "s disjoint t == empty set" is true;
+#X msg 196 181 list Print ( Card ( 1 2 3 ) ) Out ( );
+#X text 192 163 Card gives you the number of elements in a list;
+#X obj 103 561 outlet;
+#X text 26 19 Operations on Sets of numbers:;
+#X msg 67 139 list Print ( Setify ( 1 3 4 2 5 1 1 2 ) ) Out ( );
+#X connect 0 0 9 0;
+#X connect 1 0 9 0;
+#X connect 4 0 9 0;
+#X connect 5 0 9 0;
+#X connect 7 0 9 0;
+#X connect 11 0 9 0;
+#X restore 394 259 pd Sets;
+#N canvas 0 30 798 854 conditional 0;
+#X text 41 33 test conditionality;
+#X msg 276 163 list Print ( and && ( 1 0 ) ) Print ( or || ( 1 0 )
+) Print ( not ! ( 1 ) ) Out ( );
+#X msg 120 92 list If ( == ( 1 2 ) Print ( hallo ) ) Out ( );
+#X msg 168 122 list If ( != ( 1 2 ) Print ( hallo ) ) Out ( );
+#X text 520 67 0 is considered FALSE \; 1 is considered BOOL \;;
+#X obj 108 317 outlet;
+#X msg 42 51 list If ( + ( 0 1 ) Print ( execute ) ) If ( - ( 3 3 )
+Print ( dont execute ) ) Out ( );
+#X connect 1 0 5 0;
+#X connect 2 0 5 0;
+#X connect 3 0 5 0;
+#X connect 6 0 5 0;
+#X restore 393 146 pd conditional;
+#N canvas 0 30 798 854 Random 0;
+#X msg 324 124 list Print ( RndI ( 1 6 ) ) Out ( );
+#X msg 39 50 list Print ( Rnd ( -1 1 ) ) Out ( );
+#X obj 89 292 outlet;
+#X msg 373 197 list Print ( MinMax ( -5 5 Rnd ( 0 1 ) ) ) Out ( );
+#X text 37 25 float numbers from a range;
+#X text 321 105 pseudorandom integers from a specific range;
+#X connect 0 0 2 0;
+#X connect 1 0 2 0;
+#X connect 3 0 2 0;
+#X restore 524 38 pd Random;
+#N canvas 0 30 798 854 sgPack 0;
+#X text 20 29 test constructing sgPacks:;
+#X msg 24 46 list Print ( Pack ( testPack Pack ( SubPack 1 2 3 ) Hussa
+Bla ) ) Out ( );
+#X text 489 14 read sgPacks:;
+#X obj 80 234 s \$0-execScript;
+#X obj 565 192 s \$0-execScript;
+#X obj 520 129 s \$0-execScript;
+#X obj 490 72 s \$0-execScript;
+#X text 46 340 sgData:;
+#X obj 77 430 s \$0-execScript;
+#X obj 203 506 s \$0-execScript;
+#X obj 278 589 s \$0-execScript;
+#X text 234 134 important sgPackFromHuman;
+#X msg 92 96 list Print ( sdPack_FromHuman ( #[ pack ( 1 2 3 subPack
+( bli bla blubb ) subPack2 ( -1 -2 -3 ) ) #] ) ) Out ( );
+#X msg 490 37 list Print ( sdPack_Type ( pack 3 bli bla blubb ) ) Out
+( );
+#X msg 520 94 list Print ( sdPack_Count ( pack 3 bli bla blubb ) )
+Out ( );
+#X msg 565 157 list Print ( sdPack_Params ( pack 3 bli bla blubb )
+) Out ( );
+#X msg 78 382 list Var ( event sdPack_FromHuman ( #[ time ( 1 ) pitch
+( 60 ) articul ( 0.1 ) #] ) ) Print ( sdData_FilterAccept ( articul
+Get ( event ) ) ) Out ( );
+#X text 117 359 sdData_FilterAccept;
+#X msg 205 457 list Var ( event sdPack_FromHuman ( #[ time ( 1 ) pitch
+( 60 ) articul ( 0.1 ) #] ) ) Print ( sdData_First ( Get ( event )
+) ) Out ( );
+#X msg 313 523 list Var ( event sdPack_FromHuman ( #[ time ( 1 ) pitch
+( 60 ) articul ( 0.1 ) #] ) ) Print ( sdData_Rest ( Get ( event ) )
+) Out ( );
+#X text 199 439 sgData_First;
+#X text 308 506 sgData_Rest;
+#X connect 1 0 3 0;
+#X connect 12 0 3 0;
+#X connect 13 0 6 0;
+#X connect 14 0 5 0;
+#X connect 15 0 4 0;
+#X connect 16 0 8 0;
+#X connect 18 0 9 0;
+#X connect 19 0 10 0;
+#X restore 528 104 pd sgPack \, sgData;
+#X obj 393 168 s \$0-execScript;
+#X obj 395 229 s \$0-execScript;
+#X obj 394 282 s \$0-execScript;
+#X obj 399 421 s \$0-execScript;
+#X text 382 347 sgScale: a scale with linearly increasing intervals
+;
+#X msg 399 397 list Print ( sgScale ( 6 2 1 11 ) ) Out ( );
+#X text 396 367 arguments: elCount \, stepAdd \, step0 \, startVal
+;
+#X obj 524 62 s \$0-execScript;
+#X obj 152 281 sdScript;
+#X text 27 42 docu:;
+#X obj 534 181 s \$0-execScript;
+#N canvas 0 30 798 854 delay 0;
+#X obj 88 298 outlet;
+#X text 75 39 test Delay ( time );
+#X msg 78 58 list Print ( wait 5s ... ) Out ( ) Delay ( 5000 ) Print
+( done ) Out ( );
+#X connect 2 0 0 0;
+#X restore 534 158 pd delay;
+#N canvas 0 30 798 854 multiple 0;
+#X msg 94 182 set PARAM \$1;
+#X floatatom 94 160 5 0 0 0 - - -;
+#X msg 597 126 list ClearMain ( );
+#X msg 537 78 list VarMain ( PARAM 0 );
+#X obj 209 232 sdScript PARAM, f 17;
+#X obj 209 255 print;
+#X msg 574 102 list ClearMain ( ) VarMain ( PARAM 7 8 9 );
+#X text 322 132 run the "bang" program;
+#X text 387 181 set the "bang" program;
+#X msg 327 150 bang;
+#X obj 307 482 sdScript PARAM, f 16;
+#X text 18 22 global variables survive between multiple runs and can
+be accessed by all programs.;
+#X text 91 139 directly set global variables;
+#X obj 103 397 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 307 505 print;
+#X obj 344 420 list prepend prog_set bang;
+#X obj 344 443 list trim;
+#X text 338 343 the right inlet is only a shortcut to set the "bang"
+program \, which can be also done explicitely;
+#X text 517 430 add another program called "sub";
+#X text 86 374 execute the "bang" program;
+#X obj 518 447 loadbang;
+#X msg 344 384 list Print ( bang: hello ) Out ( ) Call ( sub ) Print
+( done ) Out ( );
+#X msg 518 469 prog_set sub Print ( sub: hello ) Out ( );
+#X obj 252 771 sdScript PARAM, f 16;
+#X obj 79 678 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X obj 252 794 print;
+#X obj 289 709 list prepend prog_set bang;
+#X obj 289 732 list trim;
+#X text 62 655 execute the "bang" program;
+#X msg 289 683 list Print ( start ) Out ( ) Delay ( 1000 ) Call ( bang
+);
+#X text 55 593 a program can allso call itself \, which is called "recursion".
+This way we can repeat an action (possibly endless);
+#X msg 425 784 list;
+#X text 423 751 sending another (e.g. empty) program stops all programs
+(including delays);
+#X msg 380 205 list Print ( $ ( PARAM ) ) Print ( *[] ( $ ( PARAM )
+2 ) ) Out ( list );
+#X msg 385 245 list Print ( list $ ( PARAM ) ) Out ( );
+#X connect 0 0 4 0;
+#X connect 1 0 0 0;
+#X connect 4 0 5 0;
+#X connect 9 0 4 0;
+#X connect 10 0 14 0;
+#X connect 13 0 10 0;
+#X connect 15 0 16 0;
+#X connect 16 0 10 0;
+#X connect 20 0 22 0;
+#X connect 21 0 15 0;
+#X connect 22 0 10 0;
+#X connect 23 0 25 0;
+#X connect 24 0 23 0;
+#X connect 26 0 27 0;
+#X connect 27 0 23 0;
+#X connect 29 0 26 0;
+#X connect 31 0 26 0;
+#X connect 33 0 4 1;
+#X connect 34 0 4 1;
+#X restore 119 394 pd multiple programs;
+#X obj 396 117 s \$0-execScript;
+#N canvas 0 30 798 854 array 0;
+#X obj 88 298 outlet;
+#X text 46 64 AddA ( a b1 b2 ... ) calculates (a+b1) (a+b2) ...;
+#X text 68 88 (analogeous for MulA \, ... );
+#X msg 94 119 list Print ( %[] ( 12 sgScale ( 6 1 1 0 ) ) ) Out ( )
+;
+#X msg 96 144 list Print ( +[] ( 12 13 14 ) ) Out ( );
+#X connect 3 0 0 0;
+#X connect 4 0 0 0;
+#X restore 396 94 pd array arithmetic;
+#X text 88 369 multiple programs \, recursion \, ...:;
+#X text 44 59 left inlet:;
+#X text 59 81 set <global_var> val1 ...;
+#X text 45 118 right inlet:;
+#X text 59 136 just a shortcut for "prog_set bang ...";
+#X obj 26 22 sdScript glob_var1 glob_var2;
+#X text 59 96 prog_set <prog_name> stmt1 ...;
+#X connect 1 0 2 0;
+#X connect 2 0 18 0;
+#X connect 2 1 18 1;
+#X connect 3 0 4 0;
+#X connect 5 0 11 0;
+#X connect 6 0 12 0;
+#X connect 7 0 10 0;
+#X connect 8 0 17 0;
+#X connect 15 0 13 0;
+#X connect 18 0 0 0;
+#X connect 21 0 20 0;
+#X connect 24 0 23 0;

@@ -2,6 +2,8 @@
 #define _GLOBAL_H_
 
 #include "Basic.h"
+#include "LinkedList.h"
+#include "DynArray.h"
 
 #include "m_pd.h"
 
@@ -12,6 +14,25 @@
 	#define DB_PRINT(message, ...)\
 	post(message, ## __VA_ARGS__)
 #endif
+
+// common container types:
+
+DECL_LIST(AtomList,AtomListEl,t_atom,getbytes,freebytes,freebytes)
+DEF_LIST(AtomList,AtomListEl,t_atom,getbytes,freebytes,freebytes);
+
+// pointers to atoms are considered references, therefore not deleted automatically:
+#pragma GCC diagnostic ignored "-Wunused-value"
+DECL_LIST(AtomPointerList,ElementAtomPointer,t_atom,getbytes,freebytes,)
+DEF_LIST(AtomPointerList,ElementAtomPointer,t_atom,getbytes,freebytes,);
+#pragma GCC diagnostic pop
+
+DECL_DYN_ARRAY(AtomDynA,t_atom,getbytes,freebytes)
+DEF_DYN_ARRAY(AtomDynA,t_atom,getbytes,freebytes)
+
+DECL_BUFFER(AtomBuf,t_atom,getbytes,freebytes)
+DEF_BUFFER(AtomBuf,t_atom,getbytes,freebytes)
+
+
 
 INLINE int compareAtoms(t_atom* atoml, t_atom* atomr)
 {
@@ -32,5 +53,13 @@ INLINE int compareAtoms(t_atom* atoml, t_atom* atomr)
 	return 0;
 }
 
+INLINE BOOL atomEqualsString(t_atom* pAtom, char* string)
+{
+	char buf[256];
+	atom_string(pAtom,buf,256);
+	if(!strncmp(buf,string,256))
+		return TRUE;
+	return FALSE;
+}
 
 #endif

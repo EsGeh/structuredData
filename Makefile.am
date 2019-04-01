@@ -6,9 +6,10 @@
 
 PATH_GLOBAL = src/global
 PATH_CODE = src/structuredData
+PATH_SCRIPT = src/sdScript
 PATH_PD_OBJS = pd_objs
 
-AM_CFLAGS = -Wall -fpic -std=c99 -Winline -fgnu89-inline -I$(top_srcdir)/$(PATH_GLOBAL)
+AM_CFLAGS = -Wall -fpic -std=c99 -Winline -fgnu89-inline -I$(top_srcdir)/$(PATH_GLOBAL) -I$(top_srcdir)/$(PATH_SCRIPT)
 
 # by default, copy all to the prefix dir, no subdirs
 libdir = $(prefix)
@@ -37,7 +38,8 @@ data_DATA = \
   $(PATH_PD_OBJS)/doc/modules/sdObjState-help.pd \
   $(PATH_PD_OBJS)/doc/modules/sdObjState_example.pd \
   $(PATH_PD_OBJS)/doc/modules/sdPack-help.pd \
-  $(PATH_PD_OBJS)/doc/modules/sdUtils-help.pd
+  $(PATH_PD_OBJS)/doc/modules/sdUtils-help.pd \
+	$(PATH_PD_OBJS)/doc/sdScript-help.pd
 
 structuredDataC_la_SOURCES = \
   $(PATH_CODE)/structuredData.c $(PATH_CODE)/structuredData.h \
@@ -47,6 +49,10 @@ structuredDataC_la_SOURCES = \
   $(PATH_CODE)/sdData.c $(PATH_CODE)/sdData.h \
   $(PATH_CODE)/sdEvent.c $(PATH_CODE)/sdEvent.h \
   $(PATH_CODE)/sdProperties.c $(PATH_CODE)/sdProperties.h \
-  $(PATH_CODE)/sdObjState.c $(PATH_CODE)/sdObjState.h
+  $(PATH_CODE)/sdObjState.c $(PATH_CODE)/sdObjState.h \
+	$(PATH_SCRIPT)/sdScriptObj.c $(PATH_SCRIPT)/sdScriptObj.h \
+	$(PATH_SCRIPT)/sdScript.c $(PATH_SCRIPT)/sdScript.h \
+	$(PATH_SCRIPT)/SymbolTable.c $(PATH_SCRIPT)/SymbolTable.h \
+	$(PATH_SCRIPT)/Commands.c $(PATH_SCRIPT)/Commands.h
 
 structuredDataC_la_LDFLAGS = -module

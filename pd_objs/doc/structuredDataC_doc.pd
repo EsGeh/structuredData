@@ -10,3 +10,5 @@
 #X obj 48 368 sdEvent-help;
 #X obj 48 453 sdObjState-help;
 #X obj 48 308 sdPackMatch-help;
+#X obj 48 521 sdScript-help;
+#X text 31 499 embeddable script language;
