@@ -122,12 +122,10 @@ typedef struct s_RuntimeInfo {
 	int input_pos;
 
 	// binding utilities:
-	// int bind_start_pos;
 	int bind_start_level;
 	// if bind sym, the buffer to take the name to bind to ("" otherwise)
 	CharBuf bind_sym;
 
-	// AtomDynA bind_ret;
 	BoundData bind_ret;
 	
 	int rec_depth;
@@ -401,9 +399,7 @@ void packMatch_input(
 			.input = argv,
 			.input_size = argc,
 			.input_pos = 0,
-			// 
 			.bind_start_level = -1,
-			// .bind_start_pos = -1,
 			.rec_depth = 0
 		};
 		CharBuf_init( & rt.bind_sym, 1024 );
@@ -415,13 +411,6 @@ void packMatch_input(
 				)
 		)
 		{
-			/*
-			SETFLOAT(
-					& AtomDynA_get_array( & rt.bind_ret )[1],
-					AtomDynA_get_size( & rt.bind_ret ) - 2
-			);
-			*/
-
 			AtomDynA bind_ret_list;
 			AtomDynA_init( & bind_ret_list );
 
@@ -967,13 +956,6 @@ BOOL pack_mode(
 	{
 		if( !lexer_match_end_bind( rt ) )
 			return FALSE;
-		/*
-		// pop the dummy bind_sym...
-		AtomDynA_set_size(
-			& rt->bind_ret,
-			AtomDynA_get_size( & rt->bind_ret ) - 2
-		);
-		*/
 	}
 
 	// 1. read all packages in the pattern:
@@ -1044,7 +1026,6 @@ BOOL pack_mode_read_pattern(
 		);
 		int depth = 0;
 		if( strcmp( CharBuf_get_array( & rt->bind_sym ), "") )
-		// if( rt->bind_start_pos != -1 )
 		{
 			strcpy(
 					CharBuf_get_array( &subPatternInfo->bind_sym ) ,
@@ -1115,13 +1096,6 @@ BOOL pack_mode_read_pattern(
 		)
 		{
 			if( !lexer_match_end_bind( rt ) ) return FALSE;
-			/*
-			// pop the dummy bind_sym...
-			AtomDynA_set_size(
-				& rt->bind_ret,
-				AtomDynA_get_size( & rt->bind_ret ) - 2
-			);
-			*/
 		}
 
 	}
@@ -1170,7 +1144,6 @@ BOOL pack_mode_match_input(
 		memcpy( &rt_temp, rt, sizeof( RuntimeInfo ) );
 
 		rt_temp.rec_depth ++;
-		// rt_temp.bind_start_pos = -1;
 		CharBuf_init( & rt_temp.bind_sym, 1024);
 		strcpy( CharBuf_get_array( & rt_temp.bind_sym ), "" );
 		rt_temp.bind_start_level = -1;
@@ -1178,16 +1151,6 @@ BOOL pack_mode_match_input(
 		while( pEl != NULL )
 		{
 			BoundData_init( & rt_temp.bind_ret, BOUNDDATA_SIZE );
-			/*AtomDynA_init( & rt_temp.bind_ret );
-			AtomDynA_append(
-					& rt_temp.bind_ret, 
-					AtomDynA_get_array( &rt->bind_ret )[0]
-			);
-			AtomDynA_append(
-					& rt_temp.bind_ret, 
-					AtomDynA_get_array( &rt->bind_ret )[1]
-			);
-			*/
 
 			SubPatternInfo* subPatternInfo = pEl->pData;
 			rt_temp.pattern_pos = subPatternInfo->pattern_pos;
@@ -1217,7 +1180,6 @@ BOOL pack_mode_match_input(
 						& rt_temp.bind_ret
 				);
 				BoundData_exit( & rt_temp.bind_ret );
-				//AtomDynA_exit( & rt_temp.bind_ret );
 
 				SubPatternsList_del(
 						expected_packages,
@@ -1236,13 +1198,11 @@ BOOL pack_mode_match_input(
 
 			CharBuf_exit( & rt_temp.bind_sym );
 			BoundData_exit( & rt_temp.bind_ret );
-			//AtomDynA_exit( & rt_temp.bind_ret );
 		}
 
 		BOOL
 			temp_binding =
 				! strcmp( CharBuf_get_array( & rt->bind_sym ), "" )
-				// rt->bind_start_pos == -1
 				&&
 				!matched
 				&&
@@ -1250,17 +1210,6 @@ BOOL pack_mode_match_input(
 				;
 		memcpy( &rt_temp, rt, sizeof( RuntimeInfo ) );
 		BoundData_init( & rt_temp.bind_ret, BOUNDDATA_SIZE );
-		/*
-		AtomDynA_init( & rt_temp.bind_ret );
-		AtomDynA_append(
-				& rt_temp.bind_ret, 
-				AtomDynA_get_array( &rt->bind_ret )[0]
-		);
-		AtomDynA_append(
-				& rt_temp.bind_ret, 
-				AtomDynA_get_array( &rt->bind_ret )[1]
-		);
-		*/
 		if( temp_binding )
 		{
 			match_db_print(
@@ -1279,7 +1228,6 @@ BOOL pack_mode_match_input(
 					"internal error!"
 				);
 				BoundData_exit( & rt_temp.bind_ret );
-				//AtomDynA_exit( & rt_temp.bind_ret );
 				SubPatternsList_exit( expected_packages );
 				return FALSE;
 			}
@@ -1305,7 +1253,6 @@ BOOL pack_mode_match_input(
 					"internal error!"
 				);
 				BoundData_exit( & rt_temp.bind_ret );
-				//AtomDynA_exit( & rt_temp.bind_ret );
 				SubPatternsList_exit( expected_packages );
 				return FALSE;
 			}
@@ -1317,7 +1264,6 @@ BOOL pack_mode_match_input(
 		rt->input_pos = rt_temp.input_pos;
 		rt->pattern_pos = rt_temp.pattern_pos;
 		BoundData_exit( & rt_temp.bind_ret );
-		//AtomDynA_exit( & rt_temp.bind_ret );
 	}
 	if( !SubPatternsList_is_empty( expected_packages ) )
 	{
@@ -1393,10 +1339,6 @@ t_pattern_atom_type lexer_pattern_peek(
 	else if( atom_getsymbol( &rt->pattern[ pattern_pos ] ) == gensym(")") )
 		return RIGHT_PARENT;
 
-	/*
-	CharBuf_get_array( & rt->bind_sym )[0] = '\0';
-	*/
-
 	char buf[CharBuf_get_size( & rt->bind_sym )];
 	atom_string( & rt->pattern[ pattern_pos], buf, CharBuf_get_size( & rt->bind_sym ) );
 	int len = strlen( buf );
@@ -1409,7 +1351,6 @@ t_pattern_atom_type lexer_pattern_peek(
 	// ?<bind_sym>
 	else if( len >= 1 && buf[0] == '?' )
 	{
-		//strcat( CharBuf_get_array( & rt->bind_sym ) , & buf[1] );
 		return ANY_SYM_BIND;
 	}
 	// <bind_sym>#[
@@ -1418,8 +1359,6 @@ t_pattern_atom_type lexer_pattern_peek(
 			&& buf[pos_sep+1] == '['
 	)
 	{
-		//buf[pos_sep] = '\0';
-		//strcat( CharBuf_get_array( & rt->bind_sym ) , buf );
 		return START_BIND;
 	}
 	// #]
@@ -1557,12 +1496,6 @@ BOOL lexer_match_next_any(
 			)
 	)
 	{
-		/*
-		match_db_print(
-				rt,
-				"binding"
-		);
-		*/
 		if( !lexer_append_to_bind( rt, & rt->input[ rt->input_pos ] ) ) return FALSE;
 	}
 
@@ -1704,7 +1637,6 @@ BOOL lexer_input_next_tok(
 	if(
 			bind
 			&& strcmp( CharBuf_get_array( & rt->bind_sym ), "" )
-			// && rt->bind_start_pos != -1
 	)
 	{
 
@@ -1725,7 +1657,6 @@ BOOL lexer_match_start_bind(
 	if( pattern_peek == START_BIND )
 	{
 		if( strcmp( CharBuf_get_array( & rt->bind_sym ), "" ) )
-		// if( rt->bind_start_pos != -1 )
 		{
 			match_error(
 					rt,
@@ -1767,7 +1698,6 @@ BOOL lexer_match_end_bind(
 			case END_BIND:
 			{
 				if( !strcmp( CharBuf_get_array( & rt->bind_sym ), "" ) )
-				// if(  rt->bind_start_pos == -1 )
 				{
 					match_error(
 							rt,
@@ -1803,7 +1733,6 @@ BOOL lexer_set_start_bind(
 )
 {
 	if( !strcmp( CharBuf_get_array( & rt->bind_sym ), "" ) )
-	// if( rt->bind_start_pos == -1 )
 	{
 		match_db_print(
 				rt,
@@ -1814,10 +1743,6 @@ BOOL lexer_set_start_bind(
 				CharBuf_get_array( & rt-> bind_sym ),
 				bind_sym
 		);
-		/*
-		rt->bind_start_pos =
-			AtomDynA_get_size( & rt -> bind_ret );
-		*/
 		rt->bind_start_level = rt->rec_depth;
 	}
 	return TRUE;
@@ -1830,7 +1755,6 @@ BOOL lexer_set_end_bind(
 {
 	//
 	if( strcmp( CharBuf_get_array( & rt->bind_sym ), "" ) )
-	// if(  rt->bind_start_pos != -1 )
 	{
 		if( rt->bind_start_level != rt->rec_depth )
 		{
@@ -1847,7 +1771,6 @@ BOOL lexer_set_end_bind(
 				CharBuf_get_array( & rt->bind_sym )
 		);
 		strcpy( CharBuf_get_array( & rt->bind_sym ), "" );
-		//rt->bind_start_pos = -1;
 		rt->bind_start_level = -1;
 	}
 	return TRUE;
@@ -1860,7 +1783,6 @@ BOOL lexer_append_to_bind(
 )
 {
 	if( !strcmp( CharBuf_get_array( & rt->bind_sym ), "" ) )
-	// if(  rt->bind_start_pos == -1 )
 	{
 		match_error(
 				rt,
@@ -1890,16 +1812,6 @@ BOOL lexer_append_to_bind(
 			entry,
 			*a
 	);
-	/*
-	AtomDynA_append(
-			& rt->bind_ret,
-			*a
-	);
-	SETFLOAT(
-			& AtomDynA_get_array( & rt->bind_ret )[ rt->bind_start_pos + 1 ],
-			AtomDynA_get_size( & rt->bind_ret ) - rt->bind_start_pos - 2
-	);
-	*/
 	return TRUE;
 }
 
