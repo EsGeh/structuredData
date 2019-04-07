@@ -32,6 +32,15 @@ DEF_DYN_ARRAY(AtomDynA,t_atom,getbytes,freebytes)
 DECL_BUFFER(AtomBuf,t_atom,getbytes,freebytes)
 DEF_BUFFER(AtomBuf,t_atom,getbytes,freebytes)
 
+DECL_BUFFER(CharBuf, char, getbytes, freebytes)
+DEF_BUFFER(CharBuf, char, getbytes, freebytes)
+
+// used by maps of type "t_symbol* -> ?"
+INLINE BOOL COMPARE_SYMBOLS( t_symbol** k1, t_symbol** k2 )
+{
+	return *k1 == *k2;
+}
+
 
 
 INLINE int compareAtoms(t_atom* atoml, t_atom* atomr)

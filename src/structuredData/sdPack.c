@@ -18,7 +18,6 @@ static t_class* packFromHuman_class;
 static t_class* packFilter_class;;
 static t_class* packToMessage_class;;
 static t_class* packFromMessage_class;;
-static t_class* packMatch_class;;
 
 t_class* register_pack(
 	t_symbol* className
@@ -464,8 +463,6 @@ int packFromHuman_fromHuman(
 		}
 
 		// '(' indicates a "pdPack": <packname> ( ... )
-		//                                      /\
-		//                                      ||
 		if(
 			(*index) < argc
 			&&

@@ -19,8 +19,8 @@
 // variable name -> value(s)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
-DECL_MAP(Scope,t_symbol*,AtomDynA,getbytes,freebytes,DEL_VAR,HASH_SYMBOL)
-DEF_MAP(Scope,t_symbol*,AtomDynA,getbytes,freebytes,DEL_VAR,HASH_SYMBOL)
+DECL_MAP(Scope,t_symbol*,AtomDynA,getbytes,freebytes,DEL_VAR,HASH_SYMBOL, COMPARE_SYMBOLS)
+DEF_MAP(Scope,t_symbol*,AtomDynA,getbytes,freebytes,DEL_VAR,HASH_SYMBOL, COMPARE_SYMBOLS)
 #pragma GCC diagnostic pop
 
 #define DEL_SCOPE(scope,size) \
@@ -30,8 +30,8 @@ DEF_MAP(Scope,t_symbol*,AtomDynA,getbytes,freebytes,DEL_VAR,HASH_SYMBOL)
 // program name -> Scope
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
-DECL_MAP(SymbolTable,t_symbol*,Scope,getbytes,freebytes,DEL_SCOPE,HASH_SYMBOL)
-DEF_MAP(SymbolTable,t_symbol*,Scope,getbytes,freebytes,DEL_SCOPE,HASH_SYMBOL)
+DECL_MAP(SymbolTable,t_symbol*,Scope,getbytes,freebytes,DEL_SCOPE,HASH_SYMBOL, COMPARE_SYMBOLS)
+DEF_MAP(SymbolTable,t_symbol*,Scope,getbytes,freebytes,DEL_SCOPE,HASH_SYMBOL, COMPARE_SYMBOLS)
 #pragma GCC diagnostic pop
 
 SymbolTable* symtab_init();

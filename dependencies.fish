@@ -18,4 +18,4 @@ set fishshell_cmd_opts \
 set c_container_types \
 	c_container_types \
 	https://github.com/EsGeh/c_container_types.git \
-	29b9df7446bb934c37cbd4ee7c2b4d4bd485411a
+	1dd08da6c24fb7e9fc062e48b5760b406810be5f

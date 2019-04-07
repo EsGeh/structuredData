@@ -1,14 +1,13 @@
 #include "sdPackMatch.h"
-#include "LinkedList.h"
-#include "Buffer.h"
-#include "DynArray.h"
 #include "Global.h"
+#include "Map.h"
 
 
 #include <string.h>
 
 #include "m_pd.h"
 
+#define BOUNDDATA_SIZE 1024
 
 static t_class* packMatch_class;;
 
@@ -24,11 +23,6 @@ void sdPackMatch_setup()
 //----------------------------------
 // packMatch
 //----------------------------------
-
-// primitive container types:
-
-DECL_BUFFER(CharBuf, char, getbytes, freebytes)
-DEF_BUFFER(CharBuf, char, getbytes, freebytes)
 
 typedef struct
 {
@@ -99,6 +93,21 @@ typedef struct {
 DECL_LIST(SubPatternsList, SubPatternsListEl, SubPatternInfo, getbytes, freebytes, FREE_SUBPATTERN_INFO)
 DEF_LIST(SubPatternsList, SubPatternsListEl, SubPatternInfo, getbytes, freebytes, FREE_SUBPATTERN_INFO)
 
+#define DEL_ATOM_DYNA( x , size ) \
+{ \
+	AtomDynA_exit( x ); \
+	freebytes( x, size ); \
+}
+
+#define HASH_SYMBOL( x ) ((unsigned int ) x)
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
+DECL_MAP(BoundData,t_symbol*, AtomDynA,getbytes, freebytes, DEL_ATOM_DYNA, HASH_SYMBOL, COMPARE_SYMBOLS)
+DEF_MAP(BoundData,t_symbol*, AtomDynA,getbytes, freebytes, DEL_ATOM_DYNA, HASH_SYMBOL, COMPARE_SYMBOLS)
+#pragma GCC diagnostic pop
+
+
 // all the variables needed during "runtime":
 typedef struct s_RuntimeInfo {
 	t_packMatch* x;
@@ -113,12 +122,13 @@ typedef struct s_RuntimeInfo {
 	int input_pos;
 
 	// binding utilities:
+	// int bind_start_pos;
 	int bind_start_level;
-	int bind_start_pos;
-	// if bind sym, the buffer to take the name to bind to:
+	// if bind sym, the buffer to take the name to bind to ("" otherwise)
 	CharBuf bind_sym;
 
-	AtomDynA bind_ret;
+	// AtomDynA bind_ret;
+	BoundData bind_ret;
 	
 	int rec_depth;
 } RuntimeInfo;
@@ -126,6 +136,11 @@ typedef struct s_RuntimeInfo {
 
 BOOL match(
 		RuntimeInfo* rt
+);
+
+void bind_ret_to_atom_list(
+		BoundData* x,
+		AtomDynA* ret
 );
 
 // actually try to match the input with the pattern
@@ -167,7 +182,7 @@ BOOL pack_mode_match_input(
 
 void pack_mode_merge_bound_symbols(
 		RuntimeInfo* rt,
-		AtomDynA new_bound_symbols
+		BoundData* new_bound_symbols
 );
 
 // ************************
@@ -252,7 +267,7 @@ BOOL lexer_set_end_bind(
 );
 
 // ignorantly append to bind return list
-void lexer_append_to_bind(
+BOOL lexer_append_to_bind(
 		RuntimeInfo* rt,
 		t_atom* a
 );
@@ -372,6 +387,7 @@ void packMatch_input(
 	t_atom *argv
 )
 {
+	DB_PRINT( "packMatch_input" );
 	BOOL match_found = FALSE;
 	LIST_FORALL_BEGIN(PatternList, PatternEl, PatternInfo, & x->patterns, i_pattern, patternEl)
 		PatternInfo* patternInfo = patternEl->pData;
@@ -387,53 +403,72 @@ void packMatch_input(
 			.input_pos = 0,
 			// 
 			.bind_start_level = -1,
-			.bind_start_pos = -1,
+			// .bind_start_pos = -1,
 			.rec_depth = 0
 		};
-		AtomDynA_init( & rt.bind_ret );
 		CharBuf_init( & rt.bind_sym, 1024 );
-		{
-			t_atom pattern_name_atom;
-			SETSYMBOL( & pattern_name_atom, patternInfo->name );
-			AtomDynA_append(
-					& rt.bind_ret,
-					pattern_name_atom
-			);
-		}
-		{
-			t_atom size;
-			SETFLOAT( & size, 0 );
-			AtomDynA_append(
-					& rt.bind_ret,
-					size
-			);
-		}
+		strcpy( CharBuf_get_array( & rt.bind_sym ), "" );
+		BoundData_init( & rt.bind_ret, BOUNDDATA_SIZE);
 		if(
 				match(
 					&rt
 				)
 		)
 		{
+			/*
 			SETFLOAT(
 					& AtomDynA_get_array( & rt.bind_ret )[1],
 					AtomDynA_get_size( & rt.bind_ret ) - 2
 			);
-	
+			*/
+
+			AtomDynA bind_ret_list;
+			AtomDynA_init( & bind_ret_list );
+
+			{
+				t_atom atom;
+				SETSYMBOL( & atom, rt.pattern_name );
+				AtomDynA_append(
+						& bind_ret_list,
+						atom
+				);
+			}
+			{
+				t_atom atom;
+				SETSYMBOL( & atom, gensym("size") );
+				AtomDynA_append(
+						& bind_ret_list,
+						atom
+				);
+			}
+
+			bind_ret_to_atom_list(
+				& rt.bind_ret,
+				& bind_ret_list
+			);
+
+			SETFLOAT(
+					& AtomDynA_get_array( & bind_ret_list )[1],
+					AtomDynA_get_size( & bind_ret_list ) - 2
+			);
+
 			outlet_list(
 				x->outlet,
 				& s_list,
-				AtomDynA_get_size( &rt.bind_ret ),
-				AtomDynA_get_array( &rt.bind_ret )
+				AtomDynA_get_size( &bind_ret_list ),
+				AtomDynA_get_array( &bind_ret_list )
 			);
+			AtomDynA_exit( & bind_ret_list );
 			match_found = TRUE;
 		}
 		CharBuf_exit( & rt.bind_sym );
-		AtomDynA_exit( & rt.bind_ret );
-		LIST_FORALL_END(PatternList, PatternEl, PatternInfo, & x->patterns, i_pattern, patternEl)
+		BoundData_exit( & rt.bind_ret );
+	LIST_FORALL_END(PatternList, PatternEl, PatternInfo, & x->patterns, i_pattern, patternEl)
 	if( !match_found )
 	outlet_bang(
 			x->outlet_reject
 	);
+	DB_PRINT( "packMatch_input: done" );
 }
 
 #define match_db_print( \
@@ -493,29 +528,6 @@ void packMatch_input(
 				"'" \
 		); \
 	} \
-	char bind_buf[1024]; \
-	{ \
-		sprintf( bind_buf, "'"); \
-		for(int i=0; i< AtomDynA_get_size( & rt->bind_ret ); i++) \
-		{ \
-			t_atom* current = & AtomDynA_get_array( & rt->bind_ret )[i]; \
-			char current_buf[1024]; \
-			atom_string( current, current_buf, 1024 ); \
-			if( i != 0 ) \
-				strcat( \
-						bind_buf, \
-						" " \
-				); \
-			strcat( \
-					bind_buf, \
-					current_buf \
-			); \
-		} \
-		strcat( \
-				bind_buf, \
-				"'" \
-		); \
-	} \
  \
 	char indent_buf[256]; \
 	indent_buf[0] ='\0'; \
@@ -527,12 +539,11 @@ void packMatch_input(
 	sprintf( msg_filled, msg, ## __VA_ARGS__ ); \
  \
 	DB_PRINT( \
-			"%s%s, input (%i,%i): %s, pattern (%i,%i): %s, bind: %s: %s", \
+			"%s%s, input (%i,%i): %s, pattern (%i,%i): %s: %s", \
 			indent_buf, \
 			pattern_name_buf, \
 			rt->input_pos, rt->input_size, input_buf, \
 			rt->pattern_pos, rt->pattern_size, pattern_buf, \
-			bind_buf, \
 			msg_filled \
 	); \
 }
@@ -640,6 +651,39 @@ BOOL match(
 		return FALSE;
 	}
 	return ret;
+}
+
+void bind_ret_to_atom_list(
+		BoundData* x,
+		AtomDynA* ret
+)
+{
+	MAP_FORALL_KEYS_BEGIN(BoundData,t_symbol*,x,sym)
+		AtomDynA* content = BoundData_get( x, sym );
+		{
+			t_atom atom;
+			SETSYMBOL( & atom, sym );
+			AtomDynA_append(
+					ret,
+					atom
+			);
+		}
+		{
+			t_atom atom;
+			SETFLOAT( & atom, AtomDynA_get_size( content ) );
+			AtomDynA_append(
+					ret,
+					atom
+			);
+		}
+		for(int i=0; i< AtomDynA_get_size( content ); i++)
+		{
+			AtomDynA_append(
+					ret,
+					AtomDynA_get_array( content )[i]
+			);
+		}
+	MAP_FORALL_KEYS_END(BoundData,t_symbol*,x,sym)
 }
 
 // actually try to match the input with the pattern
@@ -898,6 +942,9 @@ BOOL pack_mode(
 )
 {
 	// we know '<bind>#[ * ...' or '* ...'
+	
+	// if the '*' is between #[ ... #], we set this
+	// variable to the name to bind to ("" otherwise)
 	CharBuf bind_arbitrary_sym;
 	CharBuf_init( & bind_arbitrary_sym, 1024);
 	CharBuf_get_array( & bind_arbitrary_sym )[0] = '\0';
@@ -920,11 +967,13 @@ BOOL pack_mode(
 	{
 		if( !lexer_match_end_bind( rt ) )
 			return FALSE;
+		/*
 		// pop the dummy bind_sym...
 		AtomDynA_set_size(
 			& rt->bind_ret,
 			AtomDynA_get_size( & rt->bind_ret ) - 2
 		);
+		*/
 	}
 
 	// 1. read all packages in the pattern:
@@ -994,7 +1043,8 @@ BOOL pack_mode_read_pattern(
 				subPatternInfo
 		);
 		int depth = 0;
-		if( rt->bind_start_pos != -1 )
+		if( strcmp( CharBuf_get_array( & rt->bind_sym ), "") )
+		// if( rt->bind_start_pos != -1 )
 		{
 			strcpy(
 					CharBuf_get_array( &subPatternInfo->bind_sym ) ,
@@ -1065,11 +1115,13 @@ BOOL pack_mode_read_pattern(
 		)
 		{
 			if( !lexer_match_end_bind( rt ) ) return FALSE;
+			/*
 			// pop the dummy bind_sym...
 			AtomDynA_set_size(
 				& rt->bind_ret,
 				AtomDynA_get_size( & rt->bind_ret ) - 2
 			);
+			*/
 		}
 
 	}
@@ -1118,12 +1170,15 @@ BOOL pack_mode_match_input(
 		memcpy( &rt_temp, rt, sizeof( RuntimeInfo ) );
 
 		rt_temp.rec_depth ++;
-		rt_temp.bind_start_pos = -1;
+		// rt_temp.bind_start_pos = -1;
+		CharBuf_init( & rt_temp.bind_sym, 1024);
+		strcpy( CharBuf_get_array( & rt_temp.bind_sym ), "" );
 		rt_temp.bind_start_level = -1;
 		BOOL matched = FALSE;
 		while( pEl != NULL )
 		{
-			AtomDynA_init( & rt_temp.bind_ret );
+			BoundData_init( & rt_temp.bind_ret, BOUNDDATA_SIZE );
+			/*AtomDynA_init( & rt_temp.bind_ret );
 			AtomDynA_append(
 					& rt_temp.bind_ret, 
 					AtomDynA_get_array( &rt->bind_ret )[0]
@@ -1132,6 +1187,8 @@ BOOL pack_mode_match_input(
 					& rt_temp.bind_ret, 
 					AtomDynA_get_array( &rt->bind_ret )[1]
 			);
+			*/
+
 			SubPatternInfo* subPatternInfo = pEl->pData;
 			rt_temp.pattern_pos = subPatternInfo->pattern_pos;
 			rt_temp.pattern_size = subPatternInfo->pattern_size;
@@ -1157,9 +1214,10 @@ BOOL pack_mode_match_input(
 				if( ! lexer_set_end_bind( & rt_temp ) ) return FALSE;
 				pack_mode_merge_bound_symbols(
 						rt,
-						rt_temp.bind_ret
+						& rt_temp.bind_ret
 				);
-				AtomDynA_exit( & rt_temp.bind_ret );
+				BoundData_exit( & rt_temp.bind_ret );
+				//AtomDynA_exit( & rt_temp.bind_ret );
 
 				SubPatternsList_del(
 						expected_packages,
@@ -1175,18 +1233,24 @@ BOOL pack_mode_match_input(
 						pEl
 				);
 			}
-			AtomDynA_exit( & rt_temp.bind_ret );
+
+			CharBuf_exit( & rt_temp.bind_sym );
+			BoundData_exit( & rt_temp.bind_ret );
+			//AtomDynA_exit( & rt_temp.bind_ret );
 		}
 
 		BOOL
 			temp_binding =
-				rt->bind_start_pos == -1
+				! strcmp( CharBuf_get_array( & rt->bind_sym ), "" )
+				// rt->bind_start_pos == -1
 				&&
 				!matched
 				&&
 				strcmp( bind_arbitrary_sym, "" )
 				;
 		memcpy( &rt_temp, rt, sizeof( RuntimeInfo ) );
+		BoundData_init( & rt_temp.bind_ret, BOUNDDATA_SIZE );
+		/*
 		AtomDynA_init( & rt_temp.bind_ret );
 		AtomDynA_append(
 				& rt_temp.bind_ret, 
@@ -1196,6 +1260,7 @@ BOOL pack_mode_match_input(
 				& rt_temp.bind_ret, 
 				AtomDynA_get_array( &rt->bind_ret )[1]
 		);
+		*/
 		if( temp_binding )
 		{
 			match_db_print(
@@ -1213,7 +1278,8 @@ BOOL pack_mode_match_input(
 					rt,
 					"internal error!"
 				);
-				AtomDynA_exit( & rt_temp.bind_ret );
+				BoundData_exit( & rt_temp.bind_ret );
+				//AtomDynA_exit( & rt_temp.bind_ret );
 				SubPatternsList_exit( expected_packages );
 				return FALSE;
 			}
@@ -1238,18 +1304,20 @@ BOOL pack_mode_match_input(
 					rt,
 					"internal error!"
 				);
-				AtomDynA_exit( & rt_temp.bind_ret );
+				BoundData_exit( & rt_temp.bind_ret );
+				//AtomDynA_exit( & rt_temp.bind_ret );
 				SubPatternsList_exit( expected_packages );
 				return FALSE;
 			}
 		}
 		pack_mode_merge_bound_symbols(
 				rt,
-				rt_temp.bind_ret
+				& rt_temp.bind_ret
 		);
 		rt->input_pos = rt_temp.input_pos;
 		rt->pattern_pos = rt_temp.pattern_pos;
-		AtomDynA_exit( & rt_temp.bind_ret );
+		BoundData_exit( & rt_temp.bind_ret );
+		//AtomDynA_exit( & rt_temp.bind_ret );
 	}
 	if( !SubPatternsList_is_empty( expected_packages ) )
 	{
@@ -1266,103 +1334,38 @@ BOOL pack_mode_match_input(
 
 void pack_mode_merge_bound_symbols(
 		RuntimeInfo* rt,
-		AtomDynA new_bound_symbols
+		BoundData* new_bound_symbols
 )
 {
 		match_db_print(
 				rt,
 				"appending..."
 		);
-
-	t_atom* new_bound_array = AtomDynA_get_array( & new_bound_symbols );
-	int new_bound_size = AtomDynA_get_size( & new_bound_symbols );
-	if(
-			new_bound_size <= 4
-	)
-		return;
-
-	// scan already bound input if it contains s.t bound to the same symbol:
-	int pos = 2;
-	t_atom* already_bound_array = AtomDynA_get_array( & rt->bind_ret );
-	while( pos < AtomDynA_get_size( & rt->bind_ret ) )
-	{
-		// walk pack wise:
-		t_symbol* pack_type = atom_getsymbol( & already_bound_array[pos+0] );
-		int pack_size = atom_getint( & already_bound_array[pos+1] );
-		{
-			if( pack_type == atom_getsymbol( & new_bound_array[2] ) )
-			{
-				match_db_print(
-						rt,
-						"found existing!"
-				);
-				int old_size =
-					AtomDynA_get_size( & rt->bind_ret );
-				AtomDynA_set_size(
-						& rt->bind_ret,
-						old_size + new_bound_size - 2 - 2
-				);
-
-				int insert_pos =
-					(pos+2+pack_size);
-				int remainder_size =
-					old_size - insert_pos;
-				// shift following content to the right:
-				t_atom* remainder = getbytes( sizeof( t_atom ) * remainder_size );
-				{
-					memcpy(
-							remainder,
-							&already_bound_array[insert_pos],
-							remainder_size * sizeof( t_atom )
-					);
-				}
-				// append new_bound_array:
-				memcpy(
-					& AtomDynA_get_array( & rt->bind_ret )[ insert_pos ],
-					& new_bound_array[4],
-					(new_bound_size -2 - 2) * sizeof( t_atom )
-				);
-				// update size:
-				SETFLOAT(
-						& AtomDynA_get_array( & rt->bind_ret )[ pos+1 ],
-						atom_getint( 
-							& AtomDynA_get_array( & rt->bind_ret )[ pos+1 ]
-						) + new_bound_size - 2 - 2
-				);
-				// append remainder:
-				memcpy(
-					& AtomDynA_get_array( & rt->bind_ret )[ insert_pos + new_bound_size - 2 - 2],
-					remainder,
-					remainder_size * sizeof( t_atom )
-				);
-				freebytes( remainder, sizeof( t_atom ) * remainder_size );
-				return;
-			}
-		}
-
-		pos += (2+pack_size);
-	}
-
-	match_db_print(
-			rt,
-			"nothing found, appending:"
-	);
-
-	// if no pack in already bound input found, just append:
 	
-	for( int i=2; i< AtomDynA_get_size( & new_bound_symbols ); i++)
-	{
-		/*
-		lexer_append_to_bind(
-				rt,
-				& AtomDynA_get_array( & new_bound_symbols )[ i ]
-		);
-		*/
-		AtomDynA_append(
-			& rt-> bind_ret,
-			AtomDynA_get_array( & new_bound_symbols )[ i ]
-		);
-	}
+	MAP_FORALL_KEYS_BEGIN(BoundData,t_symbol*,new_bound_symbols,sym)
+		AtomDynA* content = BoundData_get( new_bound_symbols, sym );
+		for(int i=0; i< AtomDynA_get_size( content ); i++)
+		{
+			t_atom* atom = & AtomDynA_get_array( content)[i];
+			AtomDynA* entry =
+				BoundData_get( & rt -> bind_ret, sym);
+			if( ! entry )
+			{
+				entry = 
+						getbytes( sizeof( AtomDynA ) );
+				AtomDynA_init( entry );
+				BoundData_insert(
+						& rt -> bind_ret,
+						sym,
+						entry
+				);
+			}
+			AtomDynA_append(
+					entry,
+					*atom
+			);
+		}
+	MAP_FORALL_KEYS_END(BoundData,t_symbol*,new_bound_symbols,sym)
 }
 
 // ************************
@@ -1536,7 +1539,8 @@ BOOL lexer_match_next_any(
 	t_pattern_atom_type pattern_peek = lexer_pattern_peek( rt, 0 );
 
 	if(
-			rt->bind_start_pos != -1
+			strcmp( CharBuf_get_array( & rt->bind_sym ), "" )
+			// rt->bind_start_pos != -1
 			&&
 			(
 				( anything )
@@ -1553,11 +1557,13 @@ BOOL lexer_match_next_any(
 			)
 	)
 	{
+		/*
 		match_db_print(
 				rt,
 				"binding"
 		);
-		lexer_append_to_bind( rt, & rt->input[ rt->input_pos ] );
+		*/
+		if( !lexer_append_to_bind( rt, & rt->input[ rt->input_pos ] ) ) return FALSE;
 	}
 
 	if( anything )
@@ -1617,29 +1623,27 @@ BOOL lexer_match_next_any(
 			{
 				match_db_print(
 						rt,
-						"<bind>?"
+						"?<bind>"
 				);
-				{
-					char buf[1024];
-					atom_string( & rt->pattern[ rt->pattern_pos], buf, 1024);
+				char buf[1024];
+				atom_string( & rt->pattern[ rt->pattern_pos], buf, 1024);
 
-					t_atom append;
-					SETSYMBOL( & append, gensym( & buf[1] ) );
-					AtomDynA_append(
-							& rt->bind_ret,
-							append
-					);
-				}
+				AtomDynA* entry =
+					BoundData_get( & rt -> bind_ret, gensym( & buf[1] ) );
+				if( ! entry )
 				{
-					t_atom append;
-					SETFLOAT( & append, 1 );
-					AtomDynA_append(
-							& rt->bind_ret,
-							append
+					match_db_print(rt, "no entry found, create one..." );
+					entry =
+							getbytes( sizeof( AtomDynA ) );
+					AtomDynA_init( entry );
+					BoundData_insert(
+							& rt -> bind_ret,
+							gensym( &buf[1] ),
+							entry
 					);
 				}
 				AtomDynA_append(
-						& rt->bind_ret,
+						entry,
 						rt->input[ rt->input_pos ]
 				);
 				rt->pattern_pos ++;
@@ -1699,11 +1703,12 @@ BOOL lexer_input_next_tok(
 	}
 	if(
 			bind
-			&& rt->bind_start_pos != -1
+			&& strcmp( CharBuf_get_array( & rt->bind_sym ), "" )
+			// && rt->bind_start_pos != -1
 	)
 	{
 
-		lexer_append_to_bind( rt, & rt->input[ rt->input_pos ] );
+		if( !lexer_append_to_bind( rt, & rt->input[ rt->input_pos ] ) ) return FALSE;
 	}
 	rt->input_pos ++;
 	return TRUE;
@@ -1719,7 +1724,8 @@ BOOL lexer_match_start_bind(
 
 	if( pattern_peek == START_BIND )
 	{
-		if( rt->bind_start_pos != -1 )
+		if( strcmp( CharBuf_get_array( & rt->bind_sym ), "" ) )
+		// if( rt->bind_start_pos != -1 )
 		{
 			match_error(
 					rt,
@@ -1760,7 +1766,8 @@ BOOL lexer_match_end_bind(
 	{
 			case END_BIND:
 			{
-				if(  rt->bind_start_pos == -1 )
+				if( !strcmp( CharBuf_get_array( & rt->bind_sym ), "" ) )
+				// if(  rt->bind_start_pos == -1 )
 				{
 					match_error(
 							rt,
@@ -1795,7 +1802,8 @@ BOOL lexer_set_start_bind(
 		char* bind_sym // bind to this symbol
 )
 {
-	if( rt->bind_start_pos == -1 )
+	if( !strcmp( CharBuf_get_array( & rt->bind_sym ), "" ) )
+	// if( rt->bind_start_pos == -1 )
 	{
 		match_db_print(
 				rt,
@@ -1806,25 +1814,11 @@ BOOL lexer_set_start_bind(
 				CharBuf_get_array( & rt-> bind_sym ),
 				bind_sym
 		);
+		/*
 		rt->bind_start_pos =
 			AtomDynA_get_size( & rt -> bind_ret );
+		*/
 		rt->bind_start_level = rt->rec_depth;
-		{
-			t_atom append;
-			SETSYMBOL( & append, gensym( bind_sym ) );
-			AtomDynA_append(
-					& rt->bind_ret,
-					append
-			);
-		}
-		{
-			t_atom append;
-			SETFLOAT( & append, 0 );
-			AtomDynA_append(
-					& rt->bind_ret,
-					append
-			);
-		}
 	}
 	return TRUE;
 }
@@ -1835,7 +1829,8 @@ BOOL lexer_set_end_bind(
 )
 {
 	//
-	if(  rt->bind_start_pos != -1 )
+	if( strcmp( CharBuf_get_array( & rt->bind_sym ), "" ) )
+	// if(  rt->bind_start_pos != -1 )
 	{
 		if( rt->bind_start_level != rt->rec_depth )
 		{
@@ -1848,22 +1843,24 @@ BOOL lexer_set_end_bind(
 		}
 		match_db_print(
 				rt,
-				"stop bind: %i",
-				AtomDynA_get_size( & rt->bind_ret )
+				"stop bind: %s",
+				CharBuf_get_array( & rt->bind_sym )
 		);
-		rt->bind_start_pos = -1;
+		strcpy( CharBuf_get_array( & rt->bind_sym ), "" );
+		//rt->bind_start_pos = -1;
 		rt->bind_start_level = -1;
 	}
 	return TRUE;
 }
 
 // ignorantly append to bind return list
-void lexer_append_to_bind(
+BOOL lexer_append_to_bind(
 		RuntimeInfo* rt,
 		t_atom* a
 )
 {
-	if(  rt->bind_start_pos == -1 )
+	if( !strcmp( CharBuf_get_array( & rt->bind_sym ), "" ) )
+	// if(  rt->bind_start_pos == -1 )
 	{
 		match_error(
 				rt,
@@ -1873,8 +1870,27 @@ void lexer_append_to_bind(
 	}
 	match_db_print(
 			rt,
-			"binding"
+			"binding to %s",
+			CharBuf_get_array( & rt->bind_sym )
 	);
+	AtomDynA* entry =
+		BoundData_get( & rt -> bind_ret, gensym( CharBuf_get_array( & rt->bind_sym ) ) );
+	if( ! entry )
+	{
+		entry = 
+				getbytes( sizeof( AtomDynA ) );
+		AtomDynA_init( entry );
+		BoundData_insert(
+				& rt -> bind_ret,
+				gensym( CharBuf_get_array( & rt->bind_sym ) ),
+				entry
+		);
+	}
+	AtomDynA_append(
+			entry,
+			*a
+	);
+	/*
 	AtomDynA_append(
 			& rt->bind_ret,
 			*a
@@ -1883,6 +1899,8 @@ void lexer_append_to_bind(
 			& AtomDynA_get_array( & rt->bind_ret )[ rt->bind_start_pos + 1 ],
 			AtomDynA_get_size( & rt->bind_ret ) - rt->bind_start_pos - 2
 	);
+	*/
+	return TRUE;
 }
 
 
@@ -1943,3 +1961,4 @@ void pattern_atom_type_to_str(
 		break;
 	};
 }
+

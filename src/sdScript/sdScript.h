@@ -38,8 +38,8 @@ DEF_BUFFER(CommandBuf,CmdRuntimeData,getbytes,freebytes)
 // program name -> cmds ...
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
-DECL_MAP(ProgramMap,t_symbol*,AtomBuf,getbytes,freebytes,DEL_PROG,PROGS_HASH)
-DEF_MAP(ProgramMap,t_symbol*,AtomBuf,getbytes,freebytes,DEL_PROG,PROGS_HASH)
+DECL_MAP(ProgramMap,t_symbol*,AtomBuf,getbytes,freebytes,DEL_PROG,PROGS_HASH, COMPARE_SYMBOLS)
+DEF_MAP(ProgramMap,t_symbol*,AtomBuf,getbytes,freebytes,DEL_PROG,PROGS_HASH, COMPARE_SYMBOLS)
 #pragma GCC diagnostic pop
 
 struct SScriptData;
