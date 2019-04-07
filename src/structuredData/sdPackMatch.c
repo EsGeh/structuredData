@@ -2,6 +2,8 @@
 #include "Global.h"
 #include "Map.h"
 
+#include "sdScript.h"
+
 
 #include <string.h>
 
@@ -28,11 +30,14 @@ typedef struct
 {
 	t_symbol* name;
 	AtomBuf pattern;
+	BOOL has_program;
+	AtomBuf program;
 } PatternInfo;
 
 #define FREE_PATTTERN_INFO(x,size) \
 { \
 	AtomBuf_exit( & x->pattern ); \
+	AtomBuf_exit( & x->program ); \
 	freebytes( x, size ); \
 }
 
@@ -58,6 +63,13 @@ void packMatch_exit(
 );
 
 void packMatch_patterns_add(
+	t_packMatch* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+void packMatch_patterns_add_script(
 	t_packMatch* x,
 	t_symbol *s,
 	int argc,
@@ -99,7 +111,7 @@ DEF_LIST(SubPatternsList, SubPatternsListEl, SubPatternInfo, getbytes, freebytes
 	freebytes( x, size ); \
 }
 
-#define HASH_SYMBOL( x ) ((unsigned int ) x)
+// #define HASH_SYMBOL( x ) ((unsigned int ) x)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
@@ -141,6 +153,11 @@ void bind_ret_to_atom_list(
 		AtomDynA* ret
 );
 
+void bind_ret_to_scope(
+		BoundData* x,
+		Scope* scope
+);
+
 // actually try to match the input with the pattern
 BOOL match_rec(
 		RuntimeInfo* rt
@@ -175,7 +192,7 @@ BOOL pack_mode_read_pattern(
 BOOL pack_mode_match_input(
 		RuntimeInfo* rt,
 		SubPatternsList* expected_packages,
-		char* bind_arbitrary_sym  // if != "": bind non required packs to this symbol
+		char* bind_arbitrary_sym  // if != "": bind non required packs to this symboL
 );
 
 void pack_mode_merge_bound_symbols(
@@ -309,6 +326,14 @@ t_class* register_packMatch(
 
 	class_addmethod(
 			class,
+			(t_method )packMatch_patterns_add_script,
+			gensym("add_script"),
+			A_GIMME,
+			0
+	);
+
+	class_addmethod(
+			class,
 			(t_method )packMatch_patterns_clear,
 			gensym("clear"),
 			A_GIMME,
@@ -357,12 +382,113 @@ void packMatch_patterns_add(
 {
 	PatternInfo* info = getbytes( sizeof( PatternInfo ) );
 	info->name = atom_getsymbol( &argv[0] );
+	info->has_program = FALSE;
 	AtomBuf_init( & info->pattern, argc - 1);
 	memcpy(
 			AtomBuf_get_array( & info->pattern ),
 			& argv[1],
 			sizeof( t_atom ) * (argc-1)
 	);
+	PatternList_append(
+			& x->patterns,
+			info
+	);
+}
+
+void packMatch_patterns_add_script(
+	t_packMatch* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	// syntax: <pattern_name> ( ...pattern... ) ( ...script... )
+	int pattern_pos = -1;
+	int pattern_size = -1;
+	int script_pos = -1;
+	int script_size = -1;
+	{
+		int pos = 1;
+		// read pattern:
+		if(
+				atom_getsymbol( &argv[1] ) != gensym("(")
+				&& pos < argc
+		)
+		{
+			pd_error( x, "invalid input: at pos %i expected '('", pos);
+			return;
+		}
+		pos ++;
+		pattern_pos = pos;
+		int depth = 1;
+		while(
+				depth >=1
+				&& pos < argc
+		)
+		{
+			if( atom_getsymbol( &argv[pos] ) == gensym("(") )
+				depth ++;
+			else if( atom_getsymbol( &argv[pos] ) == gensym(")") )
+				depth --;
+			pos ++;
+		}
+		if( depth != 0 )
+		{
+			pd_error( x, "missing ')' after '('" );
+			return;
+		}
+		pattern_size = pos - 2 - pattern_pos + 1;
+
+		// read script
+		if(
+				atom_getsymbol( &argv[1] ) != gensym("(")
+				&& pos < argc
+		)
+		{
+			pd_error( x, "invalid input: at pos %i expected '('", pos);
+			return;
+		}
+		pos ++;
+		script_pos = pos;
+		depth = 1;
+		while(
+				depth >=1
+				&& pos < argc
+		)
+		{
+			if( atom_getsymbol( &argv[pos] ) == gensym("(") )
+				depth ++;
+			else if( atom_getsymbol( &argv[pos] ) == gensym(")") )
+				depth --;
+			pos ++;
+		}
+		if( depth != 0 )
+		{
+			pd_error( x, "missing ')' after '('" );
+			return;
+		}
+		script_size = pos - 2 - script_pos + 1;
+	}
+
+	DB_PRINT( "pattern: (%i,%i), script: (%i,%i)",
+			pattern_pos, pattern_size,
+			script_pos, script_size
+	);
+	PatternInfo* info = getbytes( sizeof( PatternInfo ) );
+	info->name = atom_getsymbol( &argv[0] );
+	AtomBuf_init( & info->pattern, pattern_size);
+	AtomBuf_init( & info->program, script_size);
+	memcpy(
+			AtomBuf_get_array( & info->pattern ),
+			& argv[pattern_pos],
+			sizeof( t_atom ) * pattern_size
+	);
+	memcpy(
+			AtomBuf_get_array( & info->program ),
+			& argv[script_pos],
+			sizeof( t_atom ) * (script_size)
+	);
+	info->has_program = TRUE;
 	PatternList_append(
 			& x->patterns,
 			info
@@ -411,43 +537,80 @@ void packMatch_input(
 				)
 		)
 		{
-			AtomDynA bind_ret_list;
-			AtomDynA_init( & bind_ret_list );
-
+			if( ! patternInfo -> has_program )
 			{
-				t_atom atom;
-				SETSYMBOL( & atom, rt.pattern_name );
-				AtomDynA_append(
-						& bind_ret_list,
-						atom
+				AtomDynA bind_ret_list;
+				AtomDynA_init( & bind_ret_list );
+				{
+					t_atom atom;
+					SETSYMBOL( & atom, rt.pattern_name );
+					AtomDynA_append(
+							& bind_ret_list,
+							atom
+					);
+				}
+				{
+					t_atom atom;
+					SETSYMBOL( & atom, gensym("size") );
+					AtomDynA_append(
+							& bind_ret_list,
+							atom
+					);
+				}
+
+				bind_ret_to_atom_list(
+					& rt.bind_ret,
+					& bind_ret_list
 				);
+
+				SETFLOAT(
+						& AtomDynA_get_array( & bind_ret_list )[1],
+						AtomDynA_get_size( & bind_ret_list ) - 2
+				);
+
+				outlet_list(
+					x->outlet,
+					& s_list,
+					AtomDynA_get_size( &bind_ret_list ),
+					AtomDynA_get_array( &bind_ret_list )
+				);
+				AtomDynA_exit( & bind_ret_list );
 			}
+			else
 			{
-				t_atom atom;
-				SETSYMBOL( & atom, gensym("size") );
-				AtomDynA_append(
-						& bind_ret_list,
-						atom
+				ProgramMap programs;
+				ProgramMap_init( &programs, 1);
+				AtomBuf* bang_prog = getbytes( sizeof( AtomBuf ) );
+				AtomBuf_init( bang_prog,
+						AtomBuf_get_size( & patternInfo->program )
 				);
+				memcpy(
+					AtomBuf_get_array( bang_prog ),
+					AtomBuf_get_array( & patternInfo -> program ),
+					sizeof( t_atom ) * AtomBuf_get_size( & patternInfo -> program )
+				);
+				ProgramMap_insert(
+						&programs,
+						gensym("bang"),
+						bang_prog
+				);
+				ScriptData script;
+				Script_init( &script,
+					& programs,
+					x->outlet,
+					NULL
+				);
+
+				bind_ret_to_scope(
+					& rt.bind_ret,
+					Script_get_global_scope( &script )
+				);
+				{
+					Script_exec( & script, gensym("bang") );
+				}
+				Script_exit( & script );
+				ProgramMap_exit( &programs );
 			}
-
-			bind_ret_to_atom_list(
-				& rt.bind_ret,
-				& bind_ret_list
-			);
-
-			SETFLOAT(
-					& AtomDynA_get_array( & bind_ret_list )[1],
-					AtomDynA_get_size( & bind_ret_list ) - 2
-			);
-
-			outlet_list(
-				x->outlet,
-				& s_list,
-				AtomDynA_get_size( &bind_ret_list ),
-				AtomDynA_get_array( &bind_ret_list )
-			);
-			AtomDynA_exit( & bind_ret_list );
 			match_found = TRUE;
 		}
 		CharBuf_exit( & rt.bind_sym );
@@ -672,6 +835,29 @@ void bind_ret_to_atom_list(
 					AtomDynA_get_array( content )[i]
 			);
 		}
+	MAP_FORALL_KEYS_END(BoundData,t_symbol*,x,sym)
+}
+
+void bind_ret_to_scope(
+		BoundData* x,
+		Scope* scope
+)
+{
+	MAP_FORALL_KEYS_BEGIN(BoundData,t_symbol*,x,sym)
+		AtomDynA* content = BoundData_get( x, sym );
+		AtomDynA* var = getbytes( sizeof ( AtomDynA ) );
+		AtomDynA_init( var );
+		AtomDynA_set_size( var, AtomDynA_get_size( content ) );
+		memcpy(
+			AtomDynA_get_array( var ),
+			AtomDynA_get_array( content ),
+			sizeof( t_atom ) * AtomDynA_get_size( content )
+		);
+		Scope_insert(
+				scope,
+				sym,
+				var
+		);
 	MAP_FORALL_KEYS_END(BoundData,t_symbol*,x,sym)
 }
 
