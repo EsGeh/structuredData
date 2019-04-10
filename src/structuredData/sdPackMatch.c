@@ -11,6 +11,8 @@
 
 #define BOUNDDATA_SIZE 1024
 
+#define CHARBUF_SIZE 1024
+
 static t_class* packMatch_class;;
 
 t_class* register_packMatch(
@@ -628,20 +630,20 @@ void packMatch_input(
 		msg, ... \
 ) \
 { \
-	char pattern_name_buf[1024]; \
+	char pattern_name_buf[CHARBUF_SIZE]; \
 	{ \
 		t_atom pattern_name_atom; \
 		SETSYMBOL( & pattern_name_atom, rt->pattern_name ); \
-		atom_string( &pattern_name_atom, pattern_name_buf, 1024 ); \
+		atom_string( &pattern_name_atom, pattern_name_buf, CHARBUF_SIZE ); \
 	} \
-	char pattern_buf[1024]; \
+	char pattern_buf[CHARBUF_SIZE]; \
 	{ \
 		sprintf( pattern_buf, "'"); \
 		for(int i=rt->pattern_pos; i< rt->pattern_size; i++) \
 		{ \
 			t_atom* current = & rt->pattern[ i ]; \
-			char current_buf[1024]; \
-			atom_string( current, current_buf, 1024 ); \
+			char current_buf[CHARBUF_SIZE]; \
+			atom_string( current, current_buf, CHARBUF_SIZE ); \
 			if( i != 0 ) \
 				strcat( \
 						pattern_buf, \
@@ -657,14 +659,14 @@ void packMatch_input(
 				"'" \
 		); \
 	} \
-	char input_buf[1024]; \
+	char input_buf[CHARBUF_SIZE]; \
 	{ \
 		sprintf( input_buf, "'"); \
 		for(int i=rt->input_pos; i< rt->input_size; i++) \
 		{ \
 			t_atom* current = & rt->input[ i ]; \
-			char current_buf[1024]; \
-			atom_string( current, current_buf, 1024 ); \
+			char current_buf[CHARBUF_SIZE]; \
+			atom_string( current, current_buf, CHARBUF_SIZE ); \
 			if( i != 0 ) \
 				strcat( \
 						input_buf, \
@@ -687,7 +689,7 @@ void packMatch_input(
 	{ \
 		strcat(indent_buf, "-"); \
 	} \
-	char msg_filled[4000]; \
+	char msg_filled[CHARBUF_SIZE]; \
 	sprintf( msg_filled, msg, ## __VA_ARGS__ ); \
  \
 	DB_PRINT( \
@@ -705,20 +707,20 @@ void packMatch_input(
 		msg, ... \
 ) \
 { \
-	char pattern_name_buf[1024]; \
+	char pattern_name_buf[CHARBUF_SIZE]; \
 	{ \
 		t_atom pattern_name_atom; \
 		SETSYMBOL( & pattern_name_atom, rt->pattern_name ); \
-		atom_string( &pattern_name_atom, pattern_name_buf, 1024 ); \
+		atom_string( &pattern_name_atom, pattern_name_buf, CHARBUF_SIZE ); \
 	} \
-	char pattern_buf[1024]; \
+	char pattern_buf[CHARBUF_SIZE]; \
 	{ \
 		sprintf( pattern_buf, "'"); \
 		for(int i=rt->pattern_pos; i< rt->pattern_size; i++) \
 		{ \
 			t_atom* current = & rt->pattern[ i ]; \
-			char current_buf[1024]; \
-			atom_string( current, current_buf, 1024 ); \
+			char current_buf[CHARBUF_SIZE]; \
+			atom_string( current, current_buf, CHARBUF_SIZE ); \
 			if( i != 0 ) \
 				strcat( \
 						pattern_buf, \
@@ -734,14 +736,14 @@ void packMatch_input(
 				"'" \
 		); \
 	} \
-	char input_buf[1024]; \
+	char input_buf[CHARBUF_SIZE]; \
 	{ \
 		sprintf( input_buf, "'"); \
 		for(int i=rt->input_pos; i< rt->input_size; i++) \
 		{ \
 			t_atom* current = & rt->input[ i ]; \
-			char current_buf[1024]; \
-			atom_string( current, current_buf, 1024 ); \
+			char current_buf[CHARBUF_SIZE]; \
+			atom_string( current, current_buf, CHARBUF_SIZE ); \
 			if( i != 0 ) \
 				strcat( \
 						input_buf, \
@@ -1121,33 +1123,50 @@ BOOL pack_mode(
 	// if the '*' is between #[ ... #], we set this
 	// variable to the name to bind to ("" otherwise)
 	CharBuf bind_arbitrary_sym;
-	CharBuf_init( & bind_arbitrary_sym, 1024);
-	CharBuf_get_array( & bind_arbitrary_sym )[0] = '\0';
+	CharBuf_init( & bind_arbitrary_sym, CHARBUF_SIZE);
+	strcpy(
+			CharBuf_get_array( & bind_arbitrary_sym ),
+			""
+	);
 
 	// #[ ...
 	if( lexer_pattern_peek( rt, 0 ) == START_BIND )
 	{
 		if( !lexer_match_start_bind( rt ) )
+		{
+			CharBuf_exit( & bind_arbitrary_sym );
 			return FALSE;
-		strcat(
+		}
+		strcpy(
 			CharBuf_get_array( & bind_arbitrary_sym ),
 			CharBuf_get_array( & rt->bind_sym )
 		);
 	}
 	// '* ...'
 	if( !lexer_pattern_next_tok_any( rt ) )
+	{
+		CharBuf_exit( & bind_arbitrary_sym );
 		return FALSE;
+	}
 	// '#] ...'
 	if( lexer_pattern_peek( rt, 0 ) == END_BIND )
 	{
 		if( !lexer_match_end_bind( rt ) )
+		{
+			CharBuf_exit( & bind_arbitrary_sym );
 			return FALSE;
+		}
 	}
 
 	// 1. read all packages in the pattern:
 	SubPatternsList expected_packages;
 	SubPatternsList_init ( & expected_packages );
-	if( !pack_mode_read_pattern( rt, & expected_packages ) ) return FALSE;
+	if( !pack_mode_read_pattern( rt, & expected_packages ) )
+	{
+		CharBuf_exit( & bind_arbitrary_sym );
+		SubPatternsList_exit( & expected_packages );
+		return FALSE;
+	}
 	match_db_print(
 			rt,
 			"done reading pattern"
@@ -1173,8 +1192,13 @@ BOOL pack_mode(
 
 	// 2. try to find all patterns in the input:
 	if( !pack_mode_match_input( rt, & expected_packages, CharBuf_get_array( & bind_arbitrary_sym ) ) )
+	{
+		CharBuf_exit( & bind_arbitrary_sym );
+		SubPatternsList_exit( & expected_packages );
 		return FALSE;
+	}
 
+	CharBuf_exit( & bind_arbitrary_sym );
 	SubPatternsList_exit( & expected_packages );
 	return TRUE;
 }
@@ -1200,7 +1224,7 @@ BOOL pack_mode_read_pattern(
 		SubPatternInfo* subPatternInfo = getbytes( sizeof( SubPatternInfo ) );
 		subPatternInfo->pattern_pos =
 				rt->pattern_pos;
-		CharBuf_init( &subPatternInfo->bind_sym, 1024 );
+		CharBuf_init( &subPatternInfo->bind_sym, CHARBUF_SIZE );
 		strcpy(
 				CharBuf_get_array( &subPatternInfo->bind_sym ) ,
 				"" 
@@ -1269,7 +1293,6 @@ BOOL pack_mode_read_pattern(
 					rt,
 					"invalid pack: missing ')'"
 			);
-			SubPatternsList_exit( expected_packages );
 			return FALSE;
 		}
 
@@ -1313,8 +1336,6 @@ BOOL pack_mode_match_input(
 					rt,
 					"FAIL: input: invalid packet"
 			);
-
-			SubPatternsList_exit( expected_packages );
 			return FALSE;
 		}
 		match_db_print(
@@ -1325,17 +1346,20 @@ BOOL pack_mode_match_input(
 		int pack_size = 
 				atom_getint( & rt->input[ rt->input_pos + 1 ] );
 
+		// try to find a sub pattern in "expected_packages" which
+		// the current pack matches to
 		SubPatternsListEl* pEl = SubPatternsList_get_first( expected_packages );
-		RuntimeInfo rt_temp;
-		memcpy( &rt_temp, rt, sizeof( RuntimeInfo ) );
-
-		rt_temp.rec_depth ++;
-		CharBuf_init( & rt_temp.bind_sym, 1024);
-		strcpy( CharBuf_get_array( & rt_temp.bind_sym ), "" );
-		rt_temp.bind_start_level = -1;
 		BOOL matched = FALSE;
 		while( pEl != NULL )
 		{
+
+			// use temporary RuntimeInfo:
+			RuntimeInfo rt_temp;
+			memcpy( &rt_temp, rt, sizeof( RuntimeInfo ) );
+			rt_temp.rec_depth ++;
+			CharBuf_init( & rt_temp.bind_sym, CHARBUF_SIZE);
+			strcpy( CharBuf_get_array( & rt_temp.bind_sym ), "" );
+			rt_temp.bind_start_level = -1;
 			BoundData_init( & rt_temp.bind_ret, BOUNDDATA_SIZE );
 
 			SubPatternInfo* subPatternInfo = pEl->pData;
@@ -1352,7 +1376,11 @@ BOOL pack_mode_match_input(
 							CharBuf_get_array( & subPatternInfo->bind_sym )
 						)
 				)
+				{
+					CharBuf_exit( & rt_temp.bind_sym );
+					BoundData_exit( & rt_temp.bind_ret );
 					return FALSE;
+				}
 			}
 			if(
 					match_rec(
@@ -1360,18 +1388,27 @@ BOOL pack_mode_match_input(
 					)
 			)
 			{
-				if( ! lexer_set_end_bind( & rt_temp ) ) return FALSE;
+				if( ! lexer_set_end_bind( & rt_temp ) )
+				{
+					CharBuf_exit( & rt_temp.bind_sym );
+					BoundData_exit( & rt_temp.bind_ret );
+					return FALSE;
+				}
 				pack_mode_merge_bound_symbols(
 						rt,
 						& rt_temp.bind_ret
 				);
-				BoundData_exit( & rt_temp.bind_ret );
 
+				// if the current pack matched,
+				// we dont have to consider this pattern anymore
+				// -> delete it!
 				SubPatternsList_del(
 						expected_packages,
 						pEl
 				);
 				matched = TRUE;
+				CharBuf_exit( & rt_temp.bind_sym );
+				BoundData_exit( & rt_temp.bind_ret );
 				break;
 			}
 			else
@@ -1386,6 +1423,9 @@ BOOL pack_mode_match_input(
 			BoundData_exit( & rt_temp.bind_ret );
 		}
 
+		// now we know if the current input pack matches
+		// any pack in the pattern.
+		// we still have to consume the input:
 		BOOL
 			temp_binding =
 				! strcmp( CharBuf_get_array( & rt->bind_sym ), "" )
@@ -1394,7 +1434,11 @@ BOOL pack_mode_match_input(
 				&&
 				strcmp( bind_arbitrary_sym, "" )
 				;
+		RuntimeInfo rt_temp;
 		memcpy( &rt_temp, rt, sizeof( RuntimeInfo ) );
+		CharBuf_init( & rt_temp.bind_sym, CHARBUF_SIZE);
+		strcpy( CharBuf_get_array( & rt_temp.bind_sym ), "" );
+		rt_temp.bind_start_level = -1;
 		BoundData_init( & rt_temp.bind_ret, BOUNDDATA_SIZE );
 		if( temp_binding )
 		{
@@ -1413,8 +1457,8 @@ BOOL pack_mode_match_input(
 					rt,
 					"internal error!"
 				);
+				CharBuf_exit( & rt_temp.bind_sym);
 				BoundData_exit( & rt_temp.bind_ret );
-				SubPatternsList_exit( expected_packages );
 				return FALSE;
 			}
 		}
@@ -1426,7 +1470,11 @@ BOOL pack_mode_match_input(
 						!matched // don't bind!
 					)
 			)
+			{
+				CharBuf_exit( & rt_temp.bind_sym);
+				BoundData_exit( & rt_temp.bind_ret );
 				return FALSE;
+			}
 		}
 		if( temp_binding )
 		{
@@ -1438,8 +1486,8 @@ BOOL pack_mode_match_input(
 					rt,
 					"internal error!"
 				);
+				CharBuf_exit( & rt_temp.bind_sym);
 				BoundData_exit( & rt_temp.bind_ret );
-				SubPatternsList_exit( expected_packages );
 				return FALSE;
 			}
 		}
@@ -1449,6 +1497,7 @@ BOOL pack_mode_match_input(
 		);
 		rt->input_pos = rt_temp.input_pos;
 		rt->pattern_pos = rt_temp.pattern_pos;
+		CharBuf_exit( & rt_temp.bind_sym);
 		BoundData_exit( & rt_temp.bind_ret );
 	}
 	if( !SubPatternsList_is_empty( expected_packages ) )
@@ -1457,8 +1506,6 @@ BOOL pack_mode_match_input(
 				rt,
 				"FAIL: packets missing in input"
 		);
-
-		SubPatternsList_exit( expected_packages );
 		return FALSE;
 	}
 	return TRUE;
@@ -1578,15 +1625,15 @@ BOOL lexer_pattern_next_tok(
 			pattern_peek != expected
 	)
 	{
-		char buf_expected[1024];
-		char buf_got[1024];
+		char buf_expected[CHARBUF_SIZE/2];
+		char buf_got[CHARBUF_SIZE/2];
 		pattern_atom_type_to_str(
 				expected,
-				buf_expected, 1024
+				buf_expected, CHARBUF_SIZE
 		);
 		pattern_atom_type_to_str(
 				pattern_peek,
-				buf_got, 1024
+				buf_got, CHARBUF_SIZE
 		);
 		match_error(
 				rt,
@@ -1632,15 +1679,15 @@ BOOL lexer_match_next(
 
 	if( pattern_peek != expected_symbol )
 	{
-		char buf_expected[1024];
-		char buf_got[1024];
+		char buf_expected[CHARBUF_SIZE];
+		char buf_got[CHARBUF_SIZE];
 		pattern_atom_type_to_str(
 				expected_symbol,
-				buf_expected, 1024
+				buf_expected, CHARBUF_SIZE
 		);
 		pattern_atom_type_to_str(
 				pattern_peek,
-				buf_got, 1024
+				buf_got, CHARBUF_SIZE
 		);
 		match_db_print(
 				rt,
@@ -1744,8 +1791,8 @@ BOOL lexer_match_next_any(
 						rt,
 						"?<bind>"
 				);
-				char buf[1024];
-				atom_string( & rt->pattern[ rt->pattern_pos], buf, 1024);
+				char buf[CHARBUF_SIZE];
+				atom_string( & rt->pattern[ rt->pattern_pos], buf, CHARBUF_SIZE);
 
 				AtomDynA* entry =
 					BoundData_get( & rt -> bind_ret, gensym( & buf[1] ) );

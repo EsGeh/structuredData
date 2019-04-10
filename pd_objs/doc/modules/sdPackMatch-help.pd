@@ -1,4 +1,4 @@
-#N canvas 0 30 798 854 10;
+#N canvas 800 30 798 189 10;
 #N canvas 0 30 846 854 basic 0;
 #X msg 144 85 list x;
 #X obj 131 127 sdPackFromHuman;
@@ -236,7 +236,7 @@ bind any content in despite the index pack, f 36;
 #X connect 47 0 28 0;
 #X connect 50 0 1 0;
 #X restore 53 330 pd bind_values;
-#N canvas 0 30 798 854 example 0;
+#N canvas 0 30 798 854 example 1;
 #X obj 101 191 sdPackFromHuman;
 #X obj 176 274 sdPackMatch;
 #X obj 176 297 print;
@@ -256,6 +256,19 @@ bind any content in despite the index pack, f 36;
 them into "start" events for some obscure instrument;
 #X msg 305 12 list trigger 6 index 1 0 value 1 1 \, list trigger 6
 index 1 0 value 1 1, f 21;
+#X obj 237 682 sdPackMatch;
+#X obj 286 560 loadbang;
+#X msg 276 589 clear \, add_script volume ( analog ( * index ( 0 )
+value ( ?value ) ) ) ( Print ( Pack ( volume $ ( value ) ) ) Out (
+) );
+#X text 146 446 ok;
+#X msg 222 527 list analog 6 index 1 1 value 1 0;
+#X text 211 507 reject:;
+#X msg 144 464 list analog 6 index 1 0 value 1 0;
+#X obj 208 722 print;
+#X obj 314 721 print reject;
+#X text 382 551 filter "analog" events (with index == 0) and resend
+them as volume changes:;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 1 0 3 0;
@@ -266,6 +279,12 @@ index 1 0 value 1 1, f 21;
 #X connect 8 0 7 0;
 #X connect 9 0 1 0;
 #X connect 11 0 1 0;
+#X connect 12 0 19 0;
+#X connect 12 1 20 0;
+#X connect 13 0 14 0;
+#X connect 14 0 12 0;
+#X connect 16 0 12 0;
+#X connect 18 0 12 0;
 #X restore 57 719 pd example;
 #N canvas 0 30 798 854 pattern+script 0;
 #X msg 134 196 list x;
@@ -299,17 +318,3 @@ variables set to the values bound in the pattern;
 #X connect 10 0 2 0;
 #X connect 11 0 2 0;
 #X restore 55 608 pd pattern+script;
-#X obj 371 778 sdPackMatch;
-#X obj 420 656 loadbang;
-#X msg 410 685 clear \, add_script volume ( analog ( * index ( 0 )
-value ( ?value ) ) ) ( Print ( Pack ( volume $ ( value ) ) ) Out (
-) );
-#X msg 278 560 list analog 6 index 1 0 value 1 0 \, list analog 6 index
-1 0 value 1 0;
-#X text 280 542 ok;
-#X text 380 604 crash;
-#X msg 397 623 list analog 6 index 1 1 value 1 0;
-#X connect 23 0 24 0;
-#X connect 24 0 22 0;
-#X connect 25 0 22 0;
-#X connect 28 0 22 0;
