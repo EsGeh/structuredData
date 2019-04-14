@@ -421,19 +421,11 @@ PFUNCTION_HEADER( addVar )
 
 PFUNCTION_HEADER( getVar )
 {
-	AtomDynA* value =
-		Scope_get(
-				prog_rt -> scope,
-				atom_getsymbol( & pArgs[0] )
-		);
-	if( ! value )
-	{
-		value =
-			Scope_get(
-					prog_rt -> global_scope,
-					atom_getsymbol( & pArgs[0] )
-			);
-	}
+	AtomDynA* value = symtab_get_var(
+			prog_rt->scope,
+			prog_rt->global_scopes,
+			atom_getsymbol( & pArgs[0] )
+	);
 	if( ! value )
 	{
 		char buf[256];
@@ -452,19 +444,11 @@ PFUNCTION_HEADER( getVar )
 
 PFUNCTION_HEADER( getVarA )
 {
-	AtomDynA* value =
-		Scope_get(
-				prog_rt -> scope,
-				atom_getsymbol( & pArgs[0] )
-		);
-	if( ! value )
-	{
-		value =
-			Scope_get(
-					prog_rt -> global_scope,
-					atom_getsymbol( & pArgs[0] )
-			);
-	}
+	AtomDynA* value = symtab_get_var(
+			prog_rt->scope,
+			prog_rt->global_scopes,
+			atom_getsymbol( & pArgs[0] )
+	);
 	if( ! value )
 	{
 		char buf[256];
@@ -493,19 +477,11 @@ PFUNCTION_HEADER( setVar )
 	}
 	DB_PRINT("setVar called with %i args", countArgs);
 
-	AtomDynA* value =
-		Scope_get(
-				prog_rt -> scope,
-				atom_getsymbol( & pArgs[0] )
-		);
-	if( ! value )
-	{
-		value =
-			Scope_get(
-					prog_rt -> global_scope,
-					atom_getsymbol( & pArgs[0] )
-			);
-	}
+	AtomDynA* value = symtab_get_var(
+			prog_rt->scope,
+			prog_rt->global_scopes,
+			atom_getsymbol( & pArgs[0] )
+	);
 	if( ! value )
 	{
 		char buf[256];
@@ -526,19 +502,11 @@ PFUNCTION_HEADER( setVar )
 
 PFUNCTION_HEADER( setVarA )
 {
-	AtomDynA* value =
-		Scope_get(
-				prog_rt -> scope,
-				atom_getsymbol( & pArgs[0] )
-		);
-	if( ! value )
-	{
-		value =
-			Scope_get(
-					prog_rt -> global_scope,
-					atom_getsymbol( & pArgs[0] )
-			);
-	}
+	AtomDynA* value = symtab_get_var(
+			prog_rt->scope,
+			prog_rt->global_scopes,
+			atom_getsymbol( & pArgs[0] )
+	);
 	if( ! value )
 	{
 		char buf[256];
@@ -572,18 +540,24 @@ PFUNCTION_HEADER( addMainVar )
 			& pArgs[1],
 			sizeof( t_atom ) * (countArgs-1)
 	);
-	Scope_insert(
-			prog_rt -> global_scope,
-			atom_getsymbol( &pArgs[0] ),
-			new_var
-	);
+	if( ScopeList_get_size( prog_rt -> global_scopes ) )
+	{
+		Scope_insert(
+				ScopeList_get_last( prog_rt -> global_scopes)->pData,
+				atom_getsymbol( &pArgs[0] ),
+				new_var
+		);
+	}
 }
 
 PFUNCTION_HEADER( clearMain )
 {
-	Scope_clear(
-			prog_rt -> global_scope
-	);
+	if( ScopeList_get_size( prog_rt -> global_scopes ) )
+	{
+		Scope_clear(
+				ScopeList_get_last( prog_rt -> global_scopes)->pData
+		);
+	}
 }
 
 PFUNCTION_HEADER( if_ )

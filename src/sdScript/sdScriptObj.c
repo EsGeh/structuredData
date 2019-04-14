@@ -22,6 +22,7 @@ typedef struct _script_obj {
 
 	ScriptData script_data;
 	ProgramMap programs;
+	Scope* global_scope;
 
 	// clock needed if a program "pauses" itself:
 	t_clock *clock;
@@ -155,6 +156,15 @@ void* t_script_obj_init(
 			x -> clock
 	);
 
+
+	x->global_scope = getbytes( sizeof( Scope ) );
+	Scope_init( x->global_scope, VARS_HASH_SIZE);
+	ScopeList_prepend(
+		Script_get_global_scopes( & x -> script_data ),
+		x->global_scope
+	);
+
+	// create global variables:
 	for( int i=0; i<argc; i++)
 	{
 		AtomDynA* new_var = getbytes( sizeof( AtomDynA ) );
@@ -163,7 +173,7 @@ void* t_script_obj_init(
 		SETFLOAT( & new_atom, 0 );
 		AtomDynA_append( new_var, new_atom );
 		Scope_insert(
-				Script_get_global_scope( & x -> script_data ),
+				x->global_scope,
 				atom_getsymbol( & argv[i] ),
 				new_var
 		);
@@ -183,6 +193,8 @@ void t_script_obj_exit(
 	Script_exit(
 			& x->script_data
 	);
+	Scope_exit( x->global_scope );
+	freebytes( x->global_scope, sizeof( Scope ) );
 }
 
 void script_obj_on_set_program(
@@ -276,8 +288,9 @@ void script_obj_on_set_var(
 	}
 
 	t_symbol* var_name = atom_getsymbol( & argv[0] );
-	AtomDynA* value = Scope_get(
-			Script_get_global_scope( & this -> script_data ),
+	AtomDynA* value = symtab_get_var(
+			NULL,
+			Script_get_global_scopes( & this -> script_data ),
 			var_name
 	);
 	AtomDynA_set_size(

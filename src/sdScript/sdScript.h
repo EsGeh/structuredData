@@ -49,7 +49,7 @@ typedef struct SProgramRTInfo {
 	AtomBuf* current_prog;
 
 	Scope* scope;
-	Scope* global_scope;
+	ScopeList* global_scopes;
 
 	// return stack
 	AtomList stack;
@@ -78,7 +78,7 @@ typedef struct SScriptData
 	SymbolTable* symbol_table;
 
 	// global scope for all programs
-	Scope global_scope;
+	ScopeList global_scopes;
 
 	CommandInfos* command_infos;
 
@@ -121,7 +121,7 @@ void Script_exit(
 		ScriptData* rt
 );
 
-Scope* Script_get_global_scope(
+ScopeList* Script_get_global_scopes(
 		ScriptData* rt
 );
 

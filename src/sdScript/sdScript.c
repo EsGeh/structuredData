@@ -92,9 +92,8 @@ void Script_init(
 
 	rt -> outlet = outlet;
 
-	Scope_init(
-			& rt -> global_scope,
-			VARS_HASH_SIZE
+	ScopeList_init(
+			& rt -> global_scopes
 	);
 }
 
@@ -102,7 +101,7 @@ void Script_exit(
 		ScriptData* rt
 )
 {
-	Scope_exit( & rt -> global_scope );
+	ScopeList_exit( & rt -> global_scopes );
 
 	ProgStack_exit( & rt-> program_stack );
 	symtab_exit( rt -> symbol_table );
@@ -113,11 +112,11 @@ void Script_exit(
 }
 
 
-Scope* Script_get_global_scope(
+ScopeList* Script_get_global_scopes(
 		ScriptData* rt
 )
 {
-	return & rt->global_scope;
+	return & rt->global_scopes;
 }
 
 void Script_exec(
@@ -364,7 +363,7 @@ ProgramRTInfo* init_prog(
 		.current_prog_name = prog_name,
 		.current_prog = prog,
 		.scope = scope,
-		.global_scope = & rt->global_scope,
+		.global_scopes = & rt->global_scopes,
 		.peek = 0,
 
 		.countParenthesisRightIgnore = 1,

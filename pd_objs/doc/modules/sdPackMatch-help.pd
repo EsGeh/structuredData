@@ -1,4 +1,4 @@
-#N canvas 800 30 798 189 10;
+#N canvas 0 605 398 279 10;
 #N canvas 0 30 846 854 basic 0;
 #X msg 144 85 list x;
 #X obj 131 127 sdPackFromHuman;
@@ -127,7 +127,7 @@ other arbitrary content. "val" is matched and bound., f 33;
 #X msg 307 470 analog ( content#[ * #] index ( * ) );
 #X text 549 463 match any analog pack containing an index pack and
 bind any content in despite the index pack, f 36;
-#N canvas 0 30 798 854 bind_values 0;
+#N canvas 0 30 1598 543 bind_values 0;
 #X obj 136 705 sdPackFromHuman;
 #X obj 203 769 sdPackMatch;
 #X obj 203 792 print;
@@ -236,7 +236,7 @@ bind any content in despite the index pack, f 36;
 #X connect 47 0 28 0;
 #X connect 50 0 1 0;
 #X restore 53 330 pd bind_values;
-#N canvas 0 30 798 854 example 1;
+#N canvas 0 30 1598 543 example 1;
 #X obj 101 191 sdPackFromHuman;
 #X obj 176 274 sdPackMatch;
 #X obj 176 297 print;
@@ -286,35 +286,42 @@ them as volume changes:;
 #X connect 16 0 12 0;
 #X connect 18 0 12 0;
 #X restore 57 719 pd example;
-#N canvas 0 30 798 854 pattern+script 0;
+#N canvas 0 30 1598 543 pattern+script 0;
 #X msg 134 196 list x;
 #X obj 121 238 sdPackFromHuman;
-#X obj 220 288 sdPackMatch;
-#X obj 220 311 print;
-#X obj 166 322 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X obj 209 420 print;
+#X obj 155 431 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
 #X msg 90 197 list;
 #X msg 187 197 list y;
 #X obj 375 138 loadbang;
-#X obj 284 313 print reject;
-#X obj 370 314 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X obj 273 422 print reject;
+#X obj 359 423 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
 #X msg 375 161 clear \, add_script pat1 ( ?val ) ( Print ( $ ( val
 ) ) Out ( ) );
-#X msg 371 231 clear \, add_script pat4 ( everything#[ * #] ) ( Print
-( Pack ( test $ ( everything ) ) ) Out ( ) );
 #X text 392 62 syntax: add_script <pattern_name> ( ...pattern... )
 ( ...script... );
 #X text 421 97 if the pattern matches \, the script is executed with
 variables set to the values bound in the pattern;
+#X obj 209 397 sdPackMatch pack_type;
+#X msg 371 231 clear \, add_script pat4 ( everything#[ * #] ) ( Print
+( Pack ( $ ( pack_type ) $ ( everything ) ) ) Out ( ) );
+#X msg 422 356 set pack_type someEvent;
+#X obj 422 332 loadbang;
+#X text 403 310 there can be "global variables" (which surwive each
+run);
 #X connect 0 0 1 0;
-#X connect 1 0 2 0;
-#X connect 2 0 3 0;
-#X connect 2 0 4 0;
-#X connect 2 1 8 0;
-#X connect 2 1 9 0;
+#X connect 1 0 12 0;
+#X connect 4 0 1 0;
 #X connect 5 0 1 0;
-#X connect 6 0 1 0;
-#X connect 10 0 2 0;
-#X connect 11 0 2 0;
+#X connect 6 0 9 0;
+#X connect 9 0 12 0;
+#X connect 12 0 2 0;
+#X connect 12 0 3 0;
+#X connect 12 1 7 0;
+#X connect 12 1 8 0;
+#X connect 13 0 12 0;
+#X connect 14 0 12 0;
+#X connect 15 0 14 0;
 #X restore 55 608 pd pattern+script;

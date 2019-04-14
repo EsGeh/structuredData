@@ -66,3 +66,31 @@ AtomDynA* symtab_get_value(
 			name
 	);
 }
+
+AtomDynA* symtab_get_var(
+		Scope* local_scope,
+		ScopeList* global_scopes,
+		t_symbol* name
+)
+{
+	AtomDynA* value = NULL;
+	if( local_scope )
+		Scope_get(
+				local_scope,
+				name
+		);
+
+	if( global_scopes )
+	{
+		LIST_FORALL_BEGIN(ScopeList, ScopeListEl, Scope, global_scopes, i, pEl)
+			if( value )
+				break;
+			value =
+				Scope_get(
+						pEl->pData,
+						name
+				);
+		LIST_FORALL_END(ScopeList, ScopeListEl, Scope, global_scopes, i, pEl)
+	}
+	return value;
+}

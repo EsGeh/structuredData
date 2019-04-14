@@ -34,6 +34,11 @@ DECL_MAP(SymbolTable,t_symbol*,Scope,getbytes,freebytes,DEL_SCOPE,HASH_SYMBOL, C
 DEF_MAP(SymbolTable,t_symbol*,Scope,getbytes,freebytes,DEL_SCOPE,HASH_SYMBOL, COMPARE_SYMBOLS)
 #pragma GCC diagnostic pop
 
+#define DEL_SCOPE_NOP(scope,size)
+
+DECL_LIST( ScopeList, ScopeListEl, Scope, getbytes, freebytes, DEL_SCOPE_NOP);
+DEF_LIST( ScopeList, ScopeListEl, Scope, getbytes, freebytes, DEL_SCOPE_NOP);
+
 SymbolTable* symtab_init();
 void symtab_exit(
 	SymbolTable* x
@@ -52,6 +57,14 @@ void symtab_del_scope(
 );
 AtomDynA* symtab_get_value(
 		Scope* scope,
+		t_symbol* name
+);
+
+// lookup a variable in global scope,
+// if not found, consider global scopes:
+AtomDynA* symtab_get_var(
+		Scope* local_scope,
+		ScopeList* global_scopes,
 		t_symbol* name
 );
 

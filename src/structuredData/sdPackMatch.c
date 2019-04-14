@@ -51,6 +51,7 @@ DEF_LIST(PatternList, PatternEl, PatternInfo, getbytes, freebytes, FREE_PATTTERN
 typedef struct s_packMatch {
   t_object x_obj;
 	PatternList patterns;
+	Scope* global_scope;
 	t_outlet* outlet;
 	t_outlet* outlet_reject;
 } t_packMatch;
@@ -80,6 +81,13 @@ void packMatch_patterns_add_script(
 
 void packMatch_patterns_clear(
 	t_packMatch* x
+);
+
+void packMatch_set_global_var(
+	t_packMatch* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
 );
 
 void packMatch_input(
@@ -327,6 +335,13 @@ t_class* register_packMatch(
 	);
 
 	class_addmethod(
+		class,
+		(t_method )packMatch_set_global_var,
+		gensym( "set" ),
+		A_GIMME
+	);
+
+	class_addmethod(
 			class,
 			(t_method )packMatch_patterns_add_script,
 			gensym("add_script"),
@@ -355,11 +370,24 @@ void* packMatch_init(
 
 	PatternList_init( & x-> patterns );
 
-	if( argc > 0  )
+	x->global_scope = getbytes( sizeof( Scope ) );
+	Scope_init( x->global_scope, VARS_HASH_SIZE);
+
+	// create global variables:
+	for( int i=0; i<argc; i++)
 	{
-		pd_error(x, "too many arguments!");
-		return NULL;
+		AtomDynA* new_var = getbytes( sizeof( AtomDynA ) );
+		AtomDynA_init( new_var );
+		t_atom new_atom;
+		SETFLOAT( & new_atom, 0 );
+		AtomDynA_append( new_var, new_atom );
+		Scope_insert(
+				x->global_scope,
+				atom_getsymbol( & argv[i] ),
+				new_var
+		);
 	}
+
 	x->outlet =
 		outlet_new( & x->x_obj, &s_list);
 	x -> outlet_reject =
@@ -373,6 +401,8 @@ void packMatch_exit(
 )
 {
 	PatternList_exit( & x-> patterns );
+	Scope_exit( x->global_scope );
+	freebytes( x->global_scope, sizeof( Scope ) );
 }
 
 void packMatch_patterns_add(
@@ -506,6 +536,36 @@ void packMatch_patterns_clear(
 	);
 }
 
+void packMatch_set_global_var(
+	t_packMatch* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	DB_PRINT("script_obj_on_set_var");
+	if( argc < 1 )
+	{
+		pd_error( x, "wrong syntax: expected 'set <global_var> val1 ...'" );
+		return;
+	}
+
+	t_symbol* var_name = atom_getsymbol( & argv[0] );
+	AtomDynA* value = Scope_get(
+			x -> global_scope,
+			var_name
+	);
+	AtomDynA_set_size(
+			value,
+			argc-1
+	);
+	memcpy(
+			AtomDynA_get_array( value ),
+			& argv[1],
+			sizeof( t_atom ) * (argc-1)
+	);
+}
+
 void packMatch_input(
 	t_packMatch* x,
 	t_symbol *s,
@@ -603,13 +663,25 @@ void packMatch_input(
 					NULL
 				);
 
+				ScopeList_prepend(
+					Script_get_global_scopes( & script ),
+					x->global_scope
+				);
+				Scope* arguments = getbytes( sizeof( Scope ) );
+				Scope_init( arguments, VARS_HASH_SIZE );
+				ScopeList_prepend(
+					Script_get_global_scopes( & script ),
+					arguments
+				);
 				bind_ret_to_scope(
 					& rt.bind_ret,
-					Script_get_global_scope( &script )
+					arguments
 				);
 				{
 					Script_exec( & script, gensym("bang") );
 				}
+				Scope_exit( arguments );
+				freebytes( arguments, sizeof( Scope ) );
 				Script_exit( & script );
 				ProgramMap_exit( &programs );
 			}
