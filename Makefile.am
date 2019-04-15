@@ -39,6 +39,7 @@ data_DATA = \
   $(PATH_PD_OBJS)/doc/modules/sdObjState_example.pd \
   $(PATH_PD_OBJS)/doc/modules/sdPack-help.pd \
   $(PATH_PD_OBJS)/doc/modules/sdUtils-help.pd \
+  $(PATH_PD_OBJS)/doc/modules/sdPackMatch-help.pd \
 	$(PATH_PD_OBJS)/doc/sdScript-help.pd
 
 structuredDataC_la_SOURCES = \
