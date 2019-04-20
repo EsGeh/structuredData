@@ -555,6 +555,13 @@ void packMatch_set_global_var(
 			x -> global_scope,
 			var_name
 	);
+	if( !value )
+	{
+		char buf[1024];
+		atom_string( & argv[0], buf, 1024 );
+		pd_error( x, "variable not found: '%s'", buf);
+		return;
+	}
 	AtomDynA_set_size(
 			value,
 			argc-1

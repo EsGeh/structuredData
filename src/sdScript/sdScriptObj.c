@@ -293,6 +293,13 @@ void script_obj_on_set_var(
 			Script_get_global_scopes( & this -> script_data ),
 			var_name
 	);
+	if( !value )
+	{
+		char buf[1024];
+		atom_string( & argv[0], buf, 1024 );
+		pd_error( this, "variable not found: '%s'", buf);
+		return;
+	}
 	AtomDynA_set_size(
 			value,
 			argc-1
