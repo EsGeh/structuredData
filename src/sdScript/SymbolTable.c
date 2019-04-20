@@ -75,7 +75,7 @@ AtomDynA* symtab_get_var(
 {
 	AtomDynA* value = NULL;
 	if( local_scope )
-		Scope_get(
+		value = Scope_get(
 				local_scope,
 				name
 		);
