@@ -1010,16 +1010,17 @@ PFUNCTION_HEADER( inc )
 	}
 	DB_PRINT("inc called with %i args", countArgs);
 
-	AtomDynA* value =
-		Scope_get(
-				prog_rt -> scope,
-				atom_getsymbol( & pArgs[0] )
-		);
+	AtomDynA* value = symtab_get_var(
+			prog_rt->scope,
+			prog_rt->global_scopes,
+			atom_getsymbol( & pArgs[0] )
+	);
+
 	char buf[256];
 	atom_string( & pArgs[0], buf, 256 );
 	if( ! value )
 	{
-		post("ERROR: inc: variable \"%s\" not found!", buf);
+		post("ERROR: variable \"%s\" not found!", buf);
 		return;
 	}
 	if( ! AtomDynA_get_size( value ) )
@@ -1045,16 +1046,16 @@ PFUNCTION_HEADER( dec )
 	}
 	DB_PRINT("inc called with %i args", countArgs);
 
-	AtomDynA* value =
-		Scope_get(
-				prog_rt -> scope,
-				atom_getsymbol( & pArgs[0] )
-		);
+	AtomDynA* value = symtab_get_var(
+			prog_rt->scope,
+			prog_rt->global_scopes,
+			atom_getsymbol( & pArgs[0] )
+	);
 	char buf[256];
 	atom_string( & pArgs[0], buf, 256 );
 	if( ! value )
 	{
-		post("ERROR: inc: variable \"%s\" not found!", buf);
+		post("ERROR: variable \"%s\" not found!", buf);
 		return;
 	}
 	if( ! AtomDynA_get_size( value ) )
