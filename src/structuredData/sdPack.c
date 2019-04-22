@@ -440,6 +440,8 @@ int packFromHuman_fromHuman(
 	
 	//char buf[256];
 
+	BOOL escape = FALSE;
+
 	while(
 		(*index) < argc
 	)
@@ -448,17 +450,30 @@ int packFromHuman_fromHuman(
 		while(
 			(*index) < argc
 			&&
-			atom_getsymbol(&argv[*index]) != gensym("(")
-			&&
-			atom_getsymbol(&argv[*index]) != gensym(")")
+			(
+				escape
+				||
+				( atom_getsymbol(&argv[*index]) != gensym("(") && atom_getsymbol(&argv[*index]) != gensym(")") )
+			)
 		)
 		{
-			//ACCEPT ANYTHING:
-			/*
-			atom_string(&argv[*index], buf, 255);
-			post("ARBITRARY: %s", buf);
-			*/
-			outputAtoms[*outCount] = argv[*index]; (*outCount)++;
+			if( atom_getsymbol( &argv[*index] ) == gensym( "#[" ) )
+			{
+				escape = TRUE;
+			}
+			else if( atom_getsymbol( &argv[*index] ) == gensym( "#]" ) )
+			{
+				escape = FALSE;
+			}
+			else
+			{
+				//ACCEPT ANYTHING:
+				/*
+				atom_string(&argv[*index], buf, 255);
+				post("ARBITRARY: %s", buf);
+				*/
+				outputAtoms[*outCount] = argv[*index]; (*outCount)++;
+			}
 			(*index)++;
 		}
 

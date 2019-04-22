@@ -1,4 +1,4 @@
-#N canvas 0 30 894 854 10;
+#N canvas 0 30 803 722 10;
 #X msg 186 70 list bla bla;
 #X obj 192 107 sdPack info;
 #X msg 302 83 symbol update;
@@ -8,11 +8,11 @@
 #X obj 106 248 print content;
 #X obj 192 130 t a a;
 #X obj 238 158 print;
-#X msg 258 372 list pack ( a b c );
-#X obj 252 434 print;
-#X obj 252 411 sdPackFromHuman;
-#X msg 421 375 list pack ( p1 ( a ) b p2 ( c ) );
-#X msg 414 430 list pack ( p1 ( a ) b p2 ( c ) ) );
+#X msg 98 388 list pack ( a b c );
+#X obj 92 450 print;
+#X obj 92 427 sdPackFromHuman;
+#X msg 261 391 list pack ( p1 ( a ) b p2 ( c ) );
+#X msg 254 446 list pack ( p1 ( a ) b p2 ( c ) ) );
 #X obj 40 567 sdPack info;
 #X obj 129 567 sdPack update;
 #X obj 81 642 print accept;
@@ -49,10 +49,11 @@
 #X obj 646 206 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
 #X msg 529 175 list get a b c;
-#X text 435 404 produce an error:;
+#X text 275 420 produce an error:;
 #X text 370 511 accept info packs and update packs;
 #X msg 228 618 list info update;
 #X text 249 635 (accept both);
+#X msg 140 338 list pack ( #[ ( ( ) ) #] a b c );
 #X connect 0 0 1 0;
 #X connect 1 0 7 0;
 #X connect 2 0 1 1;
@@ -97,3 +98,4 @@
 #X connect 47 0 42 0;
 #X connect 48 0 42 0;
 #X connect 51 0 22 1;
+#X connect 53 0 11 0;
