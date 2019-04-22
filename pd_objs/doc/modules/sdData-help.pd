@@ -1,11 +1,9 @@
-#N canvas 0 30 894 854 10;
-#N canvas 0 30 894 854 example 1;
-#X msg 404 173 pack1 ( bla ) \, pack2 ( blubb );
+#N canvas 0 30 803 722 10;
+#N canvas 0 30 803 722 example 0;
 #X msg 174 93 clear;
 #X obj 83 100 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
 #X text 61 31 accumulate sgPacks:;
-#X msg 612 174 pack1 ( bla ) pack2 ( blubb );
 #X msg 231 122 prepend packX 3 one two 3;
 #X msg 230 94 append packX 3 one two 3;
 #X msg 238 150 pop;
@@ -17,33 +15,41 @@
 #X obj 370 297 print serialize;
 #X obj 481 300 print serializeRev;
 #X obj 105 295 print bang;
-#X obj 124 248 sdData bang pop popRev serialize serializeRev, f 83
-;
 #X msg 439 97 set pack 5 0 1 2 3 4;
 #X msg 244 27 set pack1 1 1 pack2 1 2 pack3 1 3 \, filterAccept pack2
 \, bang;
 #X msg 240 54 set pack1 1 1 pack2 1 2 pack3 1 3 \, filterReject pack2
 \, bang;
-#X obj 402 208 sdPackFromHuman;
-#X connect 0 0 20 0;
-#X connect 1 0 16 0;
-#X connect 2 0 16 0;
-#X connect 4 0 20 0;
-#X connect 5 0 16 0;
-#X connect 6 0 16 0;
-#X connect 7 0 16 0;
-#X connect 8 0 16 0;
-#X connect 9 0 16 0;
-#X connect 10 0 16 0;
-#X connect 16 0 15 0;
-#X connect 16 1 11 0;
-#X connect 16 2 12 0;
-#X connect 16 3 13 0;
-#X connect 16 4 14 0;
-#X connect 17 0 16 0;
-#X connect 18 0 16 0;
-#X connect 19 0 16 0;
-#X connect 20 0 16 1;
+#X obj 428 199 sdPackFromHuman;
+#X obj 629 124 sdSetSelector get;
+#X floatatom 634 80 5 0 0 0 - - -;
+#X msg 605 196 list pack1 ( bla ) pack2 ( blubb );
+#X msg 404 172 list pack1 ( bla ) \, list pack2 ( blubb );
+#X obj 124 248 sdData bang pop popRev serialize serializeRev get,
+f 83;
+#X obj 555 276 print get;
+#X connect 0 0 22 0;
+#X connect 1 0 22 0;
+#X connect 3 0 22 0;
+#X connect 4 0 22 0;
+#X connect 5 0 22 0;
+#X connect 6 0 22 0;
+#X connect 7 0 22 0;
+#X connect 8 0 22 0;
+#X connect 14 0 22 0;
+#X connect 15 0 22 0;
+#X connect 16 0 22 0;
+#X connect 17 0 22 1;
+#X connect 18 0 22 0;
+#X connect 19 0 18 0;
+#X connect 20 0 17 0;
+#X connect 21 0 17 0;
+#X connect 22 0 13 0;
+#X connect 22 1 9 0;
+#X connect 22 2 10 0;
+#X connect 22 3 11 0;
+#X connect 22 4 12 0;
+#X connect 22 5 23 0;
 #X restore 225 65 pd example;
 #X text 15 16 sgData is a sequence of sgPacks;
 #X text 31 45 create by accumulating sgPacks:;

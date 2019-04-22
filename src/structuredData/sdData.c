@@ -114,6 +114,10 @@ void data_serialize(
 void data_serializeRev(
 	t_data *x
 );
+void data_get(
+	t_data *x,
+	t_float index
+);
 
 // helper:
 void data_outputAt(
@@ -212,6 +216,13 @@ t_class* register_data(
 		gensym("serializeRev"),
 		0
 	);
+	class_addmethod(
+		class,
+		(t_method )data_get,
+		gensym("get"),
+		A_FLOAT,
+		0
+	);
 
 	return class;
 }
@@ -280,6 +291,7 @@ void* data_init(
 				|| sym == gensym("popRev")
 				|| sym == gensym("serialize")
 				|| sym == gensym("serializeRev")
+				|| sym == gensym("get")
 			)
 			{
   			x->outletDescriptions[i] = sym;
@@ -287,7 +299,7 @@ void* data_init(
 			}
 			else
 			{
-				pd_error(x,"syntax: arg1 arg2 ..., argi one of: all, bang, pop, popRev, serialize, serializeRev");
+				pd_error(x,"syntax: arg1 arg2 ..., argi one of: all, bang, pop, popRev, serialize, serializeRev, get");
 				data_exit(x);
 				return NULL;
 			}
@@ -578,4 +590,28 @@ void data_serializeRev(
 			pEl->pData->atoms
 		);
 	LIST_FORALL_REV_END(PackList,PackEl,Pack, & x->packs, i, pEl)
+}
+
+void data_get(
+	t_data *x,
+	t_float index
+)
+{
+	LIST_FORALL_BEGIN(PackList,PackEl,Pack, & x->packs, i, pEl)
+		unsigned int countAtomsInPack = atom_getint( & pEl->pData->atoms[1] ) + 2;
+		if(
+				(index >= 0 && i == index)
+				||
+				(index < 0 && i == (PackList_get_size( & x->packs ) + (t_int )index))
+		)
+		{
+			data_outputAt(
+				x,
+				gensym("get"),
+				countAtomsInPack,
+				pEl->pData->atoms
+			);
+			return;
+		}
+	LIST_FORALL_END(PackList,PackEl,Pack, & x->packs, i, pEl)
 }
