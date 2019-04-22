@@ -221,8 +221,8 @@ typedef enum e_pattern_atom_type {
 	RIGHT_PARENT, // )
 	ANY_SYM, // ?
 	ANY_SYM_BIND, // ?<bind>
-	START_BIND, // <bind>#[
-	END_BIND, // #]
+	START_BIND, // <bind>=[
+	END_BIND, // =]
 	STAR, // *
 	END // eof
 } t_pattern_atom_type;
@@ -266,13 +266,13 @@ BOOL lexer_input_next_tok(
 		BOOL bind // consider binding
 );
 
-// if input == "<bind>#[ ..." match "<bind>#["
+// if input == "<bind>=[ ..." match "<bind>=["
 // and start binding input to "<bind>"
 BOOL lexer_match_start_bind(
 		RuntimeInfo* rt
 );
 
-// if input == "#] ...", match "#]"
+// if input == "=] ...", match "=]"
 // and stop binding input
 BOOL lexer_match_end_bind(
 		RuntimeInfo* rt
@@ -957,7 +957,7 @@ BOOL match_rec(
 			// "* ..."
 			lexer_pattern_peek( rt, 0) == STAR
 			|| 
-			// "<bind>#[ * ..."
+			// "<bind>=[ * ..."
 			( lexer_pattern_peek( rt, 0) == START_BIND && lexer_pattern_peek( rt, 1) == STAR )
 	)
 	{
@@ -1020,7 +1020,7 @@ BOOL arbitrary_mode(
 		RuntimeInfo* rt
 )
 {
-	// eat '<bind>#['
+	// eat '<bind>=['
 	if(
 		!lexer_match_start_bind( rt )
 	)
@@ -1058,7 +1058,7 @@ BOOL arbitrary_mode(
 		{
 			match_error(
 					rt,
-					"#] expected!"
+					"=] expected!"
 			);
 			return FALSE;
 		}
@@ -1197,9 +1197,9 @@ BOOL pack_mode(
 		RuntimeInfo* rt
 )
 {
-	// we know '<bind>#[ * ...' or '* ...'
+	// we know '<bind>=[ * ...' or '* ...'
 	
-	// if the '*' is between #[ ... #], we set this
+	// if the '*' is between =[ ... =], we set this
 	// variable to the name to bind to ("" otherwise)
 	CharBuf bind_arbitrary_sym;
 	CharBuf_init( & bind_arbitrary_sym, CHARBUF_SIZE);
@@ -1208,7 +1208,7 @@ BOOL pack_mode(
 			""
 	);
 
-	// #[ ...
+	// =[ ...
 	if( lexer_pattern_peek( rt, 0 ) == START_BIND )
 	{
 		if( !lexer_match_start_bind( rt ) )
@@ -1227,7 +1227,7 @@ BOOL pack_mode(
 		CharBuf_exit( & bind_arbitrary_sym );
 		return FALSE;
 	}
-	// '#] ...'
+	// '=] ...'
 	if( lexer_pattern_peek( rt, 0 ) == END_BIND )
 	{
 		if( !lexer_match_end_bind( rt ) )
@@ -1378,7 +1378,7 @@ BOOL pack_mode_read_pattern(
 		subPatternInfo->pattern_size =
 			rt->pattern_pos;
 
-		// #] ...
+		// =] ...
 		if(
 				lexer_pattern_peek( rt, 0 ) == END_BIND
 		)
@@ -1654,7 +1654,7 @@ t_pattern_atom_type lexer_pattern_peek(
 	char buf[CharBuf_get_size( & rt->bind_sym )];
 	atom_string( & rt->pattern[ pattern_pos], buf, CharBuf_get_size( & rt->bind_sym ) );
 	int len = strlen( buf );
-	int pos_sep = (strchr( buf, '#' ) - buf);
+	int pos_sep = (strchr( buf, '=' ) - buf);
 	// '?'
 	if( len == 1 && buf[0] == '?' )
 	{
@@ -1665,7 +1665,7 @@ t_pattern_atom_type lexer_pattern_peek(
 	{
 		return ANY_SYM_BIND;
 	}
-	// <bind_sym>#[
+	// <bind_sym>=[
 	else if(
 			pos_sep + 1 == len - 1
 			&& buf[pos_sep+1] == '['
@@ -1673,10 +1673,10 @@ t_pattern_atom_type lexer_pattern_peek(
 	{
 		return START_BIND;
 	}
-	// #]
+	// =]
 	else if(
 			len == 2
-			&& buf[0] == '#'
+			&& buf[0] == '='
 			&& buf[1] == ']'
 	)
 	{
@@ -1908,7 +1908,7 @@ BOOL lexer_match_next_any(
 			{
 				match_error(
 						rt,
-						"#] found! internal error!"
+						"=] found! internal error!"
 				);
 				return FALSE;
 			}
@@ -1958,7 +1958,7 @@ BOOL lexer_input_next_tok(
 	return TRUE;
 }
 
-// if input == "<bind>#[ ..." match "<bind>#["
+// if input == "<bind>=[ ..." match "<bind>=["
 // and start binding input to "<bind>"
 BOOL lexer_match_start_bind(
 		RuntimeInfo* rt
@@ -1972,17 +1972,17 @@ BOOL lexer_match_start_bind(
 		{
 			match_error(
 					rt,
-					"ERROR: #[ before closing #]!"
+					"ERROR: =[ before closing =]!"
 			);
 			return FALSE;
 		}
 		char buf[CharBuf_get_size( & rt->bind_sym )];
 		atom_string( & rt->pattern[ rt->pattern_pos], buf, CharBuf_get_size( & rt->bind_sym ) );
-		int pos_sep = (strchr( buf, '#' ) - buf);
+		int pos_sep = (strchr( buf, '=' ) - buf);
 		buf[pos_sep] = '\0';
 		match_db_print(
 				rt,
-				"%s#[",
+				"%s=[",
 				buf
 		);
 		if(
@@ -1997,7 +1997,7 @@ BOOL lexer_match_start_bind(
 	return TRUE;
 }
 
-// if input == "#] ...", match "#]"
+// if input == "=] ...", match "=]"
 // and stop binding input
 BOOL lexer_match_end_bind(
 		RuntimeInfo* rt
@@ -2013,13 +2013,13 @@ BOOL lexer_match_end_bind(
 				{
 					match_error(
 							rt,
-							"ERROR in pattern: #] before #[ !"
+							"ERROR in pattern: =] before =[ !"
 					);
 					return FALSE;
 				}
 				match_db_print(
 						rt,
-						"#]"
+						"=]"
 				);
 				//
 				if(
@@ -2072,7 +2072,7 @@ BOOL lexer_set_end_bind(
 		{
 			match_error(
 					rt,
-					"ERROR in pattern: '#[' was opened on level %i, but #] on level %i!",
+					"ERROR in pattern: '=[' was opened on level %i, but =] on level %i!",
 					rt->bind_start_level, rt->rec_depth
 			);
 			return FALSE;
@@ -2165,12 +2165,12 @@ void pattern_atom_type_to_str(
 		break;
 		case START_BIND:
 		{
-			sprintf( buf, "<bind>#[" );
+			sprintf( buf, "<bind>=[" );
 		}
 		break;
 		case END_BIND:
 		{
-			sprintf( buf, "#]" );
+			sprintf( buf, "=]" );
 		}
 		break;
 		case STAR:
