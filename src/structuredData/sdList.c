@@ -95,6 +95,9 @@ void list_get(
 	t_list *x,
 	t_float index
 );
+void list_count(
+	t_list *x
+);
 void list_find(
 	t_list *x,
 	t_symbol *s,
@@ -223,6 +226,12 @@ t_class* register_list(
 	);
 	class_addmethod(
 		class,
+		(t_method )list_count,
+		gensym("count"),
+		0
+	);
+	class_addmethod(
+		class,
 		(t_method )list_find,
 		gensym("find"),
 		A_GIMME,
@@ -285,6 +294,7 @@ void* list_init(
 				|| sym == gensym("pop")
 				|| sym == gensym("popRev")
 				|| sym == gensym("get")
+				|| sym == gensym("count")
 				|| sym == gensym("find")
 				|| sym == gensym("findAll")
 				|| sym == gensym("serialize")
@@ -297,7 +307,7 @@ void* list_init(
 			}
 			else
 			{
-				pd_error(x,"syntax: arg1 arg2 ..., argi one of: all, bang, pop, popRev, serialize, serializeRev, get, equal");
+				pd_error(x,"syntax: arg1 arg2 ..., argi one of: all, bang, pop, popRev, serialize, serializeRev, get, count, equal");
 				list_exit(x);
 				return NULL;
 			}
@@ -567,6 +577,21 @@ void list_get(
 			pEl = AtomList_get_prev( & x->atoms, pEl );
 		}
 	}
+}
+
+void list_count(
+	t_list *x
+)
+{
+	t_atom ret;
+	SETFLOAT( & ret, AtomList_get_size( & x->atoms ) );
+	list_outputAt(
+		x,
+		gensym("count"),
+		1,
+		&ret
+	);
+	return;
 }
 
 void list_find(
