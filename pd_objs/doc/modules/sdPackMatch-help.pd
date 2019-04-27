@@ -1,4 +1,4 @@
-#N canvas 0 30 803 722 10;
+#N canvas 0 30 844 722 10;
 #N canvas 0 30 846 854 basic 0;
 #X msg 144 85 list x;
 #X obj 131 127 sdPackFromHuman;
@@ -323,5 +323,63 @@ run);
 #X connect 13 0 12 0;
 #X connect 14 0 13 0;
 #X connect 16 0 12 0;
-#X restore 55 608 pd pattern+script;
+#X restore 58 513 pd pattern+script;
 #X msg 307 470 analog ( content=[ * =] index ( * ) );
+#N canvas 0 30 844 722 test_performance 0;
+#X msg 341 62 clear \, add_script out_vol ( key ( * symbol ( a ) value
+( 1 ) ) ) ( Print ( Pack ( play Pack ( pitch 0 ) ) ) Out ( list ) )
+\, add_script out_vol ( key ( * symbol ( s ) value ( 1 ) ) ) ( Print
+( Pack ( play Pack ( pitch 2 ) ) ) Out ( list ) ) \, add_script out_vol
+( key ( * symbol ( d ) value ( 1 ) ) ) ( Print ( Pack ( play Pack (
+pitch 4 ) ) ) Out ( list ) ) \, add_script out_vol ( key ( * symbol
+( f ) value ( 1 ) ) ) ( Print ( Pack ( play Pack ( pitch 5 ) ) ) Out
+( list ) ) \, add_script out_vol ( key ( * symbol ( g ) value ( 1 )
+) ) ( Print ( Pack ( play Pack ( pitch 7 ) ) ) Out ( list ) ) \, add_script
+out_vol ( key ( * symbol ( h ) value ( 1 ) ) ) ( Print ( Pack ( play
+Pack ( pitch 9 ) ) ) Out ( list ) ) \, add_script out_vol ( key ( *
+symbol ( j ) value ( 1 ) ) ) ( Print ( Pack ( play Pack ( pitch 11
+) ) ) Out ( list ) ) \, add_script out_vol ( key ( * symbol ( k ) value
+( 1 ) ) ) ( Print ( Pack ( play Pack ( pitch 12 ) ) ) Out ( list )
+) \, add_script out_vol ( key ( * symbol ( w ) value ( 1 ) ) ) ( Print
+( Pack ( play Pack ( pitch 1 ) ) ) Out ( list ) ) \, add_script out_vol
+( key ( * symbol ( e ) value ( 1 ) ) ) ( Print ( Pack ( play Pack (
+pitch 3 ) ) ) Out ( list ) ) \, add_script out_vol ( key ( * symbol
+( t ) value ( 1 ) ) ) ( Print ( Pack ( play Pack ( pitch 6 ) ) ) Out
+( list ) ) \, add_script out_vol ( key ( * symbol ( z ) value ( 1 )
+) ) ( Print ( Pack ( play Pack ( pitch 8 ) ) ) Out ( list ) ) \, add_script
+out_vol ( key ( * symbol ( u ) value ( 1 ) ) ) ( Print ( Pack ( play
+Pack ( pitch 10 ) ) ) Out ( list ) );
+#X obj 156 621 sdPackMatch;
+#X obj 156 644 print;
+#X obj 128 67 keyname;
+#X obj 128 116 pack f s;
+#X obj 126 181 sdEvent key value symbol;
+#X obj 341 39 loadbang;
+#X msg 367 418 clear \, add_script out_vol ( key ( * symbol ( a ) value
+( 1 ) ) ) ( ) \, add_script out_vol ( key ( * symbol ( s ) value (
+1 ) ) ) ( ) \, add_script out_vol ( key ( * symbol ( d ) value ( 1
+) ) ) ( ) \, add_script out_vol ( key ( * symbol ( f ) value ( 1 )
+) ) ( ) \, add_script out_vol ( key ( * symbol ( g ) value ( 1 ) )
+) ( ) \, add_script out_vol ( key ( * symbol ( h ) value ( 1 ) ) )
+( ) \, add_script out_vol ( key ( * symbol ( j ) value ( 1 ) ) ) (
+) \, add_script out_vol ( key ( * symbol ( k ) value ( 1 ) ) ) ( )
+\, add_script out_vol ( key ( * symbol ( w ) value ( 1 ) ) ) ( ) \,
+add_script out_vol ( key ( * symbol ( e ) value ( 1 ) ) ) ( ) \, add_script
+out_vol ( key ( * symbol ( t ) value ( 1 ) ) ) ( ) \, add_script out_vol
+( key ( * symbol ( z ) value ( 1 ) ) ) ( ) \, add_script out_vol (
+key ( * symbol ( u ) value ( 1 ) ) ) ( );
+#X obj 126 158 sdGate;
+#X obj 212 128 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X text 232 127 enable test;
+#X connect 0 0 1 0;
+#X connect 1 0 2 0;
+#X connect 3 0 4 0;
+#X connect 3 1 4 1;
+#X connect 4 0 8 0;
+#X connect 5 0 1 0;
+#X connect 6 0 0 0;
+#X connect 7 0 1 0;
+#X connect 8 0 5 0;
+#X connect 9 0 8 1;
+#X restore 62 596 pd test_performance;
