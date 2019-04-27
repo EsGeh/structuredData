@@ -42,7 +42,8 @@ typedef enum e_last_method { LAST_METHOD_SET, LAST_METHOD_GET } t_last_method;
 typedef struct s_objState {
   t_object x_obj;
 	t_symbol* objName;
-	t_symbol* globalIn;
+	SymList groups;
+	//t_symbol* globalIn;
 	SymList* outList;
 	t_last_method last_method;
 	BOOL enable_accuml;
@@ -167,20 +168,15 @@ void* objState_init(
 {
   t_objState *x = (t_objState *)pd_new(objState_class);
 
-	if( argc < 1 || argc > 2 )
+	if( argc < 1 )
 	{
-		pd_error( x, "to few parameters. syntax: objName [globalIn]" );
+		pd_error( x, "to few parameters. syntax: objName [group1] ..." );
 		return NULL;
 	}
-	else if( argv[0].a_type != A_SYMBOL || argv[1].a_type != A_SYMBOL )
-	{
-		pd_error( x, "symbol expected. syntax: objName [globalIn]" );
-		return NULL;
-	}
-
+	SymList_init( & x->groups );
 	if( atom_getsymbol( &argv[0] ) == gensym("") )
 	{
-		pd_error( x, "invalid objName. syntax: objName [globalIn]");
+		pd_error( x, "invalid objName. syntax: objName [group1] ...");
 		return NULL;
 	}
 	else
@@ -188,13 +184,20 @@ void* objState_init(
 		x->objName = atom_getsymbol( &argv[0] );
 	}
 
-	if( argc != 2 )
+	for( int i=1; i< argc; i++ )
 	{
-		x->globalIn = gensym("GLOBAL");
+		if( atom_getsymbol( & argv[i] ) == gensym("") )
+		{
+			pd_error( x, "invalid group name at pos %i. syntax: objName [group1] ...", i );
+			return NULL;
+		}
+		SymList_append( & x->groups, atom_getsymbol( & argv[i] ) );
 	}
-	else
+
+	// init groupIn:
+	if( argc == 1 )
 	{
-		x->globalIn = atom_getsymbol( &argv[1] );
+		SymList_append( & x->groups, gensym("GLOBAL") );
 	}
 
 	x->outList = getbytes( sizeof( SymList ) );
@@ -214,11 +217,13 @@ void* objState_init(
 		x->objName
 	);
 
-	// receive GLOBAL:
-	pd_bind(
-		& x->x_obj.ob_pd,
-		x->globalIn
-	);
+	LIST_FORALL_BEGIN(SymList,SymEl,t_symbol,&x->groups,i,pEl)
+		// receive group messages:
+		pd_bind(
+			& x->x_obj.ob_pd,
+			pEl->pData
+		);
+	LIST_FORALL_END(SymList,SymEl,t_symbol,&x->groups,i,pEl)
 
 	x->toObj_in =
 		x->x_obj.ob_inlet;
@@ -259,10 +264,13 @@ void objState_exit(
 		x->objName
 	);
 
-	pd_unbind(
-		& x->x_obj.ob_pd,
-		x->globalIn
-	);
+	LIST_FORALL_BEGIN(SymList,SymEl,t_symbol,&x->groups,i,pEl)
+		// unbind from groups:
+		pd_unbind(
+			& x->x_obj.ob_pd,
+			pEl->pData
+		);
+	LIST_FORALL_END(SymList,SymEl,t_symbol,&x->groups,i,pEl)
 
 	AtomBuffer_exit( & x->accumlArray );
 	SymList_exit( x->outList );
