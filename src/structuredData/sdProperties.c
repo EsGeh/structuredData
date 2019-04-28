@@ -444,6 +444,7 @@ int property_initall(
 		}
 		AtomList_append( & x->value, init_val );
 	}
+	x->init_type = INITTYPE_NONE;
 	if( argc >= 4 )
 	{
 		if( atom_getsymbol( &argv[3] ) == gensym("intern") )
@@ -463,10 +464,6 @@ int property_initall(
 			pd_error( x, "sdProperty %s: wrong type for init value. syntax: '<prop_name> [$0 default init]', init one of: 'intern', 'update'", buf );
 			return 1;
 		}
-	}
-	else
-	{
-		x->init_type = INITTYPE_NONE;
 	}
 
 	x->fromObjIn_in =
