@@ -399,6 +399,11 @@ int property_initall(
 	AtomList_init( & x->value );
 
 	// type checking:
+	/* the following code would lead to problems...:
+	 * if $1 or similar is used as argv[2], pd sets its type
+	 * to float if it is empty. This should not lead to errors.
+	*/
+	/*
 	if(
 	 x->type == PROPTYPE_SYMBOL && argc >= 3 && argv[2].a_type != A_SYMBOL
 	)
@@ -410,6 +415,7 @@ int property_initall(
 		pd_error( x, "sdPropertySym %s: wrong type for default value. syntax: '<prop_name> [$0 default]'", buf );
 		return 1;
 	}
+	*/
 	if(
 	 x->type == PROPTYPE_FLOAT && argc >= 3 && argv[2].a_type != A_FLOAT
 	)
