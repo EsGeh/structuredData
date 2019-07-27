@@ -6,7 +6,8 @@
 
 set dependencies \
 	fishshell_cmd_opts \
-	c_container_types
+	c_container_types \
+	zexy
 
 # for every entry in $dependencies:
 # 	name uri version [init-command]
@@ -19,3 +20,9 @@ set c_container_types \
 	c_container_types \
 	https://github.com/EsGeh/c_container_types.git \
 	1dd08da6c24fb7e9fc062e48b5760b406810be5f
+
+set zexy \
+	zexy \
+	https://git.iem.at/pd/zexy \
+	b078a0ed5f32444b65d2fd6235127d72e4129646 \
+	"make"
