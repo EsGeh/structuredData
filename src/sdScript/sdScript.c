@@ -124,7 +124,9 @@ void Script_exec(
 	t_symbol* prog_name
 )
 {
+	Script_stop( rt );
 	// if some program is still loaded, clean it up:
+	/*
 	if(
 			ProgStack_get_size( & rt -> program_stack )
 	)
@@ -132,6 +134,7 @@ void Script_exec(
 		ProgStack_clear( & rt -> program_stack );
 		clock_unset( rt -> clock );
 	}
+	*/
 
 	rt -> jump_to_program = prog_name;
 
@@ -140,6 +143,22 @@ void Script_exec(
 	);
 }
 
+/* if a program is loaded, delete it
+ * (including timers!)
+*/
+void Script_stop(
+	ScriptData* rt
+)
+{
+	if(
+			ProgStack_get_size( & rt -> program_stack )
+	)
+	{
+		clock_unset( rt -> clock );
+		ProgStack_clear( & rt -> program_stack );
+	}
+	rt -> jump_to_program = NULL;
+}
 
 // ****************************
 // low level execution control:
@@ -502,7 +521,7 @@ void utils_try_to_exec_immediately(
 	// if the topmost command is a dont-read-all-parameters-command:
 	if( pElCurrentCommand->pData -> pCommandInfo -> executeAfter != -1)
 	{
-		DB_PRINT("trying to executed immediately...:");
+		DB_PRINT("trying to execute immediately...:");
 		CommandInfo* pCommandInfo = pElCurrentCommand->pData -> pCommandInfo;
 		// check if there are enough values on stack now to call the next command
 		t_int paramCount =
@@ -511,7 +530,33 @@ void utils_try_to_exec_immediately(
 		;
 		if( paramCount== pCommandInfo -> executeAfter )
 		{
+			CommandInfo* pContinuation =
+				pElCurrentCommand -> pData -> pCommandInfo -> continuation_func;
 			utils_call_command(rt, pCommandInfo, paramCount);
+			CommandStack_del( & rt -> command_stack, pElCurrentCommand);
+
+			// add continuation:
+			if( pContinuation == NULL )
+			{
+				post( "INTERNAL ERROR: no continuation function specified!" );
+			}
+			if( ! rt->skipMode )
+			{
+				utils_push_cmd(
+						rt,
+						pContinuation
+				);
+			}
+			/*
+			CmdRuntimeData* pCurrentCmdRuntimeData = getbytes(sizeof(CmdRuntimeData));
+			pCurrentCmdRuntimeData -> stackHeight0 =
+				AtomList_get_size ( & prog_rt -> stack );
+			pCurrentCmdRuntimeData -> pCommandInfo = get_RETURN_ALL(
+					prog_rt -> rt -> command_infos
+			);
+			CommandStack_append( & prog_rt -> command_stack, pCurrentCmdRuntimeData);
+			*/
+
 		}
 		else if( paramCount > pCommandInfo -> executeAfter)
 		{
@@ -519,7 +564,6 @@ void utils_try_to_exec_immediately(
 			atom_string(& pCommandInfo->name, buf, 256);
 			post("ERROR: wrong number of parameters for %s", buf);
 		}
-		CommandStack_del( & rt -> command_stack, pElCurrentCommand);
 	}
 }
 

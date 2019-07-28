@@ -213,6 +213,8 @@ void script_obj_on_set_program(
 		);
 	}
 
+	Script_stop( &this->script_data );
+
 	t_symbol* prog_name = atom_getsymbol(
 		& argv[0]
 	);
@@ -242,6 +244,8 @@ void script_obj_on_set_bang(
 )
 {
 	DB_PRINT("script_obj_on_set_bang");
+
+	Script_stop( &this->script_data );
 
 	t_symbol* prog_name = gensym( "bang" );
 	int prog_size = argc;

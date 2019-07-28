@@ -25,6 +25,9 @@ typedef struct SCommandInfo {
 	  -1 is the usual behaviour. the command is called when all parameters have
 	  	been parsed, that means when the ')' is found.
 	*/
+	// if 'executeAfter' == TRUE and rt->skipMode == FALSE,
+	// this function is called with the remaining arguments:
+	struct SCommandInfo* continuation_func;
 
 	POperatorFunction pFunc;
 } CommandInfo;

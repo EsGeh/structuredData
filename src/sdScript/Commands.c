@@ -98,6 +98,23 @@ PFUNCTION_HEADER( delay );
 // call an other command as sub routine:
 PFUNCTION_HEADER( callFunction );
 
+#define ADD_FUNCTION_CONTINUATION( NAME,PFUNC,PARAMCOUNT,EXECAFTER, CONTINUATION) \
+{ \
+	t_atom atomName; \
+	SETSYMBOL( &atomName, gensym( NAME ) ); \
+ \
+	CommandInfo func = { \
+		.name = atomName, \
+		.paramCount = PARAMCOUNT, \
+		.executeAfter = EXECAFTER, \
+		.continuation_func = CONTINUATION, \
+		.pFunc = PFUNC \
+	}; \
+	CommandInfos_append( command_infos, \
+			func \
+	); \
+}
+
 #define ADD_FUNCTION( NAME,PFUNC,PARAMCOUNT,EXECAFTER) \
 { \
 	t_atom atomName; \
@@ -107,6 +124,7 @@ PFUNCTION_HEADER( callFunction );
 		.name = atomName, \
 		.paramCount = PARAMCOUNT, \
 		.executeAfter = EXECAFTER, \
+		.continuation_func = NULL, \
 		.pFunc = PFUNC \
 	}; \
 	CommandInfos_append( command_infos, \
@@ -135,7 +153,6 @@ CommandInfos* commands_init()
 	ADD_FUNCTION("GetA",&getVarA,2,-1);
 	ADD_FUNCTION("Set",&setVar,-1,-1);
 	ADD_FUNCTION("SetA",&setVarA,-1,-1);
-	ADD_FUNCTION("If",&if_,-1,1);
 	ADD_FUNCTION("VarMain",&addMainVar,-1,-1);
 	ADD_FUNCTION("ClearMain",&clearMain,0,-1);
 
@@ -229,6 +246,8 @@ CommandInfos* commands_init()
 			command_infos,
 			&atom_temp
 	);
+
+	ADD_FUNCTION_CONTINUATION("If",&if_,-1,1, pRETURN_ALL);
 	return command_infos;
 }
 
@@ -564,12 +583,14 @@ PFUNCTION_HEADER( if_ )
 {
 	if( atom_getfloat(& pArgs[0]) )
 	{
+		/*
 		CmdRuntimeData* pCurrentCmdRuntimeData = getbytes(sizeof(CmdRuntimeData));
 		pCurrentCmdRuntimeData -> stackHeight0 = AtomList_get_size ( & prog_rt -> stack );
 		pCurrentCmdRuntimeData -> pCommandInfo = get_RETURN_ALL(
 				prog_rt -> rt -> command_infos
 		);
 		CommandStack_append( & prog_rt -> command_stack, pCurrentCmdRuntimeData);
+		*/
 	}
 	else
 	{
@@ -1206,6 +1227,13 @@ PFUNCTION_HEADER( sdDataGetPackFromTypeRest )
 // returns the first sdPack
 PFUNCTION_HEADER( sdDataGetFirst )
 {
+	if( countArgs == 0)
+		return;
+	if( countArgs < 2)
+	{
+		post("WARNING: sdDataGetRest: invalid pack!");
+		return;
+	}
 	t_int pos = 0;
 	
 	t_int count = atom_getfloat(& pArgs[pos+1]);
@@ -1220,14 +1248,16 @@ PFUNCTION_HEADER( sdDataGetFirst )
 
 PFUNCTION_HEADER( sdDataGetRest )
 {
+	if( countArgs == 0)
+		return;
+	if( countArgs < 2)
+	{
+		post("WARNING: sdDataGetRest: invalid pack!");
+		return;
+	}
 	t_int pos = 0;
 	
 	t_int count = atom_getfloat(& pArgs[pos+1]);
-	for( int i=pos; i<pos+2+count; i++ )
-	{
-		t_atom* pAtom = getbytes( sizeof(t_atom));
-		(*pAtom) = pArgs[i] ;
-	}
 	pos += (2 + count);
 	for( ; pos<countArgs; pos++ )
 	{

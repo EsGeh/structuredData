@@ -130,7 +130,15 @@ void Script_exec(
 	t_symbol* prog_name
 );
 
+/* if a program is loaded, delete it
+ * (including timers!)
+*/
+void Script_stop(
+	ScriptData* rt
+);
+
 // continue after the program has been paused ...:
+// (this should be run by a timer)
 void Script_continue(
 	ScriptData* rt
 );
