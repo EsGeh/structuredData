@@ -97,7 +97,7 @@ begin
 	if not set -q debug
 		set cmd "$BASE_DIR/configure --prefix=$install_prefix"
 	else
-		set flags -DDEBUG -O0
+		set flags -g -DDEBUG -O0
 		set cmd "$BASE_DIR/configure CFLAGS='$flags' --prefix=$install_prefix"
 	end
 	eval $cmd

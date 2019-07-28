@@ -1,5 +1,5 @@
-#N canvas 0 30 844 722 10;
-#N canvas 0 30 846 854 basic 0;
+#N canvas 0 30 762 722 10;
+#N canvas 0 30 803 722 basic 0;
 #X msg 144 85 list x;
 #X obj 131 127 sdPackFromHuman;
 #X obj 230 177 sdPackMatch;
@@ -325,7 +325,7 @@ run);
 #X connect 16 0 12 0;
 #X restore 58 513 pd pattern+script;
 #X msg 307 470 analog ( content=[ * =] index ( * ) );
-#N canvas 0 30 844 722 test_performance 0;
+#N canvas 0 30 803 722 test_performance 0;
 #X msg 341 62 clear \, add_script out_vol ( key ( * symbol ( a ) value
 ( 1 ) ) ) ( Print ( Pack ( play Pack ( pitch 0 ) ) ) Out ( list ) )
 \, add_script out_vol ( key ( * symbol ( s ) value ( 1 ) ) ) ( Print

@@ -8,7 +8,8 @@ set doc_dir $BASE_DIR/doc
 
 
 # (enabled audio, to test performance issues)
-pd \
+
+set args \
 	-nrt \
 	-noprefs \
 	-stderr \
@@ -18,3 +19,7 @@ pd \
 	-path "$doc_dir" \
 	-lib "structuredDataC" \
 	"$doc_dir/structuredDataC_doc.pd"
+
+# gdb -ex "run $args" pd
+
+valgrind pd $args
