@@ -1,9 +1,9 @@
-#N canvas 0 30 846 854 10;
+#N canvas 0 30 762 722 10;
 #X obj 127 22 inlet;
 #X obj 495 301 symbol;
 #X obj 480 258 t s b;
 #X obj 487 359 pack s s;
-#X text 525 558 \$1: this \; \$2: obj to connect to;
+#X text 386 94 \$1: this \; \$2: obj to connect to;
 #X obj 450 332 sdFirst;
 #X msg 486 384 \; \$1 list out 2 del \$2;
 #X obj 355 368 outlet;
