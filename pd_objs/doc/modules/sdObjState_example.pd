@@ -1,4 +1,4 @@
-#N canvas 0 30 803 722 10;
+#N canvas 683 30 681 118 10;
 #X text 525 178 "generic" gui to read/write objects:;
 #N canvas 0 407 681 345 other 0;
 #X obj 269 270 send, f 18;
@@ -68,7 +68,7 @@ about its state:;
 #X text 31 17 define an "instrument" as an stateful object with some
 properties:;
 #X text 382 53 <- open abstraction to see details;
-#N canvas 0 30 803 722 UserInterface 0;
+#N canvas 0 30 681 722 UserInterface 1;
 #X text 345 8 1 click update_ui;
 #X text 345 25 2 select an object;
 #X text 344 44 now you can:;
@@ -103,6 +103,10 @@ properties:;
 #X msg 386 423 list set_num_by_ind_in_range ( \$2 \$1 );
 #X obj 204 631 sdObjInterface_obj objIF, f 32;
 #X obj 470 633 sdObjGroupsInterface_obj objIF;
+#X obj 9 509 print GUI.out;
+#X obj 331 495 print genericObj.out;
+#X connect 5 0 34 0;
+#X connect 5 1 35 0;
 #X connect 6 0 7 0;
 #X connect 8 0 6 0;
 #X connect 9 0 8 0;
