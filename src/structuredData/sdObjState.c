@@ -37,7 +37,10 @@ DEF_DYN_ARRAY(AtomBuffer,t_atom,getbytes,freebytes)
 // objState
 //----------------------------------
 
-typedef enum e_last_method { LAST_METHOD_SET, LAST_METHOD_GET } t_last_method;
+typedef enum e_last_method {
+	LAST_METHOD_SET,
+	LAST_METHOD_GET
+} t_last_method;
 
 typedef struct s_objState {
   t_object x_obj;
@@ -98,6 +101,7 @@ void objState_sendEvent(
 void objState_get(
 	t_objState* x,
 	t_atom* prop,
+	t_symbol* message,
 	int out_count,
 	t_atom* out
 );
@@ -360,6 +364,8 @@ void objState_input(
 	// get ( out ( dest1 ... ) )
 	else if(
 		atom_getsymbol( & argv[0] ) == gensym("get")
+		|| atom_getsymbol( & argv[0] ) == gensym("get_range")
+		|| atom_getsymbol( & argv[0] ) == gensym("get_with_range")
 	)
 	{
 		x->last_method = LAST_METHOD_GET;
@@ -374,6 +380,7 @@ void objState_input(
 			objState_get(
 				x,
 				&argv[2],
+				atom_getsymbol( & argv[0] ),
 				0,
 				NULL
 			);
@@ -396,6 +403,7 @@ void objState_input(
 			objState_get(
 					x,
 					NULL,
+					atom_getsymbol( & argv[0] ),
 					out_count,
 					out
 			);
@@ -420,6 +428,7 @@ void objState_input(
 			objState_get(
 					x,
 					prop,
+					atom_getsymbol( & argv[0] ),
 					out_count,
 					out
 			);
@@ -440,6 +449,14 @@ void objState_input(
 		atom_getsymbol( & argv[0] ) == gensym("set")
 		|| 
 		atom_getsymbol( & argv[0] ) == gensym("set_no_out")
+		||
+		atom_getsymbol( & argv[0] ) == gensym("set_in_range")
+		||
+		atom_getsymbol( & argv[0] ) == gensym("set_in_range_no_out")
+		||
+		atom_getsymbol( & argv[0] ) == gensym("set_min")
+		||
+		atom_getsymbol( & argv[0] ) == gensym("set_max")
 	)
 	{
 		x->last_method = LAST_METHOD_SET;
@@ -558,6 +575,7 @@ void objState_rawinput(
 		}
 		if(
 			atom_getsymbol( & argv[0] ) == gensym("get")
+			|| atom_getsymbol( & argv[0] ) == gensym("get_range")
 		)
 		{
 			x->last_method = LAST_METHOD_GET;
@@ -571,6 +589,7 @@ void objState_rawinput(
 				objState_get(
 						x,
 						& argv[1],
+						atom_getsymbol( & argv[0] ),
 						0,
 						NULL
 					);
@@ -586,6 +605,7 @@ void objState_rawinput(
 				objState_get(
 						x,
 						NULL,
+						atom_getsymbol( & argv[0] ),
 						out_count,
 						& argv[2]
 				);
@@ -602,6 +622,7 @@ void objState_rawinput(
 				objState_get(
 						x,
 						& argv[1],
+						atom_getsymbol( & argv[0] ),
 						out_count,
 						& argv[3]
 				);
@@ -723,6 +744,7 @@ void objState_sendEvent(
 void objState_get(
 	t_objState* x,
 	t_atom* prop,
+	t_symbol* message,
 	int out_count,
 	t_atom* out
 )
@@ -732,7 +754,7 @@ void objState_get(
 		// send to obj: "get <property>"
 		outlet_anything(
 			x->toProperties_out,
-			gensym("get"),
+			message,
 			1,
 			prop
 		);
@@ -756,7 +778,7 @@ void objState_get(
 			// send to obj: "get ( )":
 			outlet_anything(
 				x->toProperties_out,
-				gensym("get"),
+				message,
 				0,
 				NULL
 			);
@@ -789,7 +811,7 @@ void objState_get(
 			// query properties:
 			outlet_anything(
 				x->toProperties_out,
-				gensym("get"),
+				message,
 				1,
 				prop
 			);

@@ -45,6 +45,8 @@ typedef struct s_property {
   t_object x_obj;
 	t_symbol* name;
 	t_property_type type;
+	t_atom range[3]; // name, min, max
+	// t_float min, max;
 	AtomList value;
 	t_symbol* rcv_sym;
 	t_symbol* send_sym;
@@ -86,8 +88,41 @@ void property_on_get(
 	int argc,
 	t_atom *argv
 );
+void property_on_get_range(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+void property_on_get_with_range(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
 
 void property_on_set(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+void property_on_set_in_range(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+void property_on_set_min(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+void property_on_set_max(
 	t_property* x,
 	t_symbol *s,
 	int argc,
@@ -132,6 +167,9 @@ void property_set(
 );
 
 void property_output(
+	t_property* x
+);
+void property_output_range(
 	t_property* x
 );
 
@@ -225,8 +263,43 @@ void register_propertyMethods(
 	);
 	class_addmethod(
 		class,
+		(t_method )property_on_get_range,
+		gensym("get_range"),
+		A_GIMME,
+		0
+	);
+	class_addmethod(
+		class,
+		(t_method )property_on_get_with_range,
+		gensym("get_with_range"),
+		A_GIMME,
+		0
+	);
+	class_addmethod(
+		class,
 		(t_method )property_on_set,
 		gensym("set"),
+		A_GIMME,
+		0
+	);
+	class_addmethod(
+		class,
+		(t_method )property_on_set_in_range,
+		gensym("set_in_range"),
+		A_GIMME,
+		0
+	);
+	class_addmethod(
+		class,
+		(t_method )property_on_set_min,
+		gensym("set_min"),
+		A_GIMME,
+		0
+	);
+	class_addmethod(
+		class,
+		(t_method )property_on_set_max,
+		gensym("set_max"),
 		A_GIMME,
 		0
 	);
@@ -346,9 +419,9 @@ int property_initall(
 	}
 	else if( x->type == PROPTYPE_FLOAT || x->type == PROPTYPE_SYMBOL )
 	{
-		if( argc < 1 || argc > 4 )
+		if( argc < 1 || argc > 6 )
 		{
-			pd_error( x, "wrong number of parameters. syntax: <prop_name> [$0 default init?]" );
+			pd_error( x, "wrong number of parameters. syntax: <prop_name> [$0 default init? min max]" );
 			return 1;
 		}
 	}
@@ -424,7 +497,7 @@ int property_initall(
 		t_atom name;
 		SETSYMBOL( & name, x->name );
 		atom_string( & name, buf, 255 );
-		pd_error( x, "sdProperty %s: wrong type for default value. syntax: '<prop_name> [$0 default]'", buf );
+		pd_error( x, "sdProperty %s: wrong type for default value. syntax: '<prop_name> [$0 default init? min max]'", buf );
 		return 1;
 	}
 
@@ -464,6 +537,23 @@ int property_initall(
 			pd_error( x, "sdProperty %s: wrong type for init value. syntax: '<prop_name> [$0 default init]', init one of: 'intern', 'update'", buf );
 			return 1;
 		}
+	}
+	SETSYMBOL( & x->range[0], x->name );
+	if( argc >= 5 )
+	{
+		SETFLOAT( & x->range[1], atom_getfloat( &argv[4] ) );
+	}
+	else
+	{
+		SETFLOAT( & x->range[1], -1000 );
+	}
+	if( argc >= 6 )
+	{
+		SETFLOAT( & x->range[2], atom_getfloat( &argv[5] ) );
+	}
+	else
+	{
+		SETFLOAT( & x->range[2], 1000 );
 	}
 
 	x->fromObjIn_in =
@@ -540,6 +630,111 @@ void property_on_get(
 
 }
 
+void property_on_get_range(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	if(
+		// get <property>
+		(
+		x->type == PROPTYPE_FLOAT
+		&&
+		argc == 1
+		&& atom_getsymbol( &argv[0] ) == x->name
+		)
+	||
+		// get
+		(
+		x->type == PROPTYPE_FLOAT
+		&&
+		argc == 0
+		)
+	)
+	{
+		property_output_range(
+			x
+		);
+		// get:
+		if(
+			argc == 0
+		)
+		{
+			outlet_anything(
+				x->redirect_out,
+				s,
+				argc,
+				argv
+			);
+		}
+	}
+	else
+	{
+		outlet_anything(
+			x->redirect_out,
+			s,
+			argc,
+			argv
+		);
+	}
+}
+
+void property_on_get_with_range(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	if(
+		// get <property>
+		(
+		argc == 1
+		&& atom_getsymbol( &argv[0] ) == x->name
+		)
+	||
+		// get
+		argc == 0
+	)
+	{
+		// output property value:
+		property_output(
+			x
+		);
+		// output property range info:
+		
+		if( x->type == PROPTYPE_FLOAT )
+		{
+			property_output_range(
+				x
+			);
+		}
+		// get:
+		if(
+			argc == 0
+		)
+		{
+			outlet_anything(
+				x->redirect_out,
+				s,
+				argc,
+				argv
+			);
+		}
+	}
+	else
+	{
+		outlet_anything(
+			x->redirect_out,
+			s,
+			argc,
+			argv
+		);
+	}
+}
+
 void property_on_set(
 	t_property* x,
 	t_symbol *s,
@@ -613,6 +808,198 @@ void property_on_set(
 			);
 		}
 		property_output(
+			x
+		);
+	}
+	else
+	{
+		// redirect to other properties:
+		outlet_anything(
+			x->redirect_out,
+			s,
+			argc,
+			argv
+		);
+	}
+}
+
+void property_on_set_in_range(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	// set <property> <val1> <val2> ...
+
+	if(
+		argc >= 1
+		&& atom_getsymbol( &argv[0] ) == x->name
+	)
+	{
+
+		if(
+		 x->type != PROPTYPE_FLOAT
+		)
+		{
+				char name_buf[256];
+				t_atom name;
+				SETSYMBOL( & name, x->name );
+				atom_string( & name, name_buf, 255 );
+				pd_error( x, "error in sdPropertySym %s: set_in_range only valid for number properties", name_buf );
+				return;
+		}
+		if( argc != 2 || (argc == 2 && argv[1].a_type != A_FLOAT ) )
+		{
+			char name_buf[256];
+			t_atom name;
+			SETSYMBOL( & name, x->name );
+			atom_string( & name, name_buf, 255 );
+			pd_error( x, "error in sdProperty %s: type error! expected 'set_in_range <prop_name> <float>'", name_buf );
+			return;
+		}
+
+		t_atom new_val;
+		t_float min, max;
+		min = atom_getfloat( &x->range[1] );
+		max = atom_getfloat( &x->range[2] );
+		SETFLOAT( &new_val, atom_getfloat( & argv[1] ) * (max - min) + min );
+		property_set(
+				x,
+				1,
+				& new_val
+		);
+		if( x->send_sym && x->send_sym->s_thing )
+		{
+			AtomEl* first = AtomList_get_first( & x->value );
+			typedmess(
+				x->send_sym->s_thing,
+				&s_list,
+				argc-1,
+				first->pData
+			);
+		}
+		property_output(
+			x
+		);
+	}
+	else
+	{
+		// redirect to other properties:
+		outlet_anything(
+			x->redirect_out,
+			s,
+			argc,
+			argv
+		);
+	}
+}
+
+void property_on_set_min(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	// set <property> <val1> <val2> ...
+	if(
+		argc >= 1
+		&& atom_getsymbol( &argv[0] ) == x->name
+	)
+	{
+		if(
+		 x->type != PROPTYPE_FLOAT
+		)
+		{
+				char name_buf[256];
+				t_atom name;
+				SETSYMBOL( & name, x->name );
+				atom_string( & name, name_buf, 255 );
+				pd_error( x, "error in sdPropertySym %s: set_min only valid for number properties", name_buf );
+				return;
+		}
+		if( argc != 2 || (argc == 2 && argv[1].a_type != A_FLOAT ) )
+		{
+			char name_buf[256];
+			t_atom name;
+			SETSYMBOL( & name, x->name );
+			atom_string( & name, name_buf, 255 );
+			pd_error( x, "error in sdProperty %s: type error! expected 'set_min <prop_name> <float>'", name_buf );
+			return;
+		}
+		SETFLOAT( & x->range[1], atom_getfloat( &argv[1] ) );
+		if( x->send_sym && x->send_sym->s_thing )
+		{
+			AtomEl* first = AtomList_get_first( & x->value );
+			typedmess(
+				x->send_sym->s_thing,
+				&s_list,
+				argc-1,
+				first->pData
+			);
+		}
+		property_output_range(
+			x
+		);
+	}
+	else
+	{
+		// redirect to other properties:
+		outlet_anything(
+			x->redirect_out,
+			s,
+			argc,
+			argv
+		);
+	}
+}
+
+void property_on_set_max(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	// set <property> <val1> <val2> ...
+	if(
+		argc >= 1
+		&& atom_getsymbol( &argv[0] ) == x->name
+	)
+	{
+		if(
+		 x->type != PROPTYPE_FLOAT
+		)
+		{
+				char name_buf[256];
+				t_atom name;
+				SETSYMBOL( & name, x->name );
+				atom_string( & name, name_buf, 255 );
+				pd_error( x, "error in sdPropertySym %s: set_max only valid for number properties", name_buf );
+				return;
+		}
+		if( argc != 2 || (argc == 2 && argv[1].a_type != A_FLOAT ) )
+		{
+			char name_buf[256];
+			t_atom name;
+			SETSYMBOL( & name, x->name );
+			atom_string( & name, name_buf, 255 );
+			pd_error( x, "error in sdProperty %s: type error! expected 'set_max <prop_name> <float>'", name_buf );
+			return;
+		}
+		SETFLOAT( & x->range[2], atom_getfloat( &argv[1] ) );
+		if( x->send_sym && x->send_sym->s_thing )
+		{
+			AtomEl* first = AtomList_get_first( & x->value );
+			typedmess(
+				x->send_sym->s_thing,
+				&s_list,
+				argc-1,
+				first->pData
+			);
+		}
+		property_output_range(
 			x
 		);
 	}
@@ -920,4 +1307,17 @@ void property_output(
 		outArray
 	);
 	freebytes( outArray, sizeof( t_atom ) * value_count );
+}
+
+void property_output_range(
+	t_property* x
+)
+{
+	// output "range_info <property> min max"
+		outlet_anything(
+		x->out,
+		gensym("range_info"),
+		3,
+		x->range
+	);
 }
