@@ -30,6 +30,8 @@ data_DATA = \
 	$(PATH_PD_OBJS)/sdObjDuplexExample.pd \
 	$(PATH_PD_OBJS)/sdObjState_ui.pd \
 	$(PATH_PD_OBJS)/sdObjRcvExample.pd \
+	$(PATH_PD_OBJS)/sdObjInterface_obj.pd \
+	$(PATH_PD_OBJS)/sdObjGroupsInterface_obj.pd \
 	$(PATH_PD_OBJS)/sdTest.pd \
   $(PATH_PD_OBJS)/doc/structuredDataC_doc.pd \
   $(PATH_PD_OBJS)/doc/modules/sdData-help.pd \
