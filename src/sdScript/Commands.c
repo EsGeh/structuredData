@@ -319,6 +319,11 @@ PFUNCTION_HEADER( mul )
 PFUNCTION_HEADER( div_ )
 {
 	DB_PRINT("div");
+	if( atom_getint(& pArgs[1]) == 0)
+	{
+		post("ERROR: div: division by 0");
+		return;
+	}
 	t_atom* pResult = getbytes(sizeof(t_atom));
 	SETFLOAT( pResult, atom_getfloat(&pArgs[0]) / atom_getfloat(& pArgs[1]));
 	//push result on stack:
@@ -326,9 +331,14 @@ PFUNCTION_HEADER( div_ )
 }
 PFUNCTION_HEADER( mod )
 {
-	DB_PRINT("div");
+	DB_PRINT("mod");
+	if( atom_getint(& pArgs[1]) == 0)
+	{
+		post("ERROR: mod: division by 0");
+		return;
+	}
 	t_atom* pResult = getbytes(sizeof(t_atom));
-	SETFLOAT( pResult, (t_int )atom_getfloat(&pArgs[0]) % (t_int )atom_getfloat(& pArgs[1]));
+	SETFLOAT( pResult, atom_getint(&pArgs[0]) % atom_getint(& pArgs[1]));
 	//push result on stack:
 	AtomList_append( & prog_rt -> stack, pResult);
 }
@@ -949,6 +959,11 @@ PFUNCTION_HEADER( divA )
 		return;
 	}
 	t_atom a = pArgs[0] ;
+	if( atom_getint(& pArgs[1]) == 0)
+	{
+		post("ERROR: divA: division by 0");
+		return;
+	}
 	for( int i=1; i<countArgs; i++)
 	{
 		t_atom x = pArgs[i] ;
@@ -965,12 +980,17 @@ PFUNCTION_HEADER( modA )
 		post("ERROR: modA called with no parameters!");
 		return;
 	}
-	t_atom m = pArgs[0] ;
+	t_atom m = pArgs[0];
+	if( atom_getint(& m) == 0)
+	{
+		post("ERROR: modA error: division by 0");
+		return;
+	}
 	for( int i=1; i<countArgs; i++)
 	{
 		t_atom x = pArgs[i] ;
 		t_atom* pResult = getbytes(sizeof(t_atom));
-		SETFLOAT( pResult, (t_int )atom_getfloat(&x) % (t_int )atom_getfloat(&m) );
+		SETFLOAT( pResult, atom_getint(&x) % atom_getint(&m) );
 		AtomList_append( & prog_rt -> stack, pResult);
 	}
 }
