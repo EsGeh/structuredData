@@ -1,4 +1,4 @@
-#N canvas 0 30 721 722 10;
+#N canvas 0 30 803 722 10;
 #X obj 48 558 r hurz;
 #X obj 48 581 print hurz;
 #X msg 60 387 list out 1 clear;

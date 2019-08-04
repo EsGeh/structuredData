@@ -1,4 +1,4 @@
-#N canvas 805 30 559 118 10;
+#N canvas 0 30 803 722 10;
 #X text 525 178 "generic" gui to read/write objects:;
 #N canvas 0 407 681 345 other 0;
 #X obj 269 270 send, f 18;
@@ -68,7 +68,7 @@ about its state:;
 #X text 31 17 define an "instrument" as an stateful object with some
 properties:;
 #X text 382 53 <- open abstraction to see details;
-#N canvas 0 30 803 722 UserInterface 1;
+#N canvas 0 30 803 722 UserInterface 0;
 #X text 345 8 1 click update_ui;
 #X text 345 25 2 select an object;
 #X text 344 44 now you can:;
