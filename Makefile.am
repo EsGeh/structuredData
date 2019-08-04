@@ -25,6 +25,7 @@ data_DATA = \
 	$(PATH_PD_OBJS)/sdObjConnectTo.pd \
 	$(PATH_PD_OBJS)/sdObjTrack.pd \
 	$(PATH_PD_OBJS)/sdObjGet.pd \
+	$(PATH_PD_OBJS)/sdObjGetAll.pd \
 	$(PATH_PD_OBJS)/sdObjExample.pd \
 	$(PATH_PD_OBJS)/sdObjSndExample.pd \
 	$(PATH_PD_OBJS)/sdObjDuplexExample.pd \
