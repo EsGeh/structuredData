@@ -32,6 +32,12 @@
 #X obj 559 122 sdObjState \$1 \$2 \$3;
 #X obj 591 322 sdProperty pitch \$0 64 intern 0 127;
 #X obj 619 358 sdProperty volume \$0 1 intern 0 1;
+#X obj 614 146 sdPropertyList events \$0;
+#X obj 614 169 s \$0-fromProperties;
+#X obj 381 200 route init;
+#X msg 324 449 list set ( events ( start stop ) );
+#X obj 324 495 s \$1;
+#X obj 324 472 sdPackFromHuman;
 #X connect 0 0 23 0;
 #X connect 1 0 24 0;
 #X connect 2 0 28 0;
@@ -46,7 +52,7 @@
 #X connect 14 0 16 0;
 #X connect 16 0 28 1;
 #X connect 17 0 13 0;
-#X connect 18 0 5 0;
+#X connect 18 0 33 0;
 #X connect 18 1 29 0;
 #X connect 19 0 20 0;
 #X connect 21 0 22 0;
@@ -57,9 +63,15 @@
 #X connect 26 0 28 0;
 #X connect 27 0 18 0;
 #X connect 28 0 27 0;
-#X connect 28 1 5 0;
+#X connect 28 1 31 0;
 #X connect 29 0 13 0;
 #X connect 29 1 30 0;
 #X connect 30 0 13 0;
 #X connect 30 1 25 0;
+#X connect 31 0 32 0;
+#X connect 31 1 29 0;
+#X connect 33 0 34 0;
+#X connect 33 1 5 0;
+#X connect 34 0 36 0;
+#X connect 36 0 35 0;
 #X coords 0 -1 1 1 200 60 1 100 100;
