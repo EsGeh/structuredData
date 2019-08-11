@@ -45,7 +45,7 @@ typedef struct s_property {
   t_object x_obj;
 	t_symbol* name;
 	t_property_type type;
-	t_atom range[3]; // name, min, max
+	t_atom range[4]; // name, min, max, step
 	// t_float min, max;
 	AtomList value;
 	t_symbol* rcv_sym;
@@ -123,6 +123,13 @@ void property_on_set_min(
 );
 
 void property_on_set_max(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+void property_on_set_step(
 	t_property* x,
 	t_symbol *s,
 	int argc,
@@ -303,6 +310,13 @@ void register_propertyMethods(
 		A_GIMME,
 		0
 	);
+	class_addmethod(
+		class,
+		(t_method )property_on_set_step,
+		gensym("set_step"),
+		A_GIMME,
+		0
+	);
 
 	class_addmethod(
 		class,
@@ -371,11 +385,16 @@ void* property_init(
 {
   t_property *x = (t_property *)pd_new(property_class);
 	x->type = PROPTYPE_FLOAT;
-	property_initall(
-			x,
-			argc,
-			argv
-	);
+	if(
+		property_initall(
+				x,
+				argc,
+				argv
+		)
+	)
+	{
+		return NULL;
+	}
 
   return (void *)x;
 }
@@ -417,11 +436,19 @@ int property_initall(
 			return 1;
 		}
 	}
-	else if( x->type == PROPTYPE_FLOAT || x->type == PROPTYPE_SYMBOL )
+	else if( x->type == PROPTYPE_FLOAT )
 	{
-		if( argc < 1 || argc > 6 )
+		if( argc < 1 || argc > 7 )
 		{
-			pd_error( x, "wrong number of parameters. syntax: <prop_name> [$0 default init? min max]" );
+			pd_error( x, "wrong number of parameters. syntax: <prop_name> [$0 default init? min max step]" );
+			return 1;
+		}
+	}
+	else if( x->type == PROPTYPE_SYMBOL )
+	{
+		if( argc < 1 || argc > 4 )
+		{
+			pd_error( x, "wrong number of parameters. syntax: <prop_name> [$0 default init?]" );
 			return 1;
 		}
 	}
@@ -543,21 +570,20 @@ int property_initall(
 		}
 	}
 	SETSYMBOL( & x->range[0], x->name );
+	SETFLOAT( & x->range[1], 0 );
+	SETFLOAT( & x->range[2], 1000 );
+	SETFLOAT( & x->range[3], 0 ); // 0 means float, (= no steps)
 	if( argc >= 5 )
 	{
 		SETFLOAT( & x->range[1], atom_getfloat( &argv[4] ) );
-	}
-	else
-	{
-		SETFLOAT( & x->range[1], -1000 );
 	}
 	if( argc >= 6 )
 	{
 		SETFLOAT( & x->range[2], atom_getfloat( &argv[5] ) );
 	}
-	else
+	if( argc >= 7 )
 	{
-		SETFLOAT( & x->range[2], 1000 );
+		SETFLOAT( & x->range[3], atom_getfloat( &argv[6] ) );
 	}
 
 	x->fromObjIn_in =
@@ -863,15 +889,34 @@ void property_on_set_in_range(
 			return;
 		}
 
-		t_atom new_val;
-		t_float min, max;
+		t_float min, max, step;
 		min = atom_getfloat( &x->range[1] );
 		max = atom_getfloat( &x->range[2] );
-		SETFLOAT( &new_val, atom_getfloat( & argv[1] ) * (max - min) + min );
+		step = atom_getfloat( &x->range[3] );
+		t_float new_val = atom_getfloat( & argv[1] ) * (max - min);
+		// rasterize by step:
+		if( step != 0 )
+		{
+			new_val /= step;
+			new_val = (int )new_val;
+			new_val *= step;
+		}
+		new_val += min;
+		// if the value didn't change, do nothing!:
+		t_float old_val;
+		old_val = atom_getfloat( AtomList_get_first( &x->value )->pData );
+		if(
+				old_val == new_val
+		)
+		{
+			return;
+		}
+		t_atom new_val_atom;
+		SETFLOAT( &new_val_atom, new_val );
 		property_set(
 				x,
 				1,
-				& new_val
+				& new_val_atom
 		);
 		if( x->send_sym && x->send_sym->s_thing )
 		{
@@ -993,6 +1038,66 @@ void property_on_set_max(
 			return;
 		}
 		SETFLOAT( & x->range[2], atom_getfloat( &argv[1] ) );
+		if( x->send_sym && x->send_sym->s_thing )
+		{
+			AtomEl* first = AtomList_get_first( & x->value );
+			typedmess(
+				x->send_sym->s_thing,
+				&s_list,
+				argc-1,
+				first->pData
+			);
+		}
+		property_output_range(
+			x
+		);
+	}
+	else
+	{
+		// redirect to other properties:
+		outlet_anything(
+			x->redirect_out,
+			s,
+			argc,
+			argv
+		);
+	}
+}
+
+void property_on_set_step(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	// set <property> <val1> <val2> ...
+	if(
+		argc >= 1
+		&& atom_getsymbol( &argv[0] ) == x->name
+	)
+	{
+		if(
+		 x->type != PROPTYPE_FLOAT
+		)
+		{
+				char name_buf[256];
+				t_atom name;
+				SETSYMBOL( & name, x->name );
+				atom_string( & name, name_buf, 255 );
+				pd_error( x, "error in sdPropertySym %s: set_step only valid for number properties", name_buf );
+				return;
+		}
+		if( argc != 2 || (argc == 2 && argv[1].a_type != A_FLOAT ) )
+		{
+			char name_buf[256];
+			t_atom name;
+			SETSYMBOL( & name, x->name );
+			atom_string( & name, name_buf, 255 );
+			pd_error( x, "error in sdProperty %s: type error! expected 'set_step <prop_name> <float>'", name_buf );
+			return;
+		}
+		SETFLOAT( & x->range[3], atom_getfloat( &argv[1] ) );
 		if( x->send_sym && x->send_sym->s_thing )
 		{
 			AtomEl* first = AtomList_get_first( & x->value );
@@ -1321,7 +1426,7 @@ void property_output_range(
 		outlet_anything(
 		x->out,
 		gensym("range_info"),
-		3,
+		4,
 		x->range
 	);
 }

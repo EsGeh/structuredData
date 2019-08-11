@@ -1,4 +1,4 @@
-#N canvas 0 30 681 722 10;
+#N canvas 0 30 967 722 10;
 #X obj 358 303 sdReplace \$0;
 #X msg 358 260 raw set dest %0-obscureInstrument;
 #X obj 374 460 sdReplace \$0;
@@ -14,15 +14,15 @@
 #X msg 375 579 raw set dest %0-obscureInstrument;
 #X msg 388 602 raw set dest %0-weirdInstrument;
 #X text 320 550 ...or an object which does both;
-#X obj 31 580 sdObjExample \$0-obscureInstrument \$0-INSTR \$0-GLOBAL
+#X obj 638 250 sdObjExample \$0-obscureInstrument \$0-INSTR \$0-GLOBAL
 ;
-#X obj 31 646 sdObjExample \$0-weirdInstrument \$0-INSTR \$0-GLOBAL
+#X obj 638 316 sdObjExample \$0-weirdInstrument \$0-INSTR \$0-GLOBAL
 ;
 #X obj 374 483 sdObjSndExample \$0-sender \$0-CONN \$0-GLOBAL;
 #X obj 348 326 sdObjRcvExample \$0-receiver \$0-CONN \$0-GLOBAL;
 #X obj 362 653 sdObjDuplexExample \$0-dupl \$0-CONN \$0-GLOBAL;
-#X obj 7 525 print GUI.out;
-#X obj 156 524 print genericObj.out;
+#X obj 7 632 print GUI.out;
+#X obj 156 631 print genericObj.out;
 #X obj 7 25 sdObjState_ui GUI \$0-GUI-INIT \$0-INSTR \$0-CONN;
 #X msg 343 40 list init 0;
 #X obj 343 63 s \$0-GUI-INIT;
@@ -32,7 +32,7 @@
 #X text 328 103 3 select an object;
 #X text 328 86 2 select a group;
 #X text 328 19 1 init GUI:;
-#N canvas 0 30 681 722 control 0;
+#N canvas 0 30 967 345 control 0;
 #X obj 91 169 sdPackFromHuman;
 #X obj 91 192 send GUI;
 #X msg 91 146 list set ( destIndex ( \$1 ) );
@@ -55,6 +55,12 @@
 #X obj 306 33 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
 #X text 405 37 send event by index;
+#X floatatom 448 148 5 0 0 0 - - -;
+#X floatatom 484 149 5 0 0 0 - - -;
+#X obj 448 170 pack 0 0;
+#X msg 448 194 list set_bool_by_ind ( \$2 \$1 );
+#X text 445 219 (generically set boolean properties);
+#X text 355 308 (generically set properties from [0..1]);
 #X connect 0 0 1 0;
 #X connect 2 0 0 0;
 #X connect 3 0 2 0;
@@ -72,8 +78,12 @@
 #X connect 17 0 18 0;
 #X connect 18 0 0 0;
 #X connect 19 0 17 0;
+#X connect 21 0 23 0;
+#X connect 22 0 23 1;
+#X connect 23 0 24 0;
+#X connect 24 0 0 0;
 #X restore 327 184 pd control gui;
-#N canvas 0 30 681 722 other 0;
+#N canvas 0 30 967 722 other 0;
 #X obj 55 117 sdPackFromHuman;
 #X msg 55 94 list set ( dest ( \$1 ) );
 #X msg 55 48 symbol %0-weirdInstrument;

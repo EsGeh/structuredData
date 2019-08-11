@@ -457,6 +457,8 @@ void objState_input(
 		atom_getsymbol( & argv[0] ) == gensym("set_min")
 		||
 		atom_getsymbol( & argv[0] ) == gensym("set_max")
+		||
+		atom_getsymbol( & argv[0] ) == gensym("set_step")
 	)
 	{
 		x->last_method = LAST_METHOD_SET;
