@@ -150,6 +150,27 @@ void property_on_priv_set(
 	t_atom *argv
 );
 
+void property_on_priv_set_min(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+void property_on_priv_set_max(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+void property_on_priv_set_step(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
 void property_on_priv_set_noupdate(
 	t_property* x,
 	t_symbol *s,
@@ -331,6 +352,27 @@ void register_propertyMethods(
 		class,
 		(t_method )property_on_priv_set,
 		gensym("priv.set"),
+		A_GIMME,
+		0
+	);
+	class_addmethod(
+		class,
+		(t_method )property_on_priv_set_min,
+		gensym("priv.set_min"),
+		A_GIMME,
+		0
+	);
+	class_addmethod(
+		class,
+		(t_method )property_on_priv_set_max,
+		gensym("priv.set_max"),
+		A_GIMME,
+		0
+	);
+	class_addmethod(
+		class,
+		(t_method )property_on_priv_set_step,
+		gensym("priv.set_step"),
 		A_GIMME,
 		0
 	);
@@ -1265,6 +1307,156 @@ void property_on_priv_set(
 		);
 	}
 	property_output(
+		x
+	);
+}
+
+void property_on_priv_set_min(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	// priv.set_min <val1>
+	if(
+		x->type != PROPTYPE_FLOAT
+	)
+	{
+		char name_buf[256];
+		t_atom name;
+		SETSYMBOL( & name, x->name );
+		atom_string( & name, name_buf, 255 );
+
+		pd_error( x, "error in property '%s': 'priv.set_min' only valid for number properties", name_buf );
+		return;
+	}
+	if(
+		argc != 1 || argv[0].a_type != A_FLOAT
+	)
+	{
+		char name_buf[256];
+		t_atom name;
+		SETSYMBOL( & name, x->name );
+		atom_string( & name, name_buf, 255 );
+
+		char sel_buf[256];
+		t_atom selector;
+		SETSYMBOL( & selector, s );
+		atom_string( & selector, sel_buf, 255 );
+
+		pd_error( x, "error in property%s: 'priv.set_min' type error! expected '%s <float>'", name_buf, sel_buf);
+		return;
+	}
+	SETFLOAT( & x->range[1], atom_getfloat( &argv[0] ) );
+	if( x->send_sym && x->send_sym->s_thing )
+	{
+		typedmess(
+			x->send_sym->s_thing,
+			&s_list,
+			argc,
+			argv
+		);
+	}
+	property_output_range(
+		x
+	);
+}
+
+void property_on_priv_set_max(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	// priv.set_max <val1>
+	if(
+		x->type != PROPTYPE_FLOAT
+	)
+	{
+		char name_buf[256];
+		t_atom name;
+		SETSYMBOL( & name, x->name );
+		atom_string( & name, name_buf, 255 );
+		pd_error( x, "error in property '%s': 'priv.set_max' only valid for number properties", name_buf );
+		return;
+	}
+	if(
+		argc != 1 || argv[0].a_type != A_FLOAT
+	)
+	{
+		char name_buf[256];
+		t_atom name;
+		SETSYMBOL( & name, x->name );
+		atom_string( & name, name_buf, 255 );
+		char sel_buf[256];
+		t_atom selector;
+		SETSYMBOL( & selector, s );
+		atom_string( & selector, sel_buf, 255 );
+		pd_error( x, "error in property%s: 'priv.set_max' type error! expected '%s <float>'", name_buf, sel_buf);
+		return;
+	}
+	SETFLOAT( & x->range[2], atom_getfloat( &argv[0] ) );
+	if( x->send_sym && x->send_sym->s_thing )
+	{
+		typedmess(
+			x->send_sym->s_thing,
+			&s_list,
+			argc,
+			argv
+		);
+	}
+	property_output_range(
+		x
+	);
+}
+
+void property_on_priv_set_step(
+	t_property* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	// priv.set_max <val1>
+	if(
+		x->type != PROPTYPE_FLOAT
+	)
+	{
+		char name_buf[256];
+		t_atom name;
+		SETSYMBOL( & name, x->name );
+		atom_string( & name, name_buf, 255 );
+		pd_error( x, "error in property '%s': 'priv.set_step' only valid for number properties", name_buf );
+		return;
+	}
+	if(
+		argc != 1 || argv[0].a_type != A_FLOAT
+	)
+	{
+		char name_buf[256];
+		t_atom name;
+		SETSYMBOL( & name, x->name );
+		atom_string( & name, name_buf, 255 );
+		char sel_buf[256];
+		t_atom selector;
+		SETSYMBOL( & selector, s );
+		atom_string( & selector, sel_buf, 255 );
+		pd_error( x, "error in property%s: 'priv.set_step' type error! expected '%s <float>'", name_buf, sel_buf);
+		return;
+	}
+	SETFLOAT( & x->range[3], atom_getfloat( &argv[0] ) );
+	if( x->send_sym && x->send_sym->s_thing )
+	{
+		typedmess(
+			x->send_sym->s_thing,
+			&s_list,
+			argc,
+			argv
+		);
+	}
+	property_output_range(
 		x
 	);
 }
