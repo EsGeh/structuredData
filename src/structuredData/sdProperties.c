@@ -520,7 +520,11 @@ int property_initall(
 	x->init_type = INITTYPE_NONE;
 	if( argc >= 4 )
 	{
-		if( atom_getsymbol( &argv[3] ) == gensym("intern") )
+		if( atom_getsymbol( &argv[3] ) == gensym("noinit") )
+		{
+			x->init_type = INITTYPE_NONE;
+		}
+		else if( atom_getsymbol( &argv[3] ) == gensym("intern") )
 		{
 			x->init_type = INITTYPE_INTERN;
 		}
@@ -534,7 +538,7 @@ int property_initall(
 			t_atom name;
 			SETSYMBOL( & name, x->name );
 			atom_string( & name, buf, 255 );
-			pd_error( x, "sdProperty %s: wrong type for init value. syntax: '<prop_name> [$0 default init]', init one of: 'intern', 'update'", buf );
+			pd_error( x, "sdProperty %s: wrong type for init value. syntax: '<prop_name> [$0 default init]', init one of: 'noinit', 'intern', 'update'", buf );
 			return 1;
 		}
 	}
