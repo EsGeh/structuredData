@@ -1,4 +1,4 @@
-#N canvas 0 30 762 722 10;
+#N canvas 723 30 641 156 10;
 #N canvas 0 30 803 722 basic 0;
 #X msg 144 85 list x;
 #X obj 131 127 sdPackFromHuman;
@@ -126,7 +126,7 @@ and c ( d ) in any order, f 38;
 other arbitrary content. "val" is matched and bound., f 33;
 #X text 549 463 match any analog pack containing an index pack and
 bind any content in despite the index pack, f 36;
-#N canvas 0 30 803 722 bind_values 0;
+#N canvas 0 30 721 722 bind_values 1;
 #X obj 136 705 sdPackFromHuman;
 #X obj 203 769 sdPackMatch;
 #X obj 203 792 print;
@@ -188,6 +188,8 @@ bind any content in despite the index pack, f 36;
 ) );
 #X msg 416 769 clear \, add pat1 all=[ analog ( * index ( * ) ) =]
 ;
+#X msg 420 793 clear \, add pat1 all=[ * index ( * ) =];
+#X msg 11 628 list index ( 2 ) b ( 3 ) c ( 4 ), f 21;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 1 0 3 0;
@@ -234,6 +236,8 @@ bind any content in despite the index pack, f 36;
 #X connect 48 0 1 0;
 #X connect 49 0 1 0;
 #X connect 50 0 1 0;
+#X connect 51 0 1 0;
+#X connect 52 0 0 0;
 #X restore 53 330 pd bind_values;
 #N canvas 0 30 1598 543 example 0;
 #X obj 101 191 sdPackFromHuman;

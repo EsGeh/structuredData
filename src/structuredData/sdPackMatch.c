@@ -1216,10 +1216,6 @@ BOOL pack_mode(
 			CharBuf_exit( & bind_arbitrary_sym );
 			return FALSE;
 		}
-		strcpy(
-			CharBuf_get_array( & bind_arbitrary_sym ),
-			CharBuf_get_array( & rt->bind_sym )
-		);
 	}
 	// '* ...'
 	if( !lexer_pattern_next_tok_any( rt ) )
@@ -1227,6 +1223,10 @@ BOOL pack_mode(
 		CharBuf_exit( & bind_arbitrary_sym );
 		return FALSE;
 	}
+	strcpy(
+		CharBuf_get_array( & bind_arbitrary_sym ),
+		CharBuf_get_array( & rt->bind_sym )
+	);
 	// '=] ...'
 	if( lexer_pattern_peek( rt, 0 ) == END_BIND )
 	{
@@ -1507,12 +1507,19 @@ BOOL pack_mode_match_input(
 		// we still have to consume the input:
 		BOOL
 			temp_binding =
-				! strcmp( CharBuf_get_array( & rt->bind_sym ), "" )
-				&&
 				!matched
 				&&
 				strcmp( bind_arbitrary_sym, "" )
 				;
+		if( !temp_binding )
+		{
+			match_db_print(
+				rt,
+				"continue WITHOUT temp binding. matched=%i, bind_arbitrary_sym=%s",
+				matched,
+				bind_arbitrary_sym
+			);
+		}
 		RuntimeInfo rt_temp;
 		memcpy( &rt_temp, rt, sizeof( RuntimeInfo ) );
 		CharBuf_init( & rt_temp.bind_sym, CHARBUF_SIZE);
