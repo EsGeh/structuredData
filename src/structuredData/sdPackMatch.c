@@ -698,9 +698,19 @@ void packMatch_input(
 		BoundData_exit( & rt.bind_ret );
 	LIST_FORALL_END(PatternList, PatternEl, PatternInfo, & x->patterns, i_pattern, patternEl)
 	if( !match_found )
-	outlet_bang(
-			x->outlet_reject
-	);
+	{
+		outlet_anything(
+				x->outlet_reject,
+				s,
+				argc,
+				argv
+		);
+		/*
+		outlet_bang(
+				x->outlet_reject
+		);
+		*/
+	}
 	DB_PRINT( "packMatch_input: done" );
 }
 
