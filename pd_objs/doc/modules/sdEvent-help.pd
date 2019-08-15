@@ -1,4 +1,4 @@
-#N canvas 0 30 846 854 10;
+#N canvas 0 30 681 503 10;
 #X msg 189 131 bang;
 #X msg 76 133 list 1 100 red;
 #X text 26 106 1 from a pack by adding "type" to its parameters:;
@@ -9,7 +9,7 @@
 #X obj 129 211 print Event;
 #X obj 486 384 print color;
 #X obj 432 407 print time;
-#X obj 690 346 print eventType;
+#X obj 602 303 print eventType;
 #X obj 238 264 t a a;
 #X msg 303 350 list volume 1 0.5;
 #X obj 303 327 loadbang;
@@ -22,8 +22,7 @@
 #X text 72 55 <eventtype> ( <param1> ( ... ) <param2> ( ... ) ... )
 ;
 #X obj 216 396 print +volume;
-#X obj 541 362 print all_values;
-#X obj 432 307 sdUnEvent time color all exotic_param;
+#X obj 502 355 print all_values;
 #X text 471 263 if a value isn't found in the event \, nothing is output
 at the corresponding outlet;
 #X obj 540 538 sdUnEvent;
@@ -34,6 +33,8 @@ at the corresponding outlet;
 #X text 637 578 all argument packages;
 #X text 643 559 |;
 #X text 727 552 event type;
+#X obj 544 333 print othersParams;
+#X obj 432 307 sdUnEvent time color all;
 #X connect 0 0 3 0;
 #X connect 1 0 3 0;
 #X connect 3 0 6 0;
@@ -41,7 +42,7 @@ at the corresponding outlet;
 #X connect 6 0 11 0;
 #X connect 6 1 7 0;
 #X connect 11 0 16 0;
-#X connect 11 1 23 0;
+#X connect 11 1 33 0;
 #X connect 12 0 14 1;
 #X connect 13 0 12 0;
 #X connect 14 0 21 0;
@@ -49,7 +50,8 @@ at the corresponding outlet;
 #X connect 15 1 18 0;
 #X connect 16 0 15 0;
 #X connect 16 1 14 0;
-#X connect 23 0 9 0;
-#X connect 23 1 8 0;
-#X connect 23 2 22 0;
-#X connect 23 4 10 0;
+#X connect 33 0 9 0;
+#X connect 33 1 8 0;
+#X connect 33 2 22 0;
+#X connect 33 3 32 0;
+#X connect 33 4 10 0;
