@@ -1349,6 +1349,10 @@ void property_on_priv_set_min(
 		return;
 	}
 	SETFLOAT( & x->range[1], atom_getfloat( &argv[0] ) );
+	/* TODO: send to internal symbol, so that
+	 * the objects implementation can follow min, max
+	*/
+	/*
 	if( x->send_sym && x->send_sym->s_thing )
 	{
 		typedmess(
@@ -1358,6 +1362,7 @@ void property_on_priv_set_min(
 			argv
 		);
 	}
+	*/
 	property_output_range(
 		x
 	);
@@ -1398,6 +1403,10 @@ void property_on_priv_set_max(
 		return;
 	}
 	SETFLOAT( & x->range[2], atom_getfloat( &argv[0] ) );
+	/* TODO: send to internal symbol, so that
+	 * the objects implementation can follow min, max
+	*/
+	/*
 	if( x->send_sym && x->send_sym->s_thing )
 	{
 		typedmess(
@@ -1407,6 +1416,7 @@ void property_on_priv_set_max(
 			argv
 		);
 	}
+	*/
 	property_output_range(
 		x
 	);
