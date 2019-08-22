@@ -204,6 +204,7 @@ t_class* register_unpack(
 			sizeof(t_unpack),
 			CLASS_DEFAULT, // graphical repr ?
 			// creation arguments:
+			A_GIMME,
 			0
 		);
 	class_sethelpsymbol(
@@ -322,6 +323,7 @@ t_class* register_packFromHuman(
 			sizeof(t_packFromHuman),
 			CLASS_DEFAULT, // graphical repr ?
 			// creation arguments:
+			A_GIMME,
 			0
 		);
 	class_sethelpsymbol(
