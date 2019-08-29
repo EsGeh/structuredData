@@ -1,6 +1,9 @@
 #include "structuredData.h"
 #include "Global.h"
 #include "sdScriptObj.h"
+
+//#include "Buffer.h"
+
 #include <string.h>
 #include <stdlib.h>
 
@@ -687,15 +690,19 @@ void isEq_setOther(
 
 typedef struct _filter {
   t_object x_obj;
-	t_atom other;
+	AtomBuf args;
 	t_outlet* acceptOut;
 	t_outlet* rejectOut;
 } t_filter;
 
-void* filter_new(
+void* filter_init(
 	t_symbol *s,
 	int argc,
 	t_atom *argv
+);
+
+void filter_exit(
+	t_filter* x
 );
 
 void filter_input(
@@ -705,7 +712,7 @@ void filter_input(
 	t_atom *argv
 );
 
-void filter_setOther(
+void filter_set_args(
 	t_filter *x,
 	t_symbol *s,
 	int argc,
@@ -719,8 +726,8 @@ t_class* register_filter(
 	t_class* class =
 		class_new(
 			className,
-			(t_newmethod)filter_new, // constructor
-			0, // destructor
+			(t_newmethod )filter_init, // constructor
+			(t_method )filter_exit, // destructor
 			sizeof(t_filter),
 			CLASS_DEFAULT, // graphical repr ?
 			// creation arguments:
@@ -735,7 +742,7 @@ t_class* register_filter(
 	class_addlist(class, filter_input);
 	class_addmethod(
 		class,
-		(t_method )filter_setOther,
+		(t_method )filter_set_args,
 		gensym("set"),
 		A_GIMME,
 		0
@@ -743,23 +750,16 @@ t_class* register_filter(
 	return class;
 }
 
-void* filter_new(
+void* filter_init(
 	t_symbol *s,
 	int argc,
 	t_atom *argv
 )
 {
   t_filter *x = (t_filter *)pd_new(filter_class);
+	AtomBuf_init( & x->args, 0 );
 
-	if( argc == 0 )
-		SETSYMBOL( & x->other, gensym(""));
-	else if( argc == 1 )
-		x -> other = argv[0];
-	else
-	{
-		pd_error(x,"too many arguments!");
-		return NULL;
-	}
+	filter_set_args( x, s, argc, argv );
 
 	inlet_new(
 		& x->x_obj,
@@ -774,6 +774,13 @@ void* filter_new(
   return (void *)x;
 }
 
+void filter_exit(
+	t_filter* x
+)
+{
+	AtomBuf_exit( &x->args );
+}
+
 void filter_input(
 	t_filter *x,
 	t_symbol *s,
@@ -786,25 +793,33 @@ void filter_input(
 		pd_error(x, "to few parameters!");
 		return;
 	}
-	if( compareAtoms( & x->other, & argv[0] )  )
+	BOOL matched = FALSE;
+	for(int i=0; i<AtomBuf_get_size( &x->args ); i++ )
 	{
-		outlet_list(
-			x->acceptOut,
-			s,
-			argc,
-			argv
-		);
+		t_atom* current = & AtomBuf_get_array( &x->args )[i];
+		if( compareAtoms( current, & argv[0] ) )
+		{
+			outlet_list(
+				x->acceptOut,
+				s,
+				argc,
+				argv
+			);
+			matched = TRUE;
+		}
 	}
-	else
+	if( !matched )
+	{
 		outlet_list(
 			x->rejectOut,
 			s,
 			argc,
 			argv
 		);
+	}
 }
 
-void filter_setOther(
+void filter_set_args(
 	t_filter *x,
 	t_symbol *s,
 	int argc,
@@ -813,10 +828,18 @@ void filter_setOther(
 {
 	if( argc == 0 )
 	{
-		pd_error(x, "to few parameters!");
-		return;
+		AtomBuf_resize( & x->args, 1 );
+		SETSYMBOL( &AtomBuf_get_array( &x->args )[0], gensym(""));
 	}
-	x -> other = argv[0];
+	else
+	{
+		AtomBuf_resize( & x->args, argc );
+		memcpy(
+				AtomBuf_get_array( &x->args ),
+				argv,
+				sizeof( t_atom ) * argc
+		);
+	}
 }
 
 //----------------------------------
