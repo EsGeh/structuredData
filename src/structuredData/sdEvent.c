@@ -352,38 +352,25 @@ void* unevent_init(
 {
   t_unevent *x = (t_unevent *)pd_new(unevent_class);
 
-	if( argc == 0 )
+	x->paramsCount = argc;
+	x->params = getbytes( sizeof( t_symbol* ) * x->paramsCount );
+	x->outlets = getbytes( sizeof( t_outlet* ) * x->paramsCount );
+	for(unsigned int i=0; i< argc; i++)
 	{
-		x->paramsCount = 1;
-		x->params = getbytes( sizeof( t_symbol* ) * x->paramsCount );
-		x->outlets = getbytes( sizeof( t_outlet* ) * x->paramsCount );
-		x->params[0] = gensym("all");
-
-		x->outlets[0] =
-			outlet_new( & x->x_obj, &s_list);
-	}
-	else
-	{
-		x->paramsCount = argc;
-		x->params = getbytes( sizeof( t_symbol* ) * x->paramsCount );
-		x->outlets = getbytes( sizeof( t_outlet* ) * x->paramsCount );
-		for(unsigned int i=0; i< argc; i++)
+		if(
+				argv[i].a_type != A_SYMBOL
+		)
 		{
-			if(
-					argv[i].a_type != A_SYMBOL
-			)
-			{
-				char buf[256];
-				atom_string( & argv[1+i] , buf, 255 );
-				pd_error(x, "not a symbol: %s. syntax: param1, param2, ...", buf);
-				unevent_exit( x );
-				return NULL;
-			}
-			x->params[i] = atom_getsymbol( & argv[i] );
-
-			x->outlets[i] =
-				outlet_new( & x->x_obj, &s_list);
+			char buf[256];
+			atom_string( & argv[1+i] , buf, 255 );
+			pd_error(x, "not a symbol: %s. syntax: param1, param2, ...", buf);
+			unevent_exit( x );
+			return NULL;
 		}
+		x->params[i] = atom_getsymbol( & argv[i] );
+
+		x->outlets[i] =
+			outlet_new( & x->x_obj, &s_list);
 	}
 
 	x->otherParamsOutlet =
