@@ -2,6 +2,8 @@
 /build/
 /doc/
 
+/save.save
+
 # autotools:
 
 /Makefile.in
