@@ -97,13 +97,15 @@ t_class* register_script_class( t_symbol* class_name )
 		class,
 		(t_method )script_obj_on_set_program,
 		gensym("prog_set"),
-		A_GIMME
+		A_GIMME,
+		0
 	);
 	class_addmethod(
 		class,
 		(t_method )script_obj_on_set_bang,
 		gensym("prog_set_bang"),
-		A_GIMME
+		A_GIMME,
+		0
 	);
 	class_addmethod(
 		class,
@@ -120,7 +122,8 @@ t_class* register_script_class( t_symbol* class_name )
 		class,
 		(t_method )script_obj_on_set_var,
 		gensym( "set" ),
-		A_GIMME
+		A_GIMME,
+		0
 	);
 
 	return class;

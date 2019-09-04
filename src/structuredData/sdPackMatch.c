@@ -338,7 +338,8 @@ t_class* register_packMatch(
 		class,
 		(t_method )packMatch_set_global_var,
 		gensym( "set" ),
-		A_GIMME
+		A_GIMME,
+		0
 	);
 
 	class_addmethod(
