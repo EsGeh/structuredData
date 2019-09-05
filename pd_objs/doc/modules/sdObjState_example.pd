@@ -57,6 +57,8 @@
 #X msg 448 194 list set_bool_by_ind ( \$2 \$1 );
 #X text 445 219 (generically set boolean properties);
 #X text 355 308 (generically set properties from [0..1]);
+#X floatatom 325 403 5 0 0 0 - - -;
+#X msg 325 425 list set ( numShift ( \$1 ) );
 #X connect 0 0 1 0;
 #X connect 2 0 0 0;
 #X connect 3 0 2 0;
@@ -78,8 +80,10 @@
 #X connect 22 0 23 1;
 #X connect 23 0 24 0;
 #X connect 24 0 0 0;
+#X connect 27 0 28 0;
+#X connect 28 0 0 0;
 #X restore 327 184 pd control gui;
-#N canvas 0 30 803 736 other 0;
+#N canvas 0 30 681 736 other 0;
 #X obj 55 117 sdPackFromHuman;
 #X msg 55 94 list set ( dest ( \$1 ) );
 #X msg 55 48 symbol %0-weirdInstrument;
@@ -167,4 +171,6 @@ don't contain \$0 symbols.;
 #X connect 10 0 16 0;
 #X connect 11 0 10 0;
 #X connect 12 0 10 0;
+#X connect 19 0 17 0;
+#X connect 19 1 18 0;
 #X connect 20 0 21 0;
