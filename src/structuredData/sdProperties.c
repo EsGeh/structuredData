@@ -771,18 +771,17 @@ void property_on_get_with_range(
 		argc == 0
 	)
 	{
-		// output property value:
-		property_output(
-			x
-		);
 		// output property range info:
-		
 		if( x->type == PROPTYPE_FLOAT )
 		{
 			property_output_range(
 				x
 			);
 		}
+		// output property value:
+		property_output(
+			x
+		);
 		// get:
 		if(
 			argc == 0
