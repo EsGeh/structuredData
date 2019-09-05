@@ -28,7 +28,7 @@
 #X text 328 103 3 select an object;
 #X text 328 86 2 select a group;
 #X text 328 19 1 init GUI:;
-#N canvas 0 30 681 736 control 0;
+#N canvas 0 30 681 352 control 0;
 #X obj 91 169 sdPackFromHuman;
 #X obj 91 192 send GUI;
 #X msg 91 146 list set ( destIndex ( \$1 ) );
@@ -57,8 +57,8 @@
 #X msg 448 194 list set_bool_by_ind ( \$2 \$1 );
 #X text 445 219 (generically set boolean properties);
 #X text 355 308 (generically set properties from [0..1]);
-#X floatatom 325 403 5 0 0 0 - - -;
-#X msg 325 425 list set ( numShift ( \$1 ) );
+#X floatatom 500 76 5 0 0 0 - - -;
+#X msg 500 98 list set ( numShift ( \$1 ) );
 #X connect 0 0 1 0;
 #X connect 2 0 0 0;
 #X connect 3 0 2 0;
@@ -83,7 +83,7 @@
 #X connect 27 0 28 0;
 #X connect 28 0 0 0;
 #X restore 327 184 pd control gui;
-#N canvas 0 30 681 736 other 0;
+#N canvas 0 30 681 352 other 0;
 #X obj 55 117 sdPackFromHuman;
 #X msg 55 94 list set ( dest ( \$1 ) );
 #X msg 55 48 symbol %0-weirdInstrument;

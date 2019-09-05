@@ -1,9 +1,9 @@
-#N canvas 683 30 681 160 10;
+#N canvas 0 30 681 736 10;
 #X text 12 9 This module is just a convention how to build high level
 objects in a patch.;
 #X obj 43 213 sdObjState_example;
 #X text 29 191 usage example;
-#N canvas 0 30 681 736 basics 1;
+#N canvas 0 30 681 736 basics 0;
 #N canvas 0 30 681 722 test 0;
 #X obj 80 13 inlet;
 #X obj 63 337 s \$0-out1;

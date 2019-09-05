@@ -1,28 +1,28 @@
-#N canvas 0 30 681 736 10;
-#X obj 22 74 hradio 12 1 0 3 \$0-objRadio \$0-objRadio_rcv empty 0
--8 0 10 -262144 -1 -1 0;
+#N canvas 683 222 681 64 10;
+#X obj 22 74 hradio 12 1 0 2 \$0-objRadio \$0-objRadio_rcv empty 0
+-8 0 10 -262144 -1 -1 1;
 #X text 11 57 select obj.:;
 #X obj 597 443 r \$0-objRadio;
 #X symbolatom 22 91 27 0 0 0 - #0-objName_rcv #0-objName;
 #X obj 141 131 nbx 6 14 -1e+37 1e+37 0 0 \$0-gui.numProp0 \$0-gui.numProp0_rcv
-empty 0 -8 1 8 -262144 -1 -1 0 256;
+empty 0 -8 1 8 -262144 -1 -1 20 256;
 #X obj 141 160 nbx 6 14 -1e+37 1e+37 0 0 \$0-gui.numProp1 \$0-gui.numProp1_rcv
-empty 0 -8 1 8 -262144 -1 -1 0 256;
+empty 0 -8 1 8 -262144 -1 -1 1 256;
 #X obj 141 189 nbx 6 14 -1e+37 1e+37 0 0 \$0-gui.numProp2 \$0-gui.numProp2_rcv
 empty 0 -8 1 8 -262144 -1 -1 0 256;
-#X obj 29 131 cnv 15 110 13 empty \$0-gui.numPropName0_rcv - 1 8 0
-10 -228856 -66577 0;
+#X obj 29 131 cnv 15 110 13 empty \$0-gui.numPropName0_rcv pitch 1
+8 0 10 -228856 -66577 0;
 #X text 12 109 numeric properties:;
-#X obj 29 160 cnv 15 110 13 empty \$0-gui.numPropName1_rcv - 1 8 0
-10 -228856 -66577 0;
+#X obj 29 160 cnv 15 110 13 empty \$0-gui.numPropName1_rcv volume 1
+8 0 10 -228856 -66577 0;
 #X obj 29 189 cnv 15 110 13 empty \$0-gui.numPropName2_rcv - 1 8 0
 10 -228856 -66577 0;
-#X obj 22 381 cnv 15 120 13 empty \$0-gui.symPropName0_rcv dest 1 8
-0 10 -228856 -66577 0;
+#X obj 22 381 cnv 15 120 13 empty \$0-gui.symPropName0_rcv descr 1
+8 0 10 -228856 -66577 0;
 #X symbolatom 148 380 25 0 0 0 - #0-gui.symProp0_rcv #0-gui.symProp0
 ;
-#X obj 22 402 cnv 15 120 13 empty \$0-gui.symPropName1_rcv - 1 8 0
-10 -228856 -66577 0;
+#X obj 22 402 cnv 15 120 13 empty \$0-gui.symPropName1_rcv envelope
+1 8 0 10 -228856 -66577 0;
 #X symbolatom 148 400 25 0 0 0 - #0-gui.symProp1_rcv #0-gui.symProp1
 ;
 #X obj 22 422 cnv 15 120 13 empty \$0-gui.symPropName2_rcv - 1 8 0
@@ -62,10 +62,10 @@ empty 0 -8 1 8 -262144 -1 -1 0 256;
 #X text 12 365 symbol (and list) properties:;
 #X obj 501 50 inlet;
 #X obj 21 25 hradio 12 1 0 2 \$0-groupRadio \$0-groupRadio_rcv empty
-0 -8 0 10 -262144 -1 -1 1;
+0 -8 0 10 -262144 -1 -1 0;
 #X symbolatom 21 42 27 0 0 0 - #0-groupName_rcv #0-groupName;
 #X obj 598 391 r \$0-groupRadio;
-#N canvas 0 30 681 736 properties 0;
+#N canvas 0 414 681 352 properties 0;
 #X obj 21 23 inlet;
 #X obj 102 166 sdUnPack;
 #X obj 102 340 list append \$0;
@@ -362,13 +362,11 @@ set \$5 \; \$1-gui.num_step\$2_rcv set \$6 \;;
 #X connect 26 0 27 0;
 #X connect 27 0 28 0;
 #X restore 646 194 pd properties -> gui;
-#N canvas 0 30 681 722 gui.numProps 0;
-#X obj 82 533 r \$0-gui.num_shift;
+#N canvas 0 30 681 736 gui.numProps 0;
 #X obj 34 628 sdPack set_num_by_ind;
 #X obj 34 604 pack;
 #X obj 33 580 swap;
 #X obj 35 11 r \$0-gui.numProp0;
-#X obj 61 559 - 0;
 #X obj 34 651 s \$1;
 #X obj 35 35 pack 0 0;
 #X obj 27 525 unpack;
@@ -386,10 +384,8 @@ set \$5 \; \$1-gui.num_step\$2_rcv set \$6 \;;
 #X obj 64 295 pack 0 5;
 #X obj 69 344 pack 0 6;
 #X obj 73 394 pack 0 7;
-#X obj 277 534 r \$0-gui.num_shift;
 #X obj 229 605 pack;
 #X obj 228 581 swap;
-#X obj 256 560 - 0;
 #X obj 229 652 s \$1;
 #X obj 230 36 pack 0 0;
 #X obj 222 526 unpack;
@@ -409,10 +405,8 @@ set \$5 \; \$1-gui.num_step\$2_rcv set \$6 \;;
 #X obj 264 321 r \$0-gui.num_min6;
 #X obj 269 372 r \$0-gui.num_min7;
 #X obj 229 629 sdPack set_min_by_ind;
-#X obj 457 534 r \$0-gui.num_shift;
 #X obj 409 605 pack;
 #X obj 408 581 swap;
-#X obj 436 560 - 0;
 #X obj 409 652 s \$1;
 #X obj 410 36 pack 0 0;
 #X obj 402 526 unpack;
@@ -432,10 +426,8 @@ set \$5 \; \$1-gui.num_step\$2_rcv set \$6 \;;
 #X obj 444 321 r \$0-gui.num_max6;
 #X obj 449 372 r \$0-gui.num_max7;
 #X obj 409 629 sdPack set_max_by_ind;
-#X obj 637 534 r \$0-gui.num_shift;
 #X obj 589 605 pack;
 #X obj 588 581 swap;
-#X obj 616 560 - 0;
 #X obj 589 652 s \$1;
 #X obj 590 36 pack 0 0;
 #X obj 582 526 unpack;
@@ -455,102 +447,94 @@ set \$5 \; \$1-gui.num_step\$2_rcv set \$6 \;;
 #X obj 624 320 r \$0-gui.num_step6;
 #X obj 629 373 r \$0-gui.num_step7;
 #X obj 589 628 sdPack set_step_by_ind;
-#X connect 0 0 5 1;
-#X connect 1 0 6 0;
+#X connect 0 0 4 0;
+#X connect 1 0 0 0;
 #X connect 2 0 1 0;
-#X connect 3 0 2 0;
-#X connect 3 1 2 1;
-#X connect 4 0 7 0;
-#X connect 5 0 3 1;
+#X connect 2 1 1 1;
+#X connect 3 0 5 0;
+#X connect 5 0 6 0;
+#X connect 6 0 2 0;
+#X connect 6 1 2 1;
 #X connect 7 0 8 0;
-#X connect 8 0 3 0;
-#X connect 8 1 5 0;
+#X connect 8 0 6 0;
 #X connect 9 0 10 0;
-#X connect 10 0 8 0;
+#X connect 10 0 6 0;
 #X connect 11 0 12 0;
-#X connect 12 0 8 0;
-#X connect 13 0 14 0;
-#X connect 14 0 8 0;
+#X connect 12 0 6 0;
+#X connect 13 0 17 0;
+#X connect 14 0 18 0;
 #X connect 15 0 19 0;
 #X connect 16 0 20 0;
-#X connect 17 0 21 0;
-#X connect 18 0 22 0;
-#X connect 19 0 8 0;
-#X connect 20 0 8 0;
-#X connect 21 0 8 0;
-#X connect 22 0 8 0;
-#X connect 23 0 26 1;
-#X connect 24 0 45 0;
-#X connect 25 0 24 0;
-#X connect 25 1 24 1;
-#X connect 26 0 25 1;
-#X connect 28 0 29 0;
+#X connect 17 0 6 0;
+#X connect 18 0 6 0;
+#X connect 19 0 6 0;
+#X connect 20 0 6 0;
+#X connect 21 0 41 0;
+#X connect 22 0 21 0;
+#X connect 22 1 21 1;
+#X connect 24 0 25 0;
+#X connect 25 0 22 0;
+#X connect 25 1 22 1;
+#X connect 26 0 25 0;
+#X connect 27 0 25 0;
+#X connect 28 0 25 0;
 #X connect 29 0 25 0;
-#X connect 29 1 26 0;
-#X connect 30 0 29 0;
-#X connect 31 0 29 0;
-#X connect 32 0 29 0;
-#X connect 33 0 29 0;
-#X connect 34 0 29 0;
-#X connect 35 0 29 0;
-#X connect 36 0 29 0;
-#X connect 37 0 28 0;
+#X connect 30 0 25 0;
+#X connect 31 0 25 0;
+#X connect 32 0 25 0;
+#X connect 33 0 24 0;
+#X connect 34 0 26 0;
+#X connect 35 0 27 0;
+#X connect 36 0 28 0;
+#X connect 37 0 29 0;
 #X connect 38 0 30 0;
 #X connect 39 0 31 0;
 #X connect 40 0 32 0;
-#X connect 41 0 33 0;
-#X connect 42 0 34 0;
-#X connect 43 0 35 0;
-#X connect 44 0 36 0;
-#X connect 45 0 27 0;
-#X connect 46 0 49 1;
-#X connect 47 0 68 0;
-#X connect 48 0 47 0;
-#X connect 48 1 47 1;
-#X connect 49 0 48 1;
-#X connect 51 0 52 0;
-#X connect 52 0 48 0;
-#X connect 52 1 49 0;
-#X connect 53 0 52 0;
-#X connect 54 0 52 0;
-#X connect 55 0 52 0;
-#X connect 56 0 52 0;
-#X connect 57 0 52 0;
-#X connect 58 0 52 0;
-#X connect 59 0 52 0;
-#X connect 60 0 51 0;
+#X connect 41 0 23 0;
+#X connect 42 0 62 0;
+#X connect 43 0 42 0;
+#X connect 43 1 42 1;
+#X connect 45 0 46 0;
+#X connect 46 0 43 0;
+#X connect 46 1 43 1;
+#X connect 47 0 46 0;
+#X connect 48 0 46 0;
+#X connect 49 0 46 0;
+#X connect 50 0 46 0;
+#X connect 51 0 46 0;
+#X connect 52 0 46 0;
+#X connect 53 0 46 0;
+#X connect 54 0 45 0;
+#X connect 55 0 47 0;
+#X connect 56 0 48 0;
+#X connect 57 0 49 0;
+#X connect 58 0 50 0;
+#X connect 59 0 51 0;
+#X connect 60 0 52 0;
 #X connect 61 0 53 0;
-#X connect 62 0 54 0;
-#X connect 63 0 55 0;
-#X connect 64 0 56 0;
-#X connect 65 0 57 0;
-#X connect 66 0 58 0;
-#X connect 67 0 59 0;
-#X connect 68 0 50 0;
-#X connect 69 0 72 1;
-#X connect 70 0 91 0;
-#X connect 71 0 70 0;
-#X connect 71 1 70 1;
-#X connect 72 0 71 1;
-#X connect 74 0 75 0;
-#X connect 75 0 71 0;
-#X connect 75 1 72 0;
-#X connect 76 0 75 0;
-#X connect 77 0 75 0;
-#X connect 78 0 75 0;
-#X connect 79 0 75 0;
-#X connect 80 0 75 0;
-#X connect 81 0 75 0;
-#X connect 82 0 75 0;
-#X connect 83 0 74 0;
-#X connect 84 0 76 0;
-#X connect 85 0 77 0;
-#X connect 86 0 78 0;
-#X connect 87 0 79 0;
-#X connect 88 0 80 0;
-#X connect 89 0 81 0;
-#X connect 90 0 82 0;
-#X connect 91 0 73 0;
+#X connect 62 0 44 0;
+#X connect 63 0 83 0;
+#X connect 64 0 63 0;
+#X connect 64 1 63 1;
+#X connect 66 0 67 0;
+#X connect 67 0 64 0;
+#X connect 67 1 64 1;
+#X connect 68 0 67 0;
+#X connect 69 0 67 0;
+#X connect 70 0 67 0;
+#X connect 71 0 67 0;
+#X connect 72 0 67 0;
+#X connect 73 0 67 0;
+#X connect 74 0 67 0;
+#X connect 75 0 66 0;
+#X connect 76 0 68 0;
+#X connect 77 0 69 0;
+#X connect 78 0 70 0;
+#X connect 79 0 71 0;
+#X connect 80 0 72 0;
+#X connect 81 0 73 0;
+#X connect 82 0 74 0;
+#X connect 83 0 65 0;
 #X restore 596 496 pd gui.numProps -> obj;
 #N canvas 0 30 681 736 gui.symProps 0;
 #X obj 34 74 s \$1;
@@ -574,7 +558,7 @@ set \$5 \; \$1-gui.num_step\$2_rcv set \$6 \;;
 #X connect 10 0 11 0;
 #X connect 11 0 3 0;
 #X restore 596 550 pd gui.symProps -> obj;
-#N canvas 0 30 681 736 obj 0;
+#N canvas 683 126 681 64 obj 1;
 #X obj 25 11 inlet;
 #X obj 31 255 s \$0-groupName_rcv;
 #X msg 169 290 number \$1;
@@ -598,7 +582,7 @@ set \$5 \; \$1-gui.num_step\$2_rcv set \$6 \;;
 #X msg 349 295 number \$1;
 #X obj 349 319 s \$0-objRadio_rcv;
 #X obj 169 314 s \$0-groupRadio_rcv;
-#N canvas 0 30 681 736 set 0;
+#N canvas 683 30 681 64 set 1;
 #X obj 143 182 sdUnPack;
 #X obj 148 274 sdList;
 #X msg 113 242 serialize;
@@ -608,26 +592,26 @@ set \$5 \; \$1-gui.num_step\$2_rcv set \$6 \;;
 #X obj 201 302 t a b;
 #X obj 178 457 send;
 #X msg 151 424 label \$1;
-#N canvas 0 30 681 736 gui 0;
+#N canvas 0 30 681 736 gui 1;
 #X obj 43 9 inlet;
 #X obj 74 149 until;
 #X msg 144 138 0;
 #X obj 79 220 pack f \$0;
 #X obj 74 71 t b b;
-#X text 69 334 clear numProps display;
+#X text 69 362 clear numProps display;
 #X obj 74 184 sdCounter -1;
+#X msg 72 113 8;
 #X msg 79 259 \; \$2-gui.numPropName\$1_rcv label - \; \$2-gui.numProp\$1_rcv
 set 0 \; \$2-gui.num_min\$1_rcv set -1000 \; \$2-gui.num_max\$1_rcv
-set 1000 \;;
-#X msg 72 113 8;
+set 1000 \; \$2-gui.scroll.numProp\$1_rcv set 0 \;;
 #X connect 0 0 4 0;
 #X connect 1 0 6 0;
 #X connect 2 0 6 0;
-#X connect 3 0 7 0;
-#X connect 4 0 8 0;
+#X connect 3 0 8 0;
+#X connect 4 0 7 0;
 #X connect 4 1 2 0;
 #X connect 6 0 3 0;
-#X connect 8 0 1 0;
+#X connect 7 0 1 0;
 #X restore 243 173 pd gui clear props;
 #X obj 179 143 t a b;
 #X obj 244 435 sdReplace \$0;
@@ -841,15 +825,15 @@ set 0 \;;
 #X connect 3 0 1 0;
 #X restore 597 467 pd gui -> \$1;
 #X obj 190 131 nbx 5 14 -1e+37 1e+37 0 0 \$0-gui.num_min0 \$0-gui.num_min0_rcv
-empty 0 -8 1 8 -262144 -1 -1 -1000 256;
+empty 0 -8 1 8 -262144 -1 -1 0 256;
 #X obj 233 131 nbx 5 14 -1e+37 1e+37 0 0 \$0-gui.num_max0 \$0-gui.num_max0_rcv
-empty 0 -8 1 8 -262144 -1 -1 1000 256;
+empty 0 -8 1 8 -262144 -1 -1 127 256;
 #X text 191 112 min;
 #X text 236 112 max;
 #X obj 190 160 nbx 5 14 -1e+37 1e+37 0 0 \$0-gui.num_min1 \$0-gui.num_min1_rcv
-empty 0 -8 1 8 -262144 -1 -1 -1000 256;
+empty 0 -8 1 8 -262144 -1 -1 0 256;
 #X obj 233 160 nbx 5 14 -1e+37 1e+37 0 0 \$0-gui.num_max1 \$0-gui.num_max1_rcv
-empty 0 -8 1 8 -262144 -1 -1 1000 256;
+empty 0 -8 1 8 -262144 -1 -1 1 256;
 #X obj 190 189 nbx 5 14 -1e+37 1e+37 0 0 \$0-gui.num_min2 \$0-gui.num_min2_rcv
 empty 0 -8 1 8 -262144 -1 -1 -1000 256;
 #X obj 233 189 nbx 5 14 -1e+37 1e+37 0 0 \$0-gui.num_max2 \$0-gui.num_max2_rcv
@@ -882,7 +866,7 @@ empty 0 -8 1 8 -262144 -1 -1 1000 256;
 #X obj 622 165 outlet;
 #X obj 690 164 outlet;
 #X symbolatom 23 551 30 0 0 0 - #0-gui.event.name_rcv -;
-#X obj 22 535 hradio 12 1 0 1 \$0-gui.event.radio \$0-gui.event.radio_rcv
+#X obj 22 535 hradio 12 1 0 2 \$0-gui.event.radio \$0-gui.event.radio_rcv
 empty 0 -8 0 10 -262144 -1 -1 0;
 #X obj 209 551 bng 15 250 50 0 \$0-gui.event.send empty empty 17 7
 0 10 -262144 -1 -1;
@@ -896,7 +880,7 @@ empty 0 -8 0 10 -262144 -1 -1 0;
 #X obj 596 671 s \$1;
 #X msg 596 648 list send_event_by_ind 1 \$1;
 #X obj 276 131 nbx 3 14 -1e+37 1e+37 0 0 \$0-gui.num_step0 \$0-gui.num_step0_rcv
-empty 0 -8 1 8 -262144 -1 -1 0 256;
+empty 0 -8 1 8 -262144 -1 -1 1 256;
 #X obj 276 160 nbx 3 14 -1e+37 1e+37 0 0 \$0-gui.num_step1 \$0-gui.num_step1_rcv
 empty 0 -8 1 8 -262144 -1 -1 0 256;
 #X obj 276 189 nbx 3 14 -1e+37 1e+37 0 0 \$0-gui.num_step2 \$0-gui.num_step2_rcv
@@ -912,8 +896,8 @@ empty 0 -8 1 8 -262144 -1 -1 0 256;
 #X obj 276 334 nbx 3 14 -1e+37 1e+37 0 0 \$0-gui.num_step7 \$0-gui.num_step7_rcv
 empty 0 -8 1 8 -262144 -1 -1 0 256;
 #X text 276 112 step;
-#X obj 33 471 cnv 15 110 13 empty \$0-gui.bool_propName0_rcv - 1 8
-0 10 -228856 -66577 0;
+#X obj 33 471 cnv 15 110 13 empty \$0-gui.bool_propName0_rcv enable
+1 8 0 10 -228856 -66577 0;
 #X obj 32 490 cnv 15 110 13 empty \$0-gui.bool_propName1_rcv - 1 8
 0 10 -228856 -66577 0;
 #X obj 182 471 cnv 15 110 13 empty \$0-gui.bool_propName2_rcv - 1 8
@@ -968,7 +952,7 @@ empty 0 -8 1 8 -262144 -1 -1 0 256;
 #X obj 12 334 cnv 15 13 13 empty empty 8 1 8 0 10 -191407 -66577 0
 ;
 #X obj 263 86 nbx 2 14 0 31 0 0 \$0-gui.num_shift \$0-gui.num_shift_rcv
-empty 0 -8 1 8 -1 -262144 -1 8 256;
+empty 0 -8 1 8 -1 -262144 -1 0 256;
 #X obj 15 471 cnv 15 13 13 empty empty 1 1 8 0 10 -191407 -66577 0
 ;
 #X obj 15 489 cnv 15 13 13 empty empty 2 1 8 0 10 -191407 -66577 0
@@ -991,7 +975,7 @@ empty 0 -8 1 8 -1 -262144 -1 8 256;
 #X obj 289 94 bng 13 250 50 0 \$0-gui.dec_shift empty empty 17 7 0
 10 -262144 -1 -1;
 #X obj 308 135 vsl 8 128 0 31 0 0 empty empty empty 0 -9 0 10 -1 -262144
--1 9700 1;
+-1 12700 1;
 #X obj 345 421 loadbang;
 #X obj 345 444 t b;
 #X obj 344 127 expr 31-$f1;
@@ -1017,9 +1001,9 @@ empty 0 -8 1 8 -1 -262144 -1 8 256;
 #X obj 407 565 r \$0-gui.dec_shift;
 #X text 188 86 shift props;
 #X obj 36 147 hsl 220 10 0 1 0 0 \$0-gui.scroll.numProp0 \$0-gui.scroll.numProp0_rcv
-empty -2 -8 0 10 -1 -260097 -1 0 1;
+empty -2 -8 0 10 -1 -260097 -1 3449 1;
 #X obj 36 176 hsl 220 10 0 1 0 0 \$0-gui.scroll.numProp1 \$0-gui.scroll.numProp1_rcv
-empty -2 -8 0 10 -1 -260097 -1 0 1;
+empty -2 -8 0 10 -1 -260097 -1 21900 1;
 #X obj 36 205 hsl 220 10 0 1 0 0 \$0-gui.scroll.numProp2 \$0-gui.scroll.numProp2_rcv
 empty -2 -8 0 10 -1 -260097 -1 0 1;
 #X obj 36 234 hsl 220 10 0 1 0 0 \$0-gui.scroll.numProp3 \$0-gui.scroll.numProp3_rcv
@@ -1033,10 +1017,8 @@ empty -2 -8 0 10 -1 -260097 -1 0 1;
 #X obj 36 351 hsl 220 10 0 1 0 0 \$0-gui.scroll.numProp7 \$0-gui.scroll.numProp7_rcv
 empty -2 -8 0 10 -1 -260097 -1 0 1;
 #N canvas 0 30 681 736 gui.numProps 0;
-#X obj 82 533 r \$0-gui.num_shift;
 #X obj 34 604 pack;
 #X obj 33 580 swap;
-#X obj 61 559 - 0;
 #X obj 34 651 s \$1;
 #X obj 27 525 unpack;
 #X obj 40 87 pack 0 1;
@@ -1056,30 +1038,28 @@ empty -2 -8 0 10 -1 -260097 -1 0 1;
 #X obj 68 320 r \$0-gui.scroll.numProp6;
 #X obj 74 371 r \$0-gui.scroll.numProp7;
 #X obj 35 35 pack 0 0;
-#X connect 0 0 3 1;
-#X connect 1 0 14 0;
-#X connect 2 0 1 0;
-#X connect 2 1 1 1;
-#X connect 3 0 2 1;
-#X connect 5 0 2 0;
-#X connect 5 1 3 0;
-#X connect 6 0 5 0;
-#X connect 7 0 5 0;
-#X connect 8 0 5 0;
-#X connect 9 0 5 0;
-#X connect 10 0 5 0;
-#X connect 11 0 5 0;
-#X connect 12 0 5 0;
-#X connect 13 0 22 0;
-#X connect 14 0 4 0;
+#X connect 0 0 12 0;
+#X connect 1 0 0 0;
+#X connect 1 1 0 1;
+#X connect 3 0 1 0;
+#X connect 3 1 1 1;
+#X connect 4 0 3 0;
+#X connect 5 0 3 0;
+#X connect 6 0 3 0;
+#X connect 7 0 3 0;
+#X connect 8 0 3 0;
+#X connect 9 0 3 0;
+#X connect 10 0 3 0;
+#X connect 11 0 20 0;
+#X connect 12 0 2 0;
+#X connect 13 0 4 0;
+#X connect 14 0 5 0;
 #X connect 15 0 6 0;
 #X connect 16 0 7 0;
 #X connect 17 0 8 0;
 #X connect 18 0 9 0;
 #X connect 19 0 10 0;
-#X connect 20 0 11 0;
-#X connect 21 0 12 0;
-#X connect 22 0 5 0;
+#X connect 20 0 3 0;
 #X restore 739 496 pd gui.numProps -> obj;
 #X msg 506 10 list init 0;
 #X msg 806 94 list set ( numShift ( \$1 ) );
@@ -1096,7 +1076,7 @@ empty -2 -8 0 10 -1 -260097 -1 0 1;
 #X connect 0 0 2 0;
 #X connect 2 0 3 0;
 #X connect 2 0 1 0;
-#X restore 869 370 pd numShift-> gui;
+#X restore 841 376 pd numShift-> gui;
 #X obj 375 170 sdFirst;
 #X obj 339 320 t f b;
 #X obj 339 355 s \$0-gui.scroll.num_shift;
