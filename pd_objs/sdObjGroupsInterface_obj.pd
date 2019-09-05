@@ -1,4 +1,4 @@
-#N canvas 0 30 681 736 10;
+#N canvas 683 30 681 77 10;
 #X obj 33 10 inlet;
 #X obj 567 203 sdPropertyList numProps \$0;
 #X obj 548 145 sdPropertySym dest \$0;
@@ -327,7 +327,7 @@
 #X obj 321 137 sdObjGetAll \$1 get_with_range;
 #X obj 285 374 s \$0-fromDest_single_msg.in;
 #X obj 14 357 r \$0-fromDest_single_msg.in, f 16;
-#N canvas 0 30 681 736 generic 0;
+#N canvas 0 30 681 736 generic 1;
 #X obj 13 9 inlet;
 #X obj 19 299 sdPackFilter get_sym_by_ind;
 #X obj 90 324 sdPackFilter set_sym_by_ind;
@@ -387,7 +387,7 @@
 #X connect 23 0 22 1;
 #X connect 24 0 22 0;
 #X connect 24 1 23 0;
-#X connect 25 0 23 1;
+#X connect 25 0 21 1;
 #X restore 289 113 pd num_by_ind;
 #N canvas 0 30 681 722 sym_by_ind 0;
 #X obj 75 114 sdUnPack;
@@ -493,7 +493,7 @@
 #X connect 23 0 22 1;
 #X connect 24 0 22 0;
 #X connect 24 1 23 0;
-#X connect 25 0 23 1;
+#X connect 25 0 21 1;
 #X restore 27 126 pd num_by_ind;
 #X obj 13 32 sdPackFilter get_num_by_ind;
 #X obj 289 64 sdPackFilter get_num_by_ind_in_range;
@@ -557,7 +557,7 @@
 #X connect 23 0 22 1;
 #X connect 24 0 22 0;
 #X connect 24 1 23 0;
-#X connect 25 0 23 1;
+#X connect 25 0 21 1;
 #X restore 16 229 pd min_by_ind;
 #X obj 115 497 sdPackFilter send_event_by_ind;
 #N canvas 0 30 681 736 events 0;
@@ -694,7 +694,7 @@
 #X connect 21 0 20 1;
 #X connect 22 0 20 0;
 #X connect 22 1 21 0;
-#X connect 23 0 21 1;
+#X connect 23 0 19 1;
 #X connect 24 0 11 0;
 #X connect 25 0 5 0;
 #X restore 266 229 pd max_by_ind;
@@ -752,7 +752,7 @@
 #X connect 21 0 20 1;
 #X connect 22 0 20 0;
 #X connect 22 1 21 0;
-#X connect 23 0 21 1;
+#X connect 23 0 19 1;
 #X connect 24 0 11 0;
 #X connect 25 0 5 0;
 #X restore 512 229 pd step_by_ind;
