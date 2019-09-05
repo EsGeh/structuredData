@@ -1,4 +1,4 @@
-#N canvas 0 30 681 722 10;
+#N canvas 0 30 681 736 10;
 #X obj 33 10 inlet;
 #X obj 567 203 sdPropertyList numProps \$0;
 #X obj 548 145 sdPropertySym dest \$0;
@@ -47,7 +47,7 @@
 #X obj 14 431 t a a;
 #X obj 66 519 r \$0-numProps;
 #X obj 14 619 s \$0-fromDest.generic;
-#N canvas 0 30 762 722 num_generic_out 0;
+#N canvas 0 30 803 736 num_generic_out 0;
 #X obj 658 340 sdList;
 #X obj 51 88 sdUnPack;
 #X obj 559 291 sdUnPack;
@@ -751,7 +751,7 @@
 #X obj 101 542 r \$0-symProps;
 #X obj 119 595 s \$0-events;
 #X obj 116 215 r \$0-events;
-#N canvas 0 30 762 722 updateInstr 0;
+#N canvas 0 30 803 736 updateInstr 0;
 #X obj 107 51 inlet;
 #X obj 157 117 t a b, f 21;
 #X obj 278 328 t a a;

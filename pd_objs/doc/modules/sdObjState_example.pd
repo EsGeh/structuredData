@@ -1,4 +1,4 @@
-#N canvas 683 30 681 118 10;
+#N canvas 0 30 681 736 10;
 #X obj 358 303 sdReplace \$0;
 #X msg 358 260 raw set dest %0-obscureInstrument;
 #X obj 374 460 sdReplace \$0;
@@ -7,9 +7,9 @@
 #X msg 373 281 raw set dest %0-weirdInstrument;
 #X text 331 229 lets define a receiver to track the instruments state
 , f 35;
-#X obj 532 24 loadbang;
-#X obj 532 70 s \$0-GLOBAL;
-#X msg 532 47 list init 0;
+#X obj 483 14 loadbang;
+#X obj 483 60 s \$0-GLOBAL;
+#X msg 483 37 list init 0;
 #X obj 376 615 sdReplace \$0;
 #X msg 375 569 raw set dest %0-obscureInstrument;
 #X msg 388 592 raw set dest %0-weirdInstrument;
@@ -17,8 +17,8 @@
 #X obj 374 483 sdObjSndExample \$0-sender \$0-CONN \$0-GLOBAL;
 #X obj 348 326 sdObjRcvExample \$0-receiver \$0-CONN \$0-GLOBAL;
 #X obj 362 643 sdObjDuplexExample \$0-dupl \$0-CONN \$0-GLOBAL;
-#X obj 7 632 print GUI.out;
-#X obj 156 631 print genericObj.out;
+#X obj 7 662 print GUI.out;
+#X obj 156 661 print genericObj.out;
 #X obj 7 25 sdObjState_ui GUI \$0-GUI-INIT \$0-INSTR \$0-CONN;
 #X msg 343 40 list init 0;
 #X obj 343 63 s \$0-GUI-INIT;
@@ -28,7 +28,7 @@
 #X text 328 103 3 select an object;
 #X text 328 86 2 select a group;
 #X text 328 19 1 init GUI:;
-#N canvas 0 30 681 722 control 0;
+#N canvas 0 30 681 736 control 0;
 #X obj 91 169 sdPackFromHuman;
 #X obj 91 192 send GUI;
 #X msg 91 146 list set ( destIndex ( \$1 ) );
@@ -79,7 +79,7 @@
 #X connect 23 0 24 0;
 #X connect 24 0 0 0;
 #X restore 327 184 pd control gui;
-#N canvas 0 30 681 722 other 1;
+#N canvas 0 30 803 736 other 0;
 #X obj 55 117 sdPackFromHuman;
 #X msg 55 94 list set ( dest ( \$1 ) );
 #X msg 55 48 symbol %0-weirdInstrument;
@@ -167,6 +167,4 @@ don't contain \$0 symbols.;
 #X connect 10 0 16 0;
 #X connect 11 0 10 0;
 #X connect 12 0 10 0;
-#X connect 19 0 17 0;
-#X connect 19 1 18 0;
 #X connect 20 0 21 0;
