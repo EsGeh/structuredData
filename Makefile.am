@@ -29,10 +29,6 @@ data_DATA = \
 	$(PATH_PD_OBJS)/sdObjTrackAll.pd \
 	$(PATH_PD_OBJS)/sdObjGet.pd \
 	$(PATH_PD_OBJS)/sdObjGetAll.pd \
-	$(PATH_PD_OBJS)/sdObjExample.pd \
-	$(PATH_PD_OBJS)/sdObjSndExample.pd \
-	$(PATH_PD_OBJS)/sdObjDuplexExample.pd \
-	$(PATH_PD_OBJS)/sdObjRcvExample.pd \
 	$(PATH_PD_OBJS)/sdObjInterface_obj.pd \
 	$(PATH_PD_OBJS)/sdObjGroupsInterface_obj.pd \
 	$(PATH_PD_OBJS)/sdTest.pd \
@@ -46,7 +42,12 @@ data_DATA = \
   $(PATH_PD_OBJS)/doc/modules/sdPack-help.pd \
   $(PATH_PD_OBJS)/doc/modules/sdUtils-help.pd \
   $(PATH_PD_OBJS)/doc/modules/sdPackMatch-help.pd \
-	$(PATH_PD_OBJS)/doc/sdScript-help.pd
+	$(PATH_PD_OBJS)/doc/sdScript-help.pd \
+	$(PATH_PD_OBJS)/doc/sdObjExample.pd \
+	$(PATH_PD_OBJS)/doc/sdObjSndExample.pd \
+	$(PATH_PD_OBJS)/doc/sdObjDuplexExample.pd \
+	$(PATH_PD_OBJS)/doc/sdObjRcvExample.pd \
+	$(PATH_PD_OBJS)/doc/sdObjExampleManyProps.pd
 
 structuredDataC_la_SOURCES = \
   $(PATH_CODE)/structuredData.c $(PATH_CODE)/structuredData.h \

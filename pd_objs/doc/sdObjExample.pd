@@ -1,4 +1,4 @@
-#N canvas 0 30 967 722 10;
+#N canvas 0 30 681 736 10;
 #X obj 145 45 r \$0-pitch;
 #X obj 228 45 r \$0-volume;
 #X obj 410 25 inlet;

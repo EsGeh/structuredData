@@ -160,6 +160,8 @@ don't contain \$0 symbols.;
 ;
 #X obj 638 316 sdObjExample \$0-weirdInstrument \$0-INSTR \$0-GLOBAL
 ;
+#X obj 641 394 sdObjExampleManyProps \$0-manyProps \$0-GLOBAL \$0-INSTR
+;
 #X connect 0 0 15 0;
 #X connect 1 0 0 0;
 #X connect 2 0 14 0;
