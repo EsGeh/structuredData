@@ -379,21 +379,18 @@ void counter_bang(
 
 typedef struct _first {
   t_object x_obj;
-	t_float reject;
+	t_float accept;
 	t_outlet* acceptOut;
 	t_outlet* rejectOut;
 } t_first;
 
-void* first_new(
-);
+void* first_new();
+
 void first_input(
 	t_first *x,
 	t_symbol *s,
 	int argc,
 	t_atom *argv
-);
-void first_reset(
-	t_first *x
 );
 
 t_class* register_first(
@@ -415,12 +412,6 @@ t_class* register_first(
 			gensym("sdUtils")
 	);
 	class_addlist(class, first_input);
-	class_addmethod(
-		class,
-		(t_method )first_reset,
-		gensym("reset"),
-		0
-	);
 	return class;
 }
 
@@ -429,13 +420,11 @@ void* first_new(
 {
   t_first *x = (t_first *)pd_new(first_class);
 
-	x -> reject = 0;
+	x -> accept = 1;
 
-	inlet_new(
+	floatinlet_new(
 		& x->x_obj,
-		& x->x_obj.ob_pd,
-		gensym("bang"), // accept method
-		gensym("reset")  // method to call
+		& x->accept
 	);
 
   x-> acceptOut = outlet_new(&x->x_obj, &s_anything);
@@ -451,7 +440,7 @@ void first_input(
 	t_atom *argv
 )
 {
-	if( x-> reject == 0 )
+	if( x-> accept != 0 )
 	{
 		outlet_list(
 			x->acceptOut,
@@ -459,7 +448,7 @@ void first_input(
 			argc,
 			argv
 		);
-		x->reject = 1;
+		x->accept = 0;
 	}
 	else
 	{
@@ -470,13 +459,6 @@ void first_input(
 			argv
 		);
 	}
-}
-
-void first_reset(
-	t_first *x
-)
-{
-	x->reject = 0;
 }
 
 //----------------------------------
