@@ -1,15 +1,15 @@
-#N canvas 683 137 681 75 10;
+#N canvas 0 30 681 722 10;
 #X obj 22 74 hradio 12 1 0 3 \$0-objRadio \$0-objRadio_rcv empty 0
--8 0 10 -262144 -1 -1 1;
+-8 0 10 -262144 -1 -1 2;
 #X text 11 57 select obj.:;
 #X obj 629 444 r \$0-objRadio;
 #X symbolatom 22 91 27 0 0 0 - #0-objName_rcv #0-objName;
 #X obj 141 131 nbx 6 14 -1e+37 1e+37 0 0 \$0-gui.numProp0 \$0-gui.numProp0_rcv
-empty 0 -8 1 8 -262144 -1 -1 76 256;
+empty 0 -8 1 8 -262144 -1 -1 85 256;
 #X obj 141 160 nbx 6 14 -1e+37 1e+37 0 0 \$0-gui.numProp1 \$0-gui.numProp1_rcv
-empty 0 -8 1 8 -262144 -1 -1 0.1 256;
+empty 0 -8 1 8 -262144 -1 -1 0.931507 256;
 #X obj 141 189 nbx 6 14 -1e+37 1e+37 0 0 \$0-gui.numProp2 \$0-gui.numProp2_rcv
-empty 0 -8 1 8 -262144 -1 -1 0.1 256;
+empty 0 -8 1 8 -262144 -1 -1 0.5 256;
 #X obj 29 131 cnv 15 110 13 empty \$0-gui.numPropName0_rcv pitch 1
 8 0 10 -228856 -66577 0;
 #X text 12 109 numeric properties:;
@@ -65,7 +65,7 @@ empty 0 -8 1 8 -262144 -1 -1 0 256;
 0 -8 0 10 -262144 -1 -1 0;
 #X symbolatom 21 42 27 0 0 0 - #0-groupName_rcv #0-groupName;
 #X obj 630 392 r \$0-groupRadio;
-#N canvas 683 30 681 75 properties 1;
+#N canvas 683 30 681 75 properties 0;
 #X obj 21 23 inlet;
 #X obj 155 167 sdUnPack;
 #X obj 155 341 list append \$0;
@@ -145,7 +145,7 @@ empty 0 -8 1 8 -262144 -1 -1 0 256;
 #X msg 414 501 \; \$1-gui.num_min\$2_rcv set \$4 \; \$1-gui.num_max\$2_rcv
 set \$5 \; \$1-gui.num_step\$2_rcv set \$6 \;;
 #X msg 155 365 \; \$3-gui.numProp\$1_rcv set \$2 \;, f 17;
-#N canvas 0 30 681 722 -> 1;
+#N canvas 0 30 681 722 -> 0;
 #X obj 44 244 list;
 #X obj 92 66 list trim;
 #X obj 72 195 route set;
@@ -890,7 +890,7 @@ empty 0 -8 1 8 -262144 -1 -1 127 256;
 #X obj 190 160 nbx 5 14 -1e+37 1e+37 0 0 \$0-gui.num_min1 \$0-gui.num_min1_rcv
 empty 0 -8 1 8 -262144 -1 -1 0 256;
 #X obj 233 160 nbx 5 14 -1e+37 1e+37 0 0 \$0-gui.num_max1 \$0-gui.num_max1_rcv
-empty 0 -8 1 8 -262144 -1 -1 0.1 256;
+empty 0 -8 1 8 -262144 -1 -1 1 256;
 #X obj 190 189 nbx 5 14 -1e+37 1e+37 0 0 \$0-gui.num_min2 \$0-gui.num_min2_rcv
 empty 0 -8 1 8 -262144 -1 -1 0.1 256;
 #X obj 233 189 nbx 5 14 -1e+37 1e+37 0 0 \$0-gui.num_max2 \$0-gui.num_max2_rcv
@@ -1050,11 +1050,11 @@ empty 0 -8 1 8 -1 -262144 -1 0 256;
 #X obj 407 565 r \$0-gui.dec_shift;
 #X text 188 86 shift props;
 #X obj 36 147 hsl 220 10 0 1 0 0 \$0-gui.scroll.numProp0 \$0-gui.scroll.numProp0_rcv
-empty -2 -8 0 10 -1 -260097 -1 13200 1;
+empty -2 -8 0 10 -1 -260097 -1 14657 1;
 #X obj 36 176 hsl 220 10 0 1 0 0 \$0-gui.scroll.numProp1 \$0-gui.scroll.numProp1_rcv
-empty -2 -8 0 10 -1 -260097 -1 21900 1;
+empty -2 -8 0 10 -1 -260097 -1 20400 1;
 #X obj 36 205 hsl 220 10 0 1 0 0 \$0-gui.scroll.numProp2 \$0-gui.scroll.numProp2_rcv
-empty -2 -8 0 10 -1 -260097 -1 0 1;
+empty -2 -8 0 10 -1 -260097 -1 8760 1;
 #X obj 36 234 hsl 220 10 0 1 0 0 \$0-gui.scroll.numProp3 \$0-gui.scroll.numProp3_rcv
 empty -2 -8 0 10 -1 -260097 -1 0 1;
 #X obj 36 263 hsl 220 10 0 1 0 0 \$0-gui.scroll.numProp4 \$0-gui.scroll.numProp4_rcv

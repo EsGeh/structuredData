@@ -29,6 +29,7 @@ data_DATA = \
 	$(PATH_PD_OBJS)/sdObjTrackAll.pd \
 	$(PATH_PD_OBJS)/sdObjGet.pd \
 	$(PATH_PD_OBJS)/sdObjGetAll.pd \
+	$(PATH_PD_OBJS)/sdObjInterface.pd \
 	$(PATH_PD_OBJS)/sdObjInterface_obj.pd \
 	$(PATH_PD_OBJS)/sdObjGroupsInterface_obj.pd \
 	$(PATH_PD_OBJS)/sdTest.pd \
