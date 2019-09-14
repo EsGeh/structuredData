@@ -33,6 +33,10 @@ data_DATA = \
 	$(PATH_PD_OBJS)/sdObjGroupsInterface_obj.pd \
 	$(PATH_PD_OBJS)/sdTest.pd \
 	$(PATH_PD_OBJS)/utils/sdListForEach.pd \
+	$(PATH_PD_OBJS)/math/sdCenterDelta.pd \
+	$(PATH_PD_OBJS)/math/sdMinDelta.pd \
+	$(PATH_PD_OBJS)/math/sdMinMax.pd \
+	$(PATH_PD_OBJS)/math/sdMod.pd \
   $(PATH_PD_OBJS)/doc/structuredDataC_doc.pd \
   $(PATH_PD_OBJS)/doc/modules/sdData-help.pd \
   $(PATH_PD_OBJS)/doc/modules/sdEvent-help.pd \
@@ -42,6 +46,7 @@ data_DATA = \
   $(PATH_PD_OBJS)/doc/modules/sdPack-help.pd \
   $(PATH_PD_OBJS)/doc/modules/sdUtils-help.pd \
   $(PATH_PD_OBJS)/doc/modules/sdPackMatch-help.pd \
+  $(PATH_PD_OBJS)/doc/modules/sdMath-help.pd \
 	$(PATH_PD_OBJS)/doc/sdScript-help.pd \
 	$(PATH_PD_OBJS)/doc/sdObjExample.pd \
 	$(PATH_PD_OBJS)/doc/sdObjSndExample.pd \

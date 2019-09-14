@@ -1,4 +1,4 @@
-#N canvas 0 30 681 736 10;
+#N canvas 0 30 681 722 10;
 #X obj 145 45 r \$0-pitch;
 #X obj 228 45 r \$0-volume;
 #X obj 410 25 inlet;
@@ -14,7 +14,7 @@
 -1 -1;
 #X obj 416 340 s \$0-start;
 #X obj 488 338 s \$0-stop;
-#X obj 571 482 s \$0-fromProperties;
+#X obj 525 536 s \$0-fromProperties;
 #X obj 605 68 r \$0-fromProperties;
 #X symbolatom 102 384 10 0 0 0 - - -;
 #X obj 605 91 list;
@@ -50,6 +50,7 @@
 #X msg 217 290 priv.set_noupdate \$1;
 #X obj 217 313 s \$0-enable_rcv;
 #X obj 586 384 sdProperty enable \$0 0 intern 0 1 1;
+#X obj 607 476 sdProperty testing \$0 0.5 intern 0.1 1.1;
 #X connect 0 0 23 0;
 #X connect 1 0 24 0;
 #X connect 2 0 28 0;
@@ -64,6 +65,7 @@
 #X connect 14 0 16 0;
 #X connect 16 0 28 1;
 #X connect 17 0 13 0;
+#X connect 17 1 48 0;
 #X connect 18 0 40 0;
 #X connect 18 1 41 0;
 #X connect 19 0 20 0;
@@ -95,4 +97,5 @@
 #X connect 45 0 46 0;
 #X connect 47 0 13 0;
 #X connect 47 1 25 0;
+#X connect 48 0 13 0;
 #X coords 0 -1 1 1 200 60 1 100 100;

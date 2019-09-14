@@ -1,4 +1,4 @@
-#N canvas 0 30 681 736 10;
+#N canvas 0 30 681 722 10;
 #X obj 358 303 sdReplace \$0;
 #X msg 358 260 raw set dest %0-obscureInstrument;
 #X obj 374 460 sdReplace \$0;
