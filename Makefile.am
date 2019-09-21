@@ -21,7 +21,6 @@ data_DATA = \
 	$(PATH_PD_OBJS)/sdAnyBang.pd \
 	$(PATH_PD_OBJS)/sdFloatBang.pd \
 	$(PATH_PD_OBJS)/sdSymbolBang.pd \
-	$(PATH_PD_OBJS)/sdObjState_ui.pd \
 	$(PATH_PD_OBJS)/sdObjSaveAll.pd \
 	$(PATH_PD_OBJS)/sdObjSaveAllToDisk.pd \
 	$(PATH_PD_OBJS)/sdObjConnectTo.pd \
@@ -33,6 +32,11 @@ data_DATA = \
 	$(PATH_PD_OBJS)/sdObjInterface_obj.pd \
 	$(PATH_PD_OBJS)/sdObjGroupsInterface_obj.pd \
 	$(PATH_PD_OBJS)/sdTest.pd \
+	$(PATH_PD_OBJS)/gui/sdObjState_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdObjState_num_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdObjState_bool_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdObjState_sym_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdObjState_events_ui.pd \
 	$(PATH_PD_OBJS)/utils/sdListForEach.pd \
 	$(PATH_PD_OBJS)/math/sdCenterDelta.pd \
 	$(PATH_PD_OBJS)/math/sdMinDelta.pd \

@@ -1,4 +1,4 @@
-#N canvas 0 30 681 722 10;
+#N canvas 0 30 721 722 10;
 #X obj 145 45 r \$0-pitch;
 #X obj 228 45 r \$0-volume;
 #X obj 410 25 inlet;
@@ -51,6 +51,7 @@
 #X obj 217 313 s \$0-enable_rcv;
 #X obj 586 384 sdProperty enable \$0 0 intern 0 1 1;
 #X obj 607 476 sdProperty testing \$0 0.5 intern 0.1 1.1;
+#X obj 543 206 print \$1.in;
 #X connect 0 0 23 0;
 #X connect 1 0 24 0;
 #X connect 2 0 28 0;

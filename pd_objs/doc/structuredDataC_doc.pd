@@ -13,3 +13,134 @@
 #X obj 48 521 sdScript-help;
 #X text 31 499 embeddable script language;
 #X obj 50 105 sdMath-help;
+#N canvas 0 30 681 722 dynpatching 0;
+#N canvas 0 30 721 736 \$0-test 0;
+#X obj 0 10 cnv 15 13 13 1003-gui.num_max0 1003-gui.num_max0_rcv 1
+1 8 0 12 -166441 -65794 0;
+#X obj 15 10 cnv 15 110 13 1003-gui.num_max0 1003-gui.numPropName0_rcv
+- 1 8 0 12 -166441 -65794 0;
+#X obj 127 10 nbx 5 14 -1e+37 1e+37 0 0 1003-gui.numProp0 1003-gui.numProp0_rcv
+empty 0 -8 0 10 -262144 -1 -1 0 256;
+#X obj 183 10 nbx 5 14 -1e+37 1e+37 0 0 1003-gui.num_step0 1003-gui.num_step0_rcv
+empty 0 -8 0 10 -262144 -1 -1 0 256;
+#X obj 15 26 nbx 5 14 -1e+37 1e+37 0 0 1003-gui.num_min0 1003-gui.num_min0_rcv
+empty 0 -8 0 10 -262144 -1 -1 0 256;
+#X obj 71 26 hsl 100 13 0 1 0 0 1003-gui.num_min0 1003-gui.num_min0_rcv
+empty -2 -8 0 10 -1 -260097 -1 0 1;
+#X obj 173 26 nbx 5 14 -1e+37 1e+37 0 0 1003-gui.num_max0 1003-gui.num_max0_rcv
+empty 0 -8 0 10 -262144 -1 -1 0 256;
+#X coords 0 -1 1 1 307 76 1 0 0;
+#X restore 202 55 pd \$0-test;
+#N canvas 0 30 721 722 line 0;
+#X obj 156 292 sdUnEvent width, f 29;
+#X obj 184 380 f 0;
+#X obj 157 353 t f b;
+#X obj 129 381 +;
+#X obj 187 408 sdPack x;
+#X obj 125 324 t f f;
+#X obj 159 400 + 2;
+#X obj 267 536 sdUnEvent;
+#X obj 197 482 t b a;
+#X obj 161 555 f 13;
+#X obj 163 456 sdEvent type width;
+#X obj 20 10 inlet;
+#X obj 496 658 outlet;
+#X obj 161 580 sdEvent test y height;
+#X obj 199 553 f 13;
+#X obj 160 517 t b b;
+#X obj 56 165 sdPackFilter nbx;
+#X obj 44 197 sdUnEvent width;
+#X obj 44 245 sdEvent nbx width;
+#X obj 44 221 * 9;
+#X obj 64 68 sdPackMatch, f 78;
+#X msg 101 43 clear \, add pat everything=[ ? ( * width ( * ) ) =]
+;
+#X obj 101 19 loadbang;
+#X obj 25 108 sdUnPack;
+#X obj 25 131 sdUnPack;
+#X obj 252 165 sdPackMatch;
+#X obj 252 117 loadbang;
+#X msg 252 141 clear \, add pat everything=[ ? ( * x ( * ) ) =];
+#X obj 359 329 sdUnEvent x y height;
+#X obj 572 107 t a a;
+#X connect 0 0 5 0;
+#X connect 0 1 10 1;
+#X connect 0 2 10 2;
+#X connect 1 0 4 0;
+#X connect 1 0 6 0;
+#X connect 2 0 3 0;
+#X connect 2 1 1 0;
+#X connect 3 0 1 1;
+#X connect 4 0 10 1;
+#X connect 5 0 10 0;
+#X connect 5 1 2 0;
+#X connect 6 0 3 1;
+#X connect 7 0 13 2;
+#X connect 7 1 13 3;
+#X connect 8 0 15 0;
+#X connect 8 1 7 0;
+#X connect 9 0 13 0;
+#X connect 10 0 8 0;
+#X connect 11 0 29 0;
+#X connect 13 0 12 0;
+#X connect 14 0 13 1;
+#X connect 15 0 9 0;
+#X connect 15 1 14 0;
+#X connect 16 0 17 0;
+#X connect 16 1 0 0;
+#X connect 17 0 19 0;
+#X connect 17 1 18 1;
+#X connect 17 2 18 2;
+#X connect 18 0 0 0;
+#X connect 19 0 18 0;
+#X connect 20 0 23 0;
+#X connect 20 1 12 0;
+#X connect 21 0 20 0;
+#X connect 22 0 21 0;
+#X connect 23 0 24 0;
+#X connect 24 0 16 0;
+#X connect 26 0 27 0;
+#X connect 27 0 25 0;
+#X connect 28 0 1 1;
+#X connect 28 1 9 1;
+#X connect 28 2 14 1;
+#X connect 29 0 20 0;
+#X connect 29 1 28 0;
+#X restore 215 557 pd line;
+#X obj 302 672 send;
+#X msg 495 637 symbol pd-\$1-test;
+#X obj 495 594 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 495 614 sdFloatBang \$0;
+#X obj 40 432 f \$0;
+#X obj 42 406 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X obj 215 532 sdPackFromHuman;
+#X obj 259 646 sdDynPatch;
+#X obj 346 604 sdEventToProperties;
+#X obj 215 581 sdPackFilter start-line;
+#X obj 208 608 sdEventToProperties;
+#X msg 154 378 list clear ( ) \, list start-line ( x ( 0 ) y ( 10 )
+height ( 13 ) ) \, list canvas ( width ( 13 ) label ( 1 ) ) \, list
+canvas ( width ( 110 ) rcv ( \$1-gui.numPropName0_rcv ) label ( - )
+) \, list nbx ( width ( 6 ) snd ( \$1-gui.numProp0 ) rcv ( \$1-gui.numProp0_rcv
+) ) \, list nbx ( width ( 3 ) snd ( \$1-gui.num_step0 ) rcv ( \$1-gui.num_step0_rcv
+) ) \, list start-line ( x ( 15 ) y ( 26 ) height ( 13 ) ) \, list
+nbx ( width ( 6 ) snd ( \$1-gui.num_min0 ) rcv ( \$1-gui.num_min0_rcv
+) ) \, list hsl ( width ( 100 ) ) \, list nbx ( width ( 6 ) snd ( \$1-gui.num_max0
+) rcv ( \$1-gui.num_max0_rcv ) );
+#X connect 1 0 11 0;
+#X connect 3 0 2 1;
+#X connect 4 0 5 0;
+#X connect 5 0 3 0;
+#X connect 6 0 13 0;
+#X connect 7 0 6 0;
+#X connect 8 0 1 0;
+#X connect 9 0 2 0;
+#X connect 10 0 9 0;
+#X connect 10 1 9 0;
+#X connect 11 0 12 0;
+#X connect 11 1 10 0;
+#X connect 12 1 9 0;
+#X connect 13 0 8 0;
+#X restore 119 602 pd dynpatching test;
