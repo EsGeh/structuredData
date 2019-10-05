@@ -118,6 +118,18 @@ void data_get(
 	t_data *x,
 	t_float index
 );
+void data_get_accept(
+	t_data *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+void data_get_reject(
+	t_data *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
 void data_count(
 	t_data *x
 );
@@ -228,6 +240,20 @@ t_class* register_data(
 	);
 	class_addmethod(
 		class,
+		(t_method )data_get_accept,
+		gensym("getAccept"),
+		A_GIMME,
+		0
+	);
+	class_addmethod(
+		class,
+		(t_method )data_get_reject,
+		gensym("getReject"),
+		A_GIMME,
+		0
+	);
+	class_addmethod(
+		class,
 		(t_method )data_count,
 		gensym("count"),
 		0
@@ -301,6 +327,8 @@ void* data_init(
 				|| sym == gensym("popRev")
 				|| sym == gensym("serialize")
 				|| sym == gensym("serializeRev")
+				|| sym == gensym("getAccept")
+				|| sym == gensym("getReject")
 				|| sym == gensym("get")
 				|| sym == gensym("count")
 			)
@@ -310,7 +338,7 @@ void* data_init(
 			}
 			else
 			{
-				pd_error(x,"syntax: arg1 arg2 ..., argi one of: all, bang, pop, popRev, serialize, serializeRev, get, count");
+				pd_error(x,"syntax: arg1 arg2 ..., argi one of: all, bang, pop, popRev, serialize, serializeRev, get, getAccept, getReject, count");
 				data_exit(x);
 				return NULL;
 			}
@@ -626,6 +654,95 @@ void data_get(
 		}
 	LIST_FORALL_END(PackList,PackEl,Pack, & x->packs, i, pEl)
 }
+
+void data_get_accept(
+	t_data *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	if( ! PackList_is_empty( & x->packs ) )
+	{
+		PackEl* pEl = PackList_get_first( & x->packs );
+		do
+		{
+			t_atom* packName = & (pEl->pData->atoms[0]);
+			/*
+			char buf[256];
+			atom_string( packName, buf, 255 );
+			post( "pack: %s", buf );
+			*/
+			int accept = 0;
+			for( int iAcc = 0; iAcc< argc; iAcc++ )
+			{
+				if( atom_getsymbol( packName ) == atom_getsymbol( &argv[iAcc] ) )
+				{
+					accept = 1;
+					break;
+				}
+			}
+			PackEl* next = PackList_get_next( & x->packs, pEl );
+			if( accept )
+			{
+				unsigned int countAtomsInPack = atom_getint( & pEl->pData->atoms[1] ) + 2;
+				data_outputAt(
+					x,
+					gensym("getAccept"),
+					countAtomsInPack,
+					pEl->pData->atoms
+				);
+			}
+			pEl = next;
+		}
+		while( pEl != NULL );
+	}
+}
+
+void data_get_reject(
+	t_data *x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	if( ! PackList_is_empty( & x->packs ) )
+	{
+		PackEl* pEl = PackList_get_first( & x->packs );
+		do
+		{
+			t_atom* packName = & (pEl->pData->atoms[0]);
+			/*
+			char buf[256];
+			atom_string( packName, buf, 255 );
+			post( "pack: %s", buf );
+			*/
+			int accept = 0;
+			for( int iAcc = 0; iAcc< argc; iAcc++ )
+			{
+				if( atom_getsymbol( packName ) == atom_getsymbol( &argv[iAcc] ) )
+				{
+					accept = 1;
+					break;
+				}
+			}
+			PackEl* next = PackList_get_next( & x->packs, pEl );
+			if( !accept )
+			{
+				unsigned int countAtomsInPack = atom_getint( & pEl->pData->atoms[1] ) + 2;
+				data_outputAt(
+					x,
+					gensym("getReject"),
+					countAtomsInPack,
+					pEl->pData->atoms
+				);
+			}
+			pEl = next;
+		}
+		while( pEl != NULL );
+	}
+}
+
 void data_count(
 	t_data *x
 )
