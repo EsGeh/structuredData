@@ -9,10 +9,11 @@ set doc_dir $BASE_DIR/doc
 
 # (enabled audio, to test performance issues)
 pd \
-	-nrt \
 	-noprefs \
+	-nostdpath \
 	-stderr \
 	-jack \
+	-nrt \
 	-path "$DEP_DIR/zexy" \
 	-lib zexy \
 	-path "$doc_dir" \
