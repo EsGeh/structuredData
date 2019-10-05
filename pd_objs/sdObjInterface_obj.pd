@@ -1,4 +1,4 @@
-#N canvas 0 30 721 722 10;
+#N canvas 0 30 681 722 10;
 #X obj 33 10 inlet;
 #X obj 133 88 sdObjState \$1 \$2;
 #X obj 180 42 r \$0-fromProperties;

@@ -1,4 +1,4 @@
-#N canvas 0 30 926 722 10;
+#N canvas 0 30 681 722 10;
 #X obj 375 513 s \$0-fromObj;
 #X obj 395 111 r \$0-fromObj;
 #X obj 375 490 list;

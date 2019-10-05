@@ -1,0 +1,40 @@
+#N canvas 0 30 681 722 10;
+#N canvas 0 30 681 345 \$0-test 0;
+#X coords 0 -1 1 1 307 76 1 0 0;
+#X restore 352 10 pd \$0-test;
+#X obj 214 452 send;
+#X msg 299 405 symbol pd-\$1-test;
+#X obj 299 362 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 299 382 sdFloatBang \$0;
+#X obj 79 415 sdDynPatch;
+#X obj 65 388 sdEventToProperties;
+#X obj 65 237 sdPackFromHuman;
+#X obj 65 260 sdLines;
+#X msg 196 222 list clear ( ) column ( init ( x ( 10 ) y ( 10 ) height
+( 10 ) width ( 20 ) ) canvas ( label ( #1 ) ) canvas ( label ( #2 )
+height ( 15 ) width ( 50 ) ) ) column ( init ( y ( 10 ) height ( 10
+) width ( 20 ) ) canvas ( label ( #1 ) ) ) column ( canvas ( label
+( #1 ) ) ) column ( init ( height ( 20 ) ) obj ( args ( * 3 ) marker
+( dummy ) ) obj ( args ( + 3 ) ) connect ( args ( prev 0 current 1
+) ) );
+#X msg 87 119 list clear ( ) line ( init ( x ( 10 ) y ( 13 ) width
+( 13 ) height ( 13 ) x.border ( 5 ) y.border ( 5 ) ) canvas ( label
+( #1 ) ) canvas ( width ( 100 ) label ( - ) ) nbx ( digits ( 3 ) )
+) line ( init ( x ( 10 ) height ( 10 ) ) nbx ( width ( 30 ) ) hsl (
+width ( 100 ) ) nbx ( width ( 30 ) ) );
+#X text 34 41 2 examples for dynamic patch creation:;
+#X text 180 202 column-wise:;
+#X text 59 88 line-wise:;
+#X msg 201 328 list clear ( );
+#X connect 2 0 1 1;
+#X connect 3 0 4 0;
+#X connect 4 0 2 0;
+#X connect 5 0 1 0;
+#X connect 6 0 5 0;
+#X connect 6 1 5 1;
+#X connect 7 0 8 0;
+#X connect 8 0 6 0;
+#X connect 9 0 7 0;
+#X connect 10 0 7 0;
+#X connect 14 0 7 0;

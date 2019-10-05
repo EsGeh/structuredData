@@ -1,0 +1,92 @@
+#N canvas 0 30 681 722 10;
+#X obj 222 604 sdDynPatch;
+#X obj 208 577 sdEventToProperties;
+#X obj 186 525 sdPackFromHuman;
+#X obj 186 548 sdLines;
+#X msg 549 486 list clear ( );
+#X obj 180 116 until;
+#X obj 180 139 sdCounter -1;
+#X msg 225 117 0;
+#X obj 280 21 inlet;
+#X obj 336 23 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X obj 180 282 list;
+#X obj 214 282 r \$0-box;
+#X obj 277 112 s \$0-box;
+#X obj 272 137 r \$0-box;
+#X obj 272 160 unpack;
+#X obj 278 48 t f b;
+#X obj 198 68 t f b;
+#X obj 180 162 expr $f1 \; $f1+1 \; 4 \; 4 + $f1 * $f3 \;;
+#X text 296 205 index \, index+1 \, \$0 \, x \, y \, width \, height
+;
+#X obj 618 15 inlet;
+#X obj 268 627 outlet;
+#X obj 433 23 inlet;
+#X obj 277 89 list;
+#X obj 180 233 pack 0 0 \$1 0 0;
+#X obj 499 26 inlet;
+#X obj 105 92 t f f;
+#X obj 35 171 sdGate;
+#X obj 499 49 s \$0-scroll-props;
+#X obj 68 148 r \$0-scroll-props;
+#N canvas 0 30 681 722 shift-props 0;
+#X obj 37 37 inlet;
+#X obj 35 250 outlet;
+#X msg 34 73 list column ( init ( x ( 140 ) y ( 4 ) height ( 10 ) width
+( 10 ) ) nbx ( digits ( 2 ) snd ( \$2-gui.shift ) rcv ( \$2-gui.shift_rcv
+) min ( 0 ) max ( 31 ) ) bang ( width ( 13 ) snd ( \$2-gui.dec_shift
+) ) bang ( snd ( \$2-gui.inc_shift ) ) );
+#X connect 0 0 2 0;
+#X connect 2 0 1 0;
+#X restore 35 234 pd shift-props;
+#X obj 35 200 pack f \$1;
+#X msg 373 551 list line ( init ( x ( \$4 ) y ( \$5 ) width ( 13 )
+height ( 13 ) x.border ( 5 ) y.border ( 3 ) ) canvas ( label ( \$2.
+) ) canvas ( width ( 90 ) label ( - ) rcv ( \$3-gui.bool_prop_name\$1_rcv
+) ) toggle ( snd ( \$3-gui.bool_prop\$1 ) rcv ( \$3-gui.bool_prop\$1_rcv
+) width ( 13 ) ) ) line ( init ( x ( \$4 ) width ( 13 ) height ( 13
+) ) );
+#X msg 181 305 list line ( init ( x ( \$4 ) y ( \$5 ) width ( 13 )
+height ( 13 ) x.border ( 5 ) y.border ( 3 ) ) canvas ( label ( \$2.
+) ) canvas ( width ( 90 ) label ( - ) rcv ( \$3-gui.sym_prop_name\$1_rcv
+) ) ) line ( init ( x ( \$4 ) width ( 13 ) height ( 13 ) digits ( 20
+) ) sym ( snd ( \$3-gui.sym_prop\$1 ) rcv ( \$3-gui.sym_prop\$1_rcv
+) ) );
+#X connect 0 0 20 0;
+#X connect 1 0 0 0;
+#X connect 1 1 0 1;
+#X connect 2 0 3 0;
+#X connect 3 0 1 0;
+#X connect 4 0 2 0;
+#X connect 5 0 6 0;
+#X connect 6 0 17 0;
+#X connect 7 0 6 0;
+#X connect 8 0 15 0;
+#X connect 9 0 15 0;
+#X connect 10 0 32 0;
+#X connect 11 0 10 1;
+#X connect 13 0 14 0;
+#X connect 14 0 17 1;
+#X connect 14 1 17 2;
+#X connect 15 0 16 0;
+#X connect 15 1 4 0;
+#X connect 16 0 25 0;
+#X connect 16 1 7 0;
+#X connect 16 1 22 0;
+#X connect 17 0 23 0;
+#X connect 17 1 23 1;
+#X connect 17 2 23 3;
+#X connect 17 3 23 4;
+#X connect 19 0 4 0;
+#X connect 21 0 22 1;
+#X connect 22 0 12 0;
+#X connect 23 0 10 0;
+#X connect 24 0 27 0;
+#X connect 25 0 26 0;
+#X connect 25 1 5 0;
+#X connect 26 0 30 0;
+#X connect 28 0 26 1;
+#X connect 29 0 2 0;
+#X connect 30 0 29 0;
+#X connect 32 0 2 0;

@@ -1,0 +1,105 @@
+#N canvas 0 30 681 722 10;
+#X obj 431 138 s \$0-init-props;
+#X obj 530 138 s \$0-update-props;
+#X obj 301 8 r \$0-init-props;
+#X obj 404 10 r \$0-update-props;
+#X text 417 91 sdObjState_num_ui [prop1 ...];
+#X obj 431 114 sdObjInterface_obj \$1 \$2 \$3;
+#X obj 313 171 sdObjState_num_ui \$4 \$5 \$6 \$7 \$8 \$9 \$10 \$11
+;
+#X obj 478 48 inlet;
+#X floatatom 336 262 5 0 0 0 - - -;
+#N canvas 0 30 681 722 set 0;
+#X obj 37 37 inlet;
+#X obj 37 113 outlet;
+#X msg 37 60 set count \$1;
+#X obj 184 40 s2l;
+#X obj 184 63 list prepend set properties;
+#X obj 184 86 list trim;
+#X obj 184 12 inlet;
+#X connect 0 0 2 0;
+#X connect 2 0 1 0;
+#X connect 3 0 4 0;
+#X connect 4 0 5 0;
+#X connect 5 0 1 0;
+#X connect 6 0 3 0;
+#X restore 336 284 pd set count/props;
+#X symbolatom 403 261 40 0 0 0 - - -;
+#X obj 285 232 s \$1;
+#X obj 339 343 namecanvas \$0-canvas;
+#N canvas 0 30 681 722 \$0-gui 0;
+#X obj 4 4 cnv 5 13 13 empty empty 1. 1 8 0 12 -166441 -65794 0;
+#X obj 22 4 cnv 5 90 13 empty 1225-gui.numPropName0_rcv pitch 1 8 0
+12 -166441 -65794 0;
+#X obj 117 4 nbx 6 13 -1e+37 1e+37 0 0 1225-gui.numProp0 1225-gui.numProp0_rcv
+empty 0 -8 1 8 -262144 -1 -1 64 256;
+#X obj 168 4 nbx 3 13 -1e+37 1e+37 0 0 1225-gui.num_step0 1225-gui.num_step0_rcv
+empty 0 -8 1 8 -262144 -1 -1 1 256;
+#X obj 4 22 nbx 5 10 -1e+37 1e+37 0 0 1225-gui.num_min0 1225-gui.num_min0_rcv
+empty 0 -8 1 8 -262144 -1 -1 0 256;
+#X obj 49 22 hsl 100 10 0 1 0 0 1225-gui.scroll.numProp0 1225-gui.scroll.numProp0_rcv
+empty -2 -8 0 10 -1 -260097 -1 4989 1;
+#X obj 154 22 nbx 5 10 -1e+37 1e+37 0 0 1225-gui.num_max0 1225-gui.num_max0_rcv
+empty 0 -8 1 8 -262144 -1 -1 127 256;
+#X obj 4 38 cnv 5 13 13 empty empty 2. 1 8 0 12 -166441 -65794 0;
+#X obj 22 38 cnv 5 90 13 empty 1225-gui.numPropName1_rcv volume 1 8
+0 12 -166441 -65794 0;
+#X obj 117 38 nbx 6 13 -1e+37 1e+37 0 0 1225-gui.numProp1 1225-gui.numProp1_rcv
+empty 0 -8 1 8 -262144 -1 -1 1 256;
+#X obj 168 38 nbx 3 13 -1e+37 1e+37 0 0 1225-gui.num_step1 1225-gui.num_step1_rcv
+empty 0 -8 1 8 -262144 -1 -1 0 256;
+#X obj 4 56 nbx 5 10 -1e+37 1e+37 0 0 1225-gui.num_min1 1225-gui.num_min1_rcv
+empty 0 -8 1 8 -262144 -1 -1 0 256;
+#X obj 49 56 hsl 100 10 0 1 0 0 1225-gui.scroll.numProp1 1225-gui.scroll.numProp1_rcv
+empty -2 -8 0 10 -1 -260097 -1 9900 1;
+#X obj 154 56 nbx 5 10 -1e+37 1e+37 0 0 1225-gui.num_max1 1225-gui.num_max1_rcv
+empty 0 -8 1 8 -262144 -1 -1 1 256;
+#X obj 4 72 cnv 5 13 13 empty empty 3. 1 8 0 12 -166441 -65794 0;
+#X obj 22 72 cnv 5 90 13 empty 1225-gui.numPropName2_rcv testing 1
+8 0 12 -166441 -65794 0;
+#X obj 117 72 nbx 6 13 -1e+37 1e+37 0 0 1225-gui.numProp2 1225-gui.numProp2_rcv
+empty 0 -8 1 8 -262144 -1 -1 0.5 256;
+#X obj 168 72 nbx 3 13 -1e+37 1e+37 0 0 1225-gui.num_step2 1225-gui.num_step2_rcv
+empty 0 -8 1 8 -262144 -1 -1 0 256;
+#X obj 4 90 nbx 5 10 -1e+37 1e+37 0 0 1225-gui.num_min2 1225-gui.num_min2_rcv
+empty 0 -8 1 8 -262144 -1 -1 0.1 256;
+#X obj 49 90 hsl 100 10 0 1 0 0 1225-gui.scroll.numProp2 1225-gui.scroll.numProp2_rcv
+empty -2 -8 0 10 -1 -260097 -1 3960 1;
+#X obj 154 90 nbx 5 10 -1e+37 1e+37 0 0 1225-gui.num_max2 1225-gui.num_max2_rcv
+empty 0 -8 1 8 -262144 -1 -1 1.1 256;
+#X obj 4 106 cnv 5 13 13 empty empty 4. 1 8 0 12 -166441 -65794 0;
+#X obj 22 106 cnv 5 90 13 empty 1225-gui.numPropName3_rcv - 1 8 0 12
+-166441 -65794 0;
+#X obj 117 106 nbx 6 13 -1e+37 1e+37 0 0 1225-gui.numProp3 1225-gui.numProp3_rcv
+empty 0 -8 1 8 -262144 -1 -1 0 256;
+#X obj 168 106 nbx 3 13 -1e+37 1e+37 0 0 1225-gui.num_step3 1225-gui.num_step3_rcv
+empty 0 -8 1 8 -262144 -1 -1 1 256;
+#X obj 4 124 nbx 5 10 -1e+37 1e+37 0 0 1225-gui.num_min3 1225-gui.num_min3_rcv
+empty 0 -8 1 8 -262144 -1 -1 -1000 256;
+#X obj 49 124 hsl 100 10 0 1 0 0 1225-gui.scroll.numProp3 1225-gui.scroll.numProp3_rcv
+empty -2 -8 0 10 -1 -260097 -1 0 1;
+#X obj 154 124 nbx 5 10 -1e+37 1e+37 0 0 1225-gui.num_max3 1225-gui.num_max3_rcv
+empty 0 -8 1 8 -262144 -1 -1 1000 256;
+#X obj 202 4 nbx 2 10 -1e+37 1e+37 0 0 1225-gui.num_shift 1225-gui.num_shift_rcv
+empty 0 -8 1 8 -262144 -1 -1 0 256;
+#X obj 202 19 bng 13 250 50 0 1225-gui.dec_shift empty empty 17 7 0
+10 -262144 -1 -1;
+#X obj 202 34 bng 13 250 50 0 1225-gui.inc_shift empty empty 17 7 0
+10 -262144 -1 -1;
+#X coords 0 0 1 1 230 136 2 0 0;
+#X restore 0 0 pd \$0-gui;
+#X obj 435 203 s pd-\$0-gui;
+#X obj 550 210 s \$0-canvas;
+#X connect 2 0 6 1;
+#X connect 3 0 6 2;
+#X connect 5 0 0 0;
+#X connect 5 1 1 0;
+#X connect 6 0 11 0;
+#X connect 6 1 14 0;
+#X connect 6 2 14 0;
+#X connect 6 2 15 0;
+#X connect 7 0 5 0;
+#X connect 8 0 9 0;
+#X connect 9 0 6 0;
+#X connect 10 0 9 1;
+#X coords 0 0 1 1 230 136 2 0 0;

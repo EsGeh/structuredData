@@ -1,0 +1,63 @@
+#N canvas 0 30 681 722 10;
+#X obj 431 138 s \$0-init-props;
+#X obj 530 138 s \$0-update-props;
+#X obj 230 302 r \$0-init-props;
+#X obj 527 324 r \$0-update-props;
+#X text 417 91 sdObjState_num_ui [prop1 ...];
+#X obj 431 114 sdObjInterface_obj \$1 \$2 \$3;
+#X obj 478 48 inlet;
+#X obj 207 390 s \$1;
+#X obj 327 501 namecanvas \$0-canvas;
+#N canvas 0 30 681 722 \$0-gui 0;
+#X obj 4 4 cnv 5 192 13 empty 1441-gui.events0_rcv start-stop 1 8 0
+12 -166441 -65794 0;
+#X obj 4 22 bng 13 250 50 0 1441-event_0 empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 22 22 bng 13 250 50 0 1441-event_1 empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 40 22 bng 13 250 50 0 1441-event_2 empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 58 22 bng 13 250 50 0 1441-event_3 empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 76 22 bng 13 250 50 0 1441-event_4 empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 94 22 bng 13 250 50 0 1441-event_5 empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 112 22 bng 13 250 50 0 1441-event_6 empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 130 22 bng 13 250 50 0 1441-event_7 empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 4 41 cnv 5 192 13 empty 1441-gui.events1_rcv empty 1 8 0 12
+-166441 -65794 0;
+#X obj 4 59 bng 13 250 50 0 1441-event_8 empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 22 59 bng 13 250 50 0 1441-event_9 empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 40 59 bng 13 250 50 0 1441-event_10 empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 58 59 bng 13 250 50 0 1441-event_11 empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 76 59 bng 13 250 50 0 1441-event_12 empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 94 59 bng 13 250 50 0 1441-event_13 empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 112 59 bng 13 250 50 0 1441-event_14 empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 130 59 bng 13 250 50 0 1441-event_15 empty empty 17 7 0 10 -262144
+-1 -1;
+#X coords 0 0 1 1 200 74 2 0 0;
+#X restore 0 0 pd \$0-gui;
+#X obj 357 361 s pd-\$0-gui;
+#X obj 472 368 s \$0-canvas;
+#X obj 235 329 sdObjState_events_ui \$4 \$5 \$6 \$7 \$8 \$9 \$10 \$11
+;
+#X connect 2 0 12 0;
+#X connect 3 0 12 1;
+#X connect 5 0 0 0;
+#X connect 5 1 1 0;
+#X connect 6 0 5 0;
+#X connect 12 0 7 0;
+#X connect 12 1 10 0;
+#X connect 12 2 10 0;
+#X connect 12 2 11 0;
+#X coords 0 0 1 1 200 74 2 0 0;

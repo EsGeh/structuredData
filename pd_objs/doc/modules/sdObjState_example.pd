@@ -1,4 +1,4 @@
-#N canvas 0 30 721 722 10;
+#N canvas 0 30 681 722 10;
 #X obj 358 303 sdReplace \$0;
 #X msg 358 260 raw set dest %0-obscureInstrument;
 #X obj 374 460 sdReplace \$0;
@@ -17,8 +17,8 @@
 #X obj 374 483 sdObjSndExample \$0-sender \$0-CONN \$0-GLOBAL;
 #X obj 348 326 sdObjRcvExample \$0-receiver \$0-CONN \$0-GLOBAL;
 #X obj 362 643 sdObjDuplexExample \$0-dupl \$0-CONN \$0-GLOBAL;
-#X obj 7 662 print GUI.out;
-#X obj 156 661 print genericObj.out;
+#X obj 7 682 print GUI.out;
+#X obj 156 681 print genericObj.out;
 #X obj 7 25 sdObjState_ui GUI \$0-GUI-INIT \$0-INSTR \$0-CONN;
 #X msg 343 40 list init 0;
 #X obj 343 63 s \$0-GUI-INIT;
@@ -28,7 +28,7 @@
 #X text 328 103 3 select an object;
 #X text 328 86 2 select a group;
 #X text 328 19 1 init GUI:;
-#N canvas 0 30 721 736 control 0;
+#N canvas 0 30 681 722 control 0;
 #X obj 91 169 sdPackFromHuman;
 #X obj 91 192 send GUI;
 #X msg 91 146 list set ( destIndex ( \$1 ) );
@@ -83,7 +83,7 @@
 #X connect 27 0 28 0;
 #X connect 28 0 0 0;
 #X restore 327 184 pd control gui;
-#N canvas 0 30 721 736 other 0;
+#N canvas 0 30 681 722 other 0;
 #X obj 55 117 sdPackFromHuman;
 #X msg 55 94 list set ( dest ( \$1 ) );
 #X msg 55 48 symbol %0-weirdInstrument;
@@ -162,11 +162,11 @@ don't contain \$0 symbols.;
 ;
 #X obj 641 394 sdObjExampleManyProps \$0-manyProps \$0-GLOBAL \$0-INSTR
 ;
-#X obj 7 631 spigot;
-#X obj 55 635 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 7 660 spigot;
+#X obj 55 664 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 161 633 spigot;
-#X obj 209 637 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 156 659 spigot;
+#X obj 204 663 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
 #X connect 0 0 15 0;
 #X connect 1 0 0 0;

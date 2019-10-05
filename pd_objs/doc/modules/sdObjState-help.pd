@@ -1,9 +1,9 @@
-#N canvas 0 30 721 722 10;
+#N canvas 683 30 681 160 10;
 #X text 12 9 This module is just a convention how to build high level
 objects in a patch.;
 #X obj 43 163 sdObjState_example;
 #X text 29 141 usage example;
-#N canvas 0 30 681 722 basics 0;
+#N canvas 0 30 681 736 basics 0;
 #N canvas 0 30 681 722 test 0;
 #X obj 80 13 inlet;
 #X obj 63 337 s \$0-out1;
@@ -532,103 +532,54 @@ informed about the objs state:, f 21;
 #X text 17 99 if you design your objects following the paradigm \,
 you can use the utility objects to manage their state in advanced ways:
 ;
-#X obj 530 43 s \$0-GLOBAL;
-#X msg 528 9 list init 0;
-#X obj 26 224 sdObjInterface_obj \$0-connector \$0-GLOBAL \$0-testInstr
+#N canvas 0 30 681 736 gui 1;
+#X msg 528 10 list init 0;
+#X obj 894 451 send;
+#X msg 979 404 symbol pd-\$1-test;
+#X obj 979 361 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 979 381 sdFloatBang \$0;
+#X obj 759 414 sdDynPatch;
+#X obj 745 387 sdEventToProperties;
+#X obj 745 341 sdPackFromHuman;
+#X obj 745 364 sdLines;
+#X msg 745 264 list clear ( ) line ( init ( x ( 10 ) y ( 13 ) width
+( 13 ) height ( 13 ) x.border ( 5 ) y.border ( 5 ) ) canvas ( label
+( #1 ) ) canvas ( width ( 100 ) label ( - ) ) nbx ( digits ( 3 ) )
+) line ( init ( x ( 10 ) height ( 10 ) ) nbx ( width ( 30 ) ) hsl (
+width ( 100 ) ) nbx ( width ( 30 ) ) );
+#X obj 530 43 s \$0-GLOBAL.1;
+#X obj 347 635 sdObjExample \$0-testInstr \$0-GLOBAL.1 \$0-gInstr;
+#X obj 63 72 sdObjState_num_obj_ui \$0-conn \$0-GLOBAL.1 \$0-testInstr
+4;
+#X text 11 12 sdObjState_num_obj_ui name global dest count;
+#X text 23 27 or:;
+#X text 11 44 sdObjState_num_obj_ui name global dest [prop1 ...];
+#X obj 60 289 sdObjState_bool_obj_ui \$0-test-bool \$0-GLOBAL.1 \$0-testInstr
+3;
+#X text 11 222 sdObjState_bool_obj_ui name global dest count;
+#X text 11 253 sdObjState_bool_obj_ui name global dest [prop1 ...]
 ;
-#X obj 413 92 sdObjExample \$0-testInstr \$0-GLOBAL \$0-gInstr;
-#X obj 26 247 s \$0-init-props;
-#X obj 186 247 s \$0-update-props;
-#X obj 450 599 sdObjState_events_ui;
-#X obj 590 575 r \$0-update-props;
-#X obj 451 576 r \$0-init-props;
-#X obj 450 675 s \$0-connector;
-#X obj 134 349 r \$0-init-props;
-#X obj 237 351 r \$0-update-props;
-#X obj 26 479 s \$0-connector;
-#X obj 26 376 sdObjState_num_ui 2;
-#X obj 73 616 sdObjState_bool_ui 3;
-#X obj 241 566 r \$0-init-props;
-#X obj 244 589 r \$0-update-props;
-#X obj 73 675 s \$0-connector;
-#X text 18 510 sdObjState_bool_ui 3;
-#X obj 434 361 sdObjState_sym_ui envelope descr;
-#X obj 521 309 r \$0-init-props;
-#X obj 545 333 r \$0-update-props;
-#X obj 434 555 s \$0-connector;
-#X text 26 286 sdObjState_num_ui [prop1 ...];
-#X floatatom 16 315 5 0 0 0 - - -;
-#N canvas 0 30 721 722 set 0;
-#X obj 37 37 inlet;
-#X obj 37 113 outlet;
-#X msg 37 60 set count \$1;
-#X obj 184 40 s2l;
-#X obj 184 63 list prepend set properties;
-#X obj 184 86 list trim;
-#X obj 184 12 inlet;
-#X connect 0 0 2 0;
-#X connect 2 0 1 0;
+#X text 28 236 or:;
+#X obj 64 428 sdObjState_sym_obj_ui \$0-sym-test \$0-GLOBAL.1 \$0-testInstr
+3;
+#X text 28 386 or:;
+#X text 11 372 sdObjState_sym_obj_ui name global dest count;
+#X text 11 403 sdObjState_sym_obj_ui name global dest [prop1 ...];
+#X obj 60 612 sdObjState_events_obj_ui \$0-test-events \$0-GLOBAL.1
+\$0-testInstr 3;
+#X text 28 576 or:;
+#X text 11 562 sdObjState_events_obj_ui name global dest count;
+#X text 11 593 sdObjState_events_obj_ui name global dest [prop1 ...]
+;
+#X connect 0 0 10 0;
+#X connect 2 0 1 1;
 #X connect 3 0 4 0;
-#X connect 4 0 5 0;
+#X connect 4 0 2 0;
 #X connect 5 0 1 0;
-#X connect 6 0 3 0;
-#X restore 16 337 pd set count/props;
-#X symbolatom 83 314 40 0 0 0 - - -;
-#X floatatom 60 532 5 0 0 0 - - -;
-#N canvas 0 30 721 722 set 0;
-#X obj 37 37 inlet;
-#X obj 37 113 outlet;
-#X msg 37 60 set count \$1;
-#X obj 184 40 s2l;
-#X obj 184 63 list prepend set properties;
-#X obj 184 86 list trim;
-#X obj 184 12 inlet;
-#X connect 0 0 2 0;
-#X connect 2 0 1 0;
-#X connect 3 0 4 0;
-#X connect 4 0 5 0;
-#X connect 5 0 1 0;
-#X connect 6 0 3 0;
-#X restore 60 554 pd set count/props;
-#X symbolatom 127 531 40 0 0 0 - - -;
-#X floatatom 396 283 5 0 0 0 - - -;
-#N canvas 0 30 721 722 set 0;
-#X obj 37 37 inlet;
-#X obj 37 113 outlet;
-#X msg 37 60 set count \$1;
-#X obj 184 40 s2l;
-#X obj 184 63 list prepend set properties;
-#X obj 184 86 list trim;
-#X obj 184 12 inlet;
-#X connect 0 0 2 0;
-#X connect 2 0 1 0;
-#X connect 3 0 4 0;
-#X connect 4 0 5 0;
-#X connect 5 0 1 0;
-#X connect 6 0 3 0;
-#X restore 396 305 pd set count/props;
-#X symbolatom 463 282 40 0 0 0 - - -;
 #X connect 6 0 5 0;
-#X connect 7 0 9 0;
-#X connect 7 1 10 0;
-#X connect 11 0 14 0;
-#X connect 12 0 11 1;
-#X connect 13 0 11 0;
-#X connect 15 0 18 1;
-#X connect 16 0 18 2;
-#X connect 18 0 17 0;
-#X connect 19 0 22 0;
-#X connect 20 0 19 1;
-#X connect 21 0 19 2;
-#X connect 24 0 27 0;
-#X connect 25 0 24 1;
-#X connect 26 0 24 2;
-#X connect 29 0 30 0;
-#X connect 30 0 18 0;
-#X connect 31 0 30 1;
-#X connect 32 0 33 0;
-#X connect 33 0 19 0;
-#X connect 34 0 33 1;
-#X connect 35 0 36 0;
-#X connect 36 0 24 0;
-#X connect 37 0 36 1;
+#X connect 6 1 5 1;
+#X connect 7 0 8 0;
+#X connect 8 0 6 0;
+#X connect 9 0 7 0;
+#X restore 43 236 pd gui parts;
