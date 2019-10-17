@@ -4,6 +4,8 @@
 
 #include "Global.h"
 
+#include "Map.h"
+
 static t_class* event_class;
 static t_class* unevent_class;
 static t_class* eventAddParam_class;
@@ -37,12 +39,23 @@ void sdEvent_setup()
 // event
 //----------------------------------
 
+#define FREE_DYN_A(p,size) (AtomDynA_exit(p))
+#define HASH_SYMBOL(sym) \
+	((unsigned int )sym)
+
+DECL_MAP(ParamMap,t_symbol*,AtomDynA,getbytes,freebytes,FREE_DYN_A,HASH_SYMBOL,COMPARE_SYMBOLS)
+DEF_MAP(ParamMap,t_symbol*,AtomDynA,getbytes,freebytes,FREE_DYN_A,HASH_SYMBOL,COMPARE_SYMBOLS)
+
 typedef struct s_event {
   t_object x_obj;
 	t_symbol* type;
-	unsigned int paramsCount;
-	t_symbol** params;
-	AtomDynA acc;
+	SymBuf args;
+	// packs by type:
+	ParamMap param_values;
+	ParamMap param_other_values;
+
+	// unspecific packs:
+	//AtomDynA acc;
 	t_inlet* arg_inlets;
 	t_outlet* outlet;
 } t_event;
@@ -74,6 +87,20 @@ void event_set_arg(
 	t_atom *argv
 );
 
+void event_on_set_arg(
+	t_event* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
+void event_on_list(
+	t_event* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+);
+
 t_class* register_event(
 	t_symbol* className
 )
@@ -98,7 +125,7 @@ t_class* register_event(
 	class_addlist( class, event_other_args );
 	class_addanything(
 			class,
-			event_set_arg
+			event_on_set_arg
 	);
 
 	return class;
@@ -116,25 +143,15 @@ void* event_init(
 		argc < 1
 	)
 	{
-		pd_error(x, "not enough arguments. syntax: name, param1, param2, ...");
+		pd_error(x, "not enough arguments. syntax: eventname, param1, param2, ...");
 		return NULL;
 	}
 	x->type = atom_getsymbol( &argv[0] );
-	x->paramsCount = argc-1;
-	x->params = getbytes( sizeof( t_symbol* ) * x->paramsCount );
-	AtomDynA_init( &x->acc );
-	{
-		AtomDynA_append(
-				&x->acc,
-				argv[0]
-		);
-		t_atom count;
-		SETFLOAT( &count, 0 );
-		AtomDynA_append(
-				&x->acc,
-				count
-		);
-	}
+
+	SymBuf_init( & x->args, argc-1);
+	ParamMap_init( & x->param_values, 1024 );
+	ParamMap_init( & x->param_other_values, 1024 );
+
 	if( argc == 1 )
 	{
 		inlet_new(
@@ -158,12 +175,21 @@ void* event_init(
 				event_exit( x );
 				return NULL;
 			}
-			x->params[0+i] = atom_getsymbol( & argv[1+i] );
+			SymBuf_get_array( &x->args )[i] =
+				atom_getsymbol( & argv[1+i] );
 			x->arg_inlets = inlet_new(
 				& x->x_obj,
 				&x->x_obj.ob_pd,
 				&s_list,
-				x->params[i]
+				atom_getsymbol( & argv[1+i] )
+			);
+			t_atom zero_a;
+			SETFLOAT( & zero_a, 0 );
+			event_set_arg(
+					x,
+					atom_getsymbol( &argv[1+i] ),
+					1,
+					&zero_a
 			);
 		}
 	}
@@ -174,6 +200,7 @@ void* event_init(
 		&x->x_obj.ob_pd,
 		&s_list,
 		&s_list
+		//gensym("other")
 	);
 
 	// rightmost inlet: set event type
@@ -191,30 +218,143 @@ void event_exit(
 	t_event* x
 )
 {
-	freebytes( x->params, sizeof( t_symbol* ) * x->paramsCount );
-	AtomDynA_exit( &x->acc );
+	SymBuf_exit( & x->args );
+	ParamMap_exit( & x->param_values );
+	ParamMap_exit( & x->param_other_values );
 }
 
 void event_bang(
 	t_event* x
 )
 {
-	//post("event_bang");
+	DB_PRINT("event_bang");
+	AtomDynA acc;
+	AtomDynA_init( &acc );
+	{
+		t_atom type_a;
+		SETSYMBOL( & type_a, x->type );
+		AtomDynA_append(
+				&acc,
+				type_a
+		);
+		t_atom count_a;
+		SETFLOAT( &count_a, 0 );
+		AtomDynA_append(
+				&acc,
+				count_a
+		);
+	}
+
+	// accumulate args:
+	for( int i=0; i< SymBuf_get_size( &x->args ); i++ )
+	{
+		t_symbol* param_name = SymBuf_get_array( &x->args )[i];
+		t_atom param_name_a;
+		SETSYMBOL( &param_name_a, param_name );
+		AtomDynA* value = ParamMap_get(
+				& x->param_values,
+				param_name
+		);
+		char param_name_str[256];
+		atom_string( &param_name_a, param_name_str, 255 );
+		if( !value )
+		{
+			pd_error(
+					x,
+					"value not set: %s",
+					param_name_str
+			);
+			ParamMap_clear( & x->param_other_values );
+			AtomDynA_exit( &acc );
+			return;
+		}
+		{
+			AtomDynA_append(
+					&acc,
+					param_name_a
+			);
+		}
+		{
+			t_atom count;
+			SETFLOAT(
+					&count,
+					AtomDynA_get_size( value )
+			);
+			AtomDynA_append(
+					&acc,
+					count
+			);
+		}
+		for( int val_ind=0; val_ind< AtomDynA_get_size( value ); val_ind++ )
+		{
+			AtomDynA_append(
+					&acc,
+					AtomDynA_get_array( value )[val_ind]
+			);
+		}
+	}
+	// other args
+	MAP_FORALL_KEYS_BEGIN(ParamMap,t_symbol*,&x->param_other_values,param_name)
+		t_atom param_name_a;
+		SETSYMBOL( &param_name_a, param_name );
+		AtomDynA* value = ParamMap_get(
+				& x->param_other_values,
+				param_name
+		);
+		char param_name_str[256];
+		atom_string( &param_name_a, param_name_str, 255 );
+		if( !value )
+		{
+			pd_error(
+					x,
+					"FATAL ERROR with '%s'",
+					param_name_str
+			);
+			ParamMap_clear( & x->param_other_values );
+			AtomDynA_exit( &acc );
+			return;
+		}
+		{
+			AtomDynA_append(
+					&acc,
+					param_name_a
+			);
+		}
+		{
+			t_atom count;
+			SETFLOAT(
+					&count,
+					AtomDynA_get_size( value )
+			);
+			AtomDynA_append(
+					&acc,
+					count
+			);
+		}
+		for( int val_ind=0; val_ind< AtomDynA_get_size( value ); val_ind++ )
+		{
+			AtomDynA_append(
+					&acc,
+					AtomDynA_get_array( value )[val_ind]
+			);
+		}
+	MAP_FORALL_KEYS_END(ParamMap,t_symbol*,&x->param_other_values,param_name)
 	SETSYMBOL(
-			&AtomDynA_get_array( &x->acc )[0],
+			&AtomDynA_get_array( &acc )[0],
 			x->type
 	);
 	SETFLOAT(
-			&AtomDynA_get_array( &x->acc )[1],
-			AtomDynA_get_size( &x->acc ) - 2
+			&AtomDynA_get_array( &acc )[1],
+			AtomDynA_get_size( &acc ) - 2
 	);
 	outlet_list(
 			x->outlet,
 			& s_list,
-			AtomDynA_get_size( &x->acc ),
-			AtomDynA_get_array( &x->acc )
+			AtomDynA_get_size( &acc ),
+			AtomDynA_get_array( &acc )
 	);
-	AtomDynA_set_size( &x->acc, 2);
+	ParamMap_clear( & x->param_other_values );
+	AtomDynA_exit( & acc );
 }
 
 void event_other_args(
@@ -224,6 +364,7 @@ void event_other_args(
 	t_atom *argv
 )
 {
+	DB_PRINT("event_other_args");
 	unsigned int pos = 0;
 	while( pos < argc )
 	{
@@ -237,14 +378,39 @@ void event_other_args(
 			pd_error(x, "at pos %i: invalid sdPack", pos);
 			return;
 		}
-		t_int count = atom_getint(&argv[1]);
-		for( int i=0; i<2+count; i++ )
+		t_symbol* type = atom_getsymbol( &argv[pos+0] );
+		t_int count = atom_getint( &argv[pos+1] );
+
+		AtomDynA* args = getbytes( sizeof( AtomDynA ) );
+		AtomDynA_init( args );
+		for( int i=0; i<count; i++ )
 		{
 			AtomDynA_append(
-					&x->acc,
-					argv[pos+i]
+					args,
+					argv[pos+2+i]
 			);
 		}
+		// delete value, if already in map:
+		{
+			AtomDynA* value =
+				ParamMap_get( 
+					& x->param_other_values,
+					type
+				);
+			if( value )
+			{
+				ParamMap_delete(
+						& x->param_other_values,
+						type
+				);
+			}
+		}
+		ParamMap_insert(
+			& x->param_other_values,
+			type,
+			args
+		);
+
 		pos += (count + 2) ;
 	}
 }
@@ -256,34 +422,53 @@ void event_set_arg(
 	t_atom *argv
 )
 {
-	//post("event_set_arg");
-	{
-		t_atom type;
-		SETSYMBOL( &type, s );
-		AtomDynA_append(
-				&x->acc,
-				type
-		);
-	}
-	{
-		t_atom count;
-		SETFLOAT( &count, argc );
-		AtomDynA_append(
-				&x->acc,
-				count
-		);
-	}
+	AtomDynA* args = getbytes( sizeof( AtomDynA ) );
+	AtomDynA_init( args );
 	for( int i=0; i<argc; i++ )
 	{
 		AtomDynA_append(
-				&x->acc,
+				args,
 				argv[i]
 		);
 	}
-	if( x->paramsCount > 0 && s == x->params[0] )
+	// delete value, if already in map:
 	{
-		event_bang( x );
+		AtomDynA* value =
+			ParamMap_get( 
+				& x->param_other_values,
+				s
+			);
+		if( value )
+		{
+			ParamMap_delete(
+					& x->param_other_values,
+					s
+			);
+		}
 	}
+	ParamMap_insert(
+		& x->param_values,
+		s,
+		args
+	);
+}
+
+void event_on_set_arg(
+	t_event* x,
+	t_symbol *s,
+	int argc,
+	t_atom *argv
+)
+{
+	DB_PRINT("event_on_set_arg");
+	event_set_arg(
+			x,
+			s,
+			argc,
+			argv
+	);
+	if( SymBuf_get_size( &x->args ) > 0 && s == SymBuf_get_array( &x->args )[0] )
+		event_bang( x );
 }
 
 //----------------------------------

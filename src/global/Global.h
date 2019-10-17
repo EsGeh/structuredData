@@ -35,6 +35,12 @@ DEF_BUFFER(AtomBuf,t_atom,getbytes,freebytes)
 DECL_BUFFER(CharBuf, char, getbytes, freebytes)
 DEF_BUFFER(CharBuf, char, getbytes, freebytes)
 
+DECL_BUFFER(IntBuf, int, getbytes, freebytes)
+DEF_BUFFER(IntBuf, int, getbytes, freebytes)
+
+DECL_BUFFER(SymBuf, t_symbol*, getbytes, freebytes)
+DEF_BUFFER(SymBuf, t_symbol*, getbytes, freebytes)
+
 // used by maps of type "t_symbol* -> ?"
 INLINE BOOL COMPARE_SYMBOLS( t_symbol** k1, t_symbol** k2 )
 {

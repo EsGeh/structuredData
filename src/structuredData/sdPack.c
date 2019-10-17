@@ -15,9 +15,9 @@
 static t_class* pack_class;
 static t_class* unpack_class;
 static t_class* packFromHuman_class;
-static t_class* packFilter_class;;
-static t_class* packToMessage_class;;
-static t_class* packFromMessage_class;;
+static t_class* packFilter_class;
+static t_class* packToMessage_class;
+static t_class* packFromMessage_class;
 
 t_class* register_pack(
 	t_symbol* className
