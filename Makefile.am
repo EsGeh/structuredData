@@ -50,9 +50,16 @@ data_DATA = \
 	$(PATH_PD_OBJS)/math/sdMinDelta.pd \
 	$(PATH_PD_OBJS)/math/sdMinMax.pd \
 	$(PATH_PD_OBJS)/math/sdMod.pd \
+	$(PATH_PD_OBJS)/dyn_patch/sdBoundingBox.pd \
 	$(PATH_PD_OBJS)/dyn_patch/sdDynPatch.pd \
 	$(PATH_PD_OBJS)/dyn_patch/sdLines_max.pd \
 	$(PATH_PD_OBJS)/dyn_patch/sdLines.pd \
+	$(PATH_PD_OBJS)/gui/sdObjState_box_helper.pd \
+	$(PATH_PD_OBJS)/gui/sdObjState_combined_obj_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdObjState_combined_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdObjState_events_compact_dyn_props.pd \
+	$(PATH_PD_OBJS)/gui/sdObjState_events_compact_obj_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdObjState_events_compact_ui.pd \
   $(PATH_PD_OBJS)/doc/structuredDataC_doc.pd \
   $(PATH_PD_OBJS)/doc/modules/sdData-help.pd \
   $(PATH_PD_OBJS)/doc/modules/sdEvent-help.pd \

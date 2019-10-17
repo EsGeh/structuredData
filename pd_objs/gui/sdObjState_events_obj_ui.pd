@@ -1,63 +1,78 @@
 #N canvas 0 30 681 722 10;
 #X obj 431 138 s \$0-init-props;
 #X obj 530 138 s \$0-update-props;
-#X obj 230 302 r \$0-init-props;
-#X obj 527 324 r \$0-update-props;
+#X obj 381 276 r \$0-init-props;
+#X obj 517 276 r \$0-update-props;
 #X text 417 91 sdObjState_num_ui [prop1 ...];
 #X obj 431 114 sdObjInterface_obj \$1 \$2 \$3;
 #X obj 478 48 inlet;
-#X obj 207 390 s \$1;
-#X obj 327 501 namecanvas \$0-canvas;
+#X obj 245 326 s \$1;
+#X obj 314 620 namecanvas \$0-canvas;
 #N canvas 0 30 681 722 \$0-gui 0;
-#X obj 4 4 cnv 5 192 13 empty 1441-gui.events0_rcv start-stop 1 8 0
-12 -166441 -65794 0;
-#X obj 4 22 bng 13 250 50 0 1441-event_0 empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 22 22 bng 13 250 50 0 1441-event_1 empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 40 22 bng 13 250 50 0 1441-event_2 empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 58 22 bng 13 250 50 0 1441-event_3 empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 76 22 bng 13 250 50 0 1441-event_4 empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 94 22 bng 13 250 50 0 1441-event_5 empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 112 22 bng 13 250 50 0 1441-event_6 empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 130 22 bng 13 250 50 0 1441-event_7 empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 4 41 cnv 5 192 13 empty 1441-gui.events1_rcv empty 1 8 0 12
--166441 -65794 0;
-#X obj 4 59 bng 13 250 50 0 1441-event_8 empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 22 59 bng 13 250 50 0 1441-event_9 empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 40 59 bng 13 250 50 0 1441-event_10 empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 58 59 bng 13 250 50 0 1441-event_11 empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 76 59 bng 13 250 50 0 1441-event_12 empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 94 59 bng 13 250 50 0 1441-event_13 empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 112 59 bng 13 250 50 0 1441-event_14 empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 130 59 bng 13 250 50 0 1441-event_15 empty empty 17 7 0 10 -262144
--1 -1;
-#X coords 0 0 1 1 200 74 2 0 0;
-#X restore 0 0 pd \$0-gui;
-#X obj 357 361 s pd-\$0-gui;
-#X obj 472 368 s \$0-canvas;
-#X obj 235 329 sdObjState_events_ui \$4 \$5 \$6 \$7 \$8 \$9 \$10 \$11
+#X coords 0 0 1 1 134 21 2 0 0;
+#X restore 0 20 pd \$0-gui;
+#X obj 245 299 sdObjState_events_ui \$4 \$5 \$6 \$7 \$8 \$9 \$10 \$11
 ;
-#X connect 2 0 12 0;
-#X connect 3 0 12 1;
+#X obj 385 420 s pd-\$0-gui;
+#X obj 566 421 s \$0-canvas;
+#X obj 381 385 sdDynPatch;
+#X obj 568 388 sdDynPatch;
+#X floatatom 296 181 5 0 0 0 - - -;
+#X msg 296 203 set y \$1 \, clear \, draw;
+#X msg 203 220 clear \, draw;
+#X msg 232 245 clear;
+#X floatatom 331 228 5 0 0 0 - - -;
+#N canvas 0 30 762 736 set 0;
+#X obj 37 37 inlet;
+#X obj 37 193 outlet;
+#X obj 308 100 s2l;
+#X obj 308 123 list prepend set properties;
+#X obj 308 146 list trim;
+#X obj 308 12 inlet;
+#X obj 308 35 t b a;
+#X msg 242 64 clear \, draw;
+#X msg 37 60 set count \$1 \, set properties \, clear \, draw;
+#X connect 0 0 8 0;
+#X connect 2 0 3 0;
+#X connect 3 0 4 0;
+#X connect 4 0 1 0;
+#X connect 5 0 6 0;
+#X connect 6 0 7 0;
+#X connect 6 1 2 0;
+#X connect 7 0 1 0;
+#X connect 8 0 1 0;
+#X restore 331 250 pd set count/props;
+#X symbolatom 398 227 40 0 0 0 - - -;
+#X obj 610 40 inlet;
+#X obj 676 36 loadbang;
+#X msg 676 59 init;
+#X obj 561 185 t b a;
+#X obj 642 93 sdProperty header \$0 1 intern;
+#X obj 561 162 r \$0-header;
+#X obj 502 333 sdObjState_box_helper;
+#X connect 2 0 10 1;
+#X connect 3 0 10 2;
 #X connect 5 0 0 0;
 #X connect 5 1 1 0;
 #X connect 6 0 5 0;
-#X connect 12 0 7 0;
-#X connect 12 1 10 0;
-#X connect 12 2 10 0;
-#X connect 12 2 11 0;
-#X coords 0 0 1 1 200 74 2 0 0;
+#X connect 10 0 7 0;
+#X connect 10 1 13 0;
+#X connect 10 2 28 0;
+#X connect 13 1 11 0;
+#X connect 14 1 12 0;
+#X connect 15 0 16 0;
+#X connect 16 0 10 0;
+#X connect 17 0 10 0;
+#X connect 18 0 10 0;
+#X connect 19 0 20 0;
+#X connect 20 0 10 0;
+#X connect 21 0 20 1;
+#X connect 22 0 26 0;
+#X connect 23 0 24 0;
+#X connect 24 0 26 0;
+#X connect 25 0 17 0;
+#X connect 25 1 28 1;
+#X connect 27 0 25 0;
+#X connect 28 0 13 0;
+#X connect 28 1 14 0;
+#X coords 0 0 1 1 134 41 1 0 0;

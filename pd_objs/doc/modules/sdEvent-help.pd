@@ -3,7 +3,7 @@
 #X text 61 36 sdEvents have this kind of structure:;
 #X text 72 55 <eventtype> ( <param1> ( ... ) <param2> ( ... ) ... )
 ;
-#N canvas 0 30 681 722 create 0;
+#N canvas 0 30 681 722 create 1;
 #X obj 70 140 sdEvent dosomething;
 #X obj 125 116 sdPack param1;
 #X msg 125 92 0;
@@ -13,16 +13,16 @@
 #X obj 72 47 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
 #X text 348 139 init arg: event type;
-#X msg 73 281 list 1 100 red;
-#X obj 74 335 sdEvent dosomething time brightness color;
-#X obj 74 358 print Event;
-#X obj 74 310 unpack f f s;
-#X msg 256 288 0;
-#X obj 256 312 sdPack obscureParam;
+#X msg 74 312 list 1 100 red;
+#X obj 74 385 sdEvent dosomething time brightness color;
+#X obj 74 408 print Event;
+#X msg 256 338 0;
+#X obj 256 362 sdPack obscureParam;
 #X text 400 343 additional init args create inlets for specific arguments
 \, which are to be given as simple values, f 32;
 #X obj 70 163 print Event;
-#X connect 0 0 15 0;
+#X obj 74 335 unpack f f s;
+#X connect 0 0 14 0;
 #X connect 1 0 0 1;
 #X connect 2 0 1 0;
 #X connect 3 0 0 1;
@@ -31,15 +31,15 @@
 #X connect 5 1 2 0;
 #X connect 5 2 4 0;
 #X connect 6 0 5 0;
-#X connect 8 0 11 0;
+#X connect 8 0 15 0;
 #X connect 9 0 10 0;
-#X connect 11 0 9 0;
-#X connect 11 1 9 1;
-#X connect 11 2 9 2;
-#X connect 12 0 13 0;
-#X connect 13 0 9 3;
+#X connect 11 0 12 0;
+#X connect 12 0 9 3;
+#X connect 15 0 9 0;
+#X connect 15 1 9 1;
+#X connect 15 2 9 2;
 #X restore 57 140 pd create events;
-#N canvas 0 30 681 722 unpack 1;
+#N canvas 0 30 681 736 unpack 0;
 #X obj 124 247 print color;
 #X obj 89 270 print time;
 #X obj 259 166 print eventType;

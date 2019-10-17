@@ -1,32 +1,21 @@
-#N canvas 0 30 681 736 10;
-#X obj 358 303 sdReplace \$0;
-#X msg 358 260 raw set dest %0-obscureInstrument;
-#X obj 347 460 sdReplace \$0;
-#X msg 346 414 raw set dest %0-obscureInstrument;
-#X msg 359 437 raw set dest %0-weirdInstrument;
-#X msg 373 281 raw set dest %0-weirdInstrument;
-#X text 331 229 lets define a receiver to track the instruments state
+#N canvas 0 30 681 722 10;
+#X text 288 350 lets define a receiver to track the instruments state
 , f 35;
-#X obj 483 14 loadbang;
-#X obj 575 92 s \$0-GLOBAL;
-#X msg 575 69 list init 0;
-#X obj 364 615 sdReplace \$0;
-#X msg 363 569 raw set dest %0-obscureInstrument;
-#X msg 376 592 raw set dest %0-weirdInstrument;
-#X text 320 550 ...or an object which does both;
-#X obj 347 483 sdObjSndExample \$0-sender \$0-CONN \$0-GLOBAL;
-#X obj 348 326 sdObjRcvExample \$0-receiver \$0-CONN \$0-GLOBAL;
-#X obj 350 643 sdObjDuplexExample \$0-dupl \$0-CONN \$0-GLOBAL;
+#X obj 596 10 loadbang;
+#X obj 596 56 s \$0-GLOBAL;
+#X msg 596 33 list init 0;
+#X text 288 585 ...or an object which does both;
+#X obj 290 517 sdObjSndExample \$0-sender \$0-CONN \$0-GLOBAL;
+#X obj 291 408 sdObjRcvExample \$0-receiver \$0-CONN \$0-GLOBAL;
+#X obj 293 625 sdObjDuplexExample \$0-dupl \$0-CONN \$0-GLOBAL;
 #X obj 7 682 print GUI.out;
 #X obj 156 681 print genericObj.out;
-#X msg 343 40 list init 0;
-#X obj 343 63 s \$0-GUI-INIT;
-#X text 327 120 now you can:;
-#X text 348 141 read or write the objects properties;
-#X text 348 159 send messages to the object;
-#X text 328 103 3 select an object;
-#X text 328 86 2 select a group;
-#X text 328 19 1 init GUI:;
+#X text 297 110 now you can:;
+#X text 318 126 read or write the objects properties;
+#X text 318 140 send messages to the object;
+#X text 298 93 3 select an object;
+#X text 298 76 2 select a group;
+#X text 298 19 1 init GUI:;
 #N canvas 0 30 681 722 control 0;
 #X obj 91 169 sdPackFromHuman;
 #X obj 91 192 send GUI;
@@ -81,8 +70,8 @@
 #X connect 24 0 0 0;
 #X connect 27 0 28 0;
 #X connect 28 0 0 0;
-#X restore 327 184 pd control gui;
-#N canvas 0 30 681 722 other 0;
+#X restore 311 164 pd control gui;
+#N canvas 0 30 762 722 other 0;
 #X obj 55 117 sdPackFromHuman;
 #X msg 55 94 list set ( dest ( \$1 ) );
 #X msg 55 48 symbol %0-weirdInstrument;
@@ -152,51 +141,111 @@ don't contain \$0 symbols.;
 #X connect 36 0 8 0;
 #X connect 36 1 26 0;
 #X connect 36 2 27 0;
-#X restore 327 210 pd other generic tools;
-#X text 323 394 ...and a sender to manipulate the instruments state
+#X restore 311 190 pd other generic tools;
+#X text 289 476 ...and a sender to manipulate the instruments state
 ;
-#X obj 638 249 sdObjExample \$0-obscureInstrument \$0-INSTR \$0-GLOBAL
-;
-#X obj 638 316 sdObjExample \$0-weirdInstrument \$0-INSTR \$0-GLOBAL
-;
-#X obj 641 394 sdObjExampleManyProps \$0-manyProps \$0-GLOBAL \$0-INSTR
-;
+#X obj 289 226 sdObjExample \$0-obscureInstrument \$0-INSTR \$0-GLOBAL
+, f 33;
+#X obj 289 265 sdObjExample \$0-weirdInstrument \$0-INSTR \$0-GLOBAL
+, f 33;
 #X obj 7 660 spigot;
-#X obj 55 664 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 52 660 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
 #X obj 156 659 spigot;
-#X obj 204 663 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 201 659 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#N canvas 0 30 681 736 init 0;
+#X obj 7 25 sdObjState_ui GUI \$0-GUI-INIT;
+#N canvas 0 30 762 722 dest 0;
+#X obj 146 103 hradio 13 1 0 2 empty empty empty 0 -8 0 10 -262144
+-1 -1 0;
+#X obj 104 234 sdReplace \$0;
+#X msg 104 191 raw set dest %0-obscureInstrument;
+#X msg 119 212 raw set dest %0-weirdInstrument;
+#X obj 101 165 route 0 1;
+#X obj 104 257 outlet;
+#X obj 147 52 r \$0-GLOBAL;
+#X obj 147 75 t b;
+#X connect 0 0 4 0;
+#X connect 1 0 5 0;
+#X connect 2 0 1 0;
+#X connect 3 0 1 0;
+#X connect 4 0 2 0;
+#X connect 4 1 3 0;
+#X connect 6 0 7 0;
+#X connect 7 0 0 0;
+#X coords 0 -1 1 1 75 19 1 100 100;
+#X restore 291 384 pd dest;
+#N canvas 0 30 762 722 dest 0;
+#X obj 146 103 hradio 13 1 0 2 empty empty empty 0 -8 0 10 -262144
+-1 -1 1;
+#X obj 104 234 sdReplace \$0;
+#X msg 104 191 raw set dest %0-obscureInstrument;
+#X msg 119 212 raw set dest %0-weirdInstrument;
+#X obj 101 165 route 0 1;
+#X obj 104 257 outlet;
+#X obj 146 53 r \$0-GLOBAL;
+#X obj 146 75 t b;
+#X connect 0 0 4 0;
+#X connect 1 0 5 0;
+#X connect 2 0 1 0;
+#X connect 3 0 1 0;
+#X connect 4 0 2 0;
+#X connect 4 1 3 0;
+#X connect 6 0 7 0;
+#X connect 7 0 0 0;
+#X coords 0 -1 1 1 75 19 1 100 100;
+#X restore 290 494 pd dest;
+#N canvas 0 30 762 722 dest 0;
+#X obj 146 103 hradio 13 1 0 2 empty empty empty 0 -8 0 10 -262144
+-1 -1 0;
+#X obj 104 234 sdReplace \$0;
+#X msg 104 191 raw set dest %0-obscureInstrument;
+#X msg 119 212 raw set dest %0-weirdInstrument;
+#X obj 101 165 route 0 1;
+#X obj 104 257 outlet;
+#X obj 146 52 r \$0-GLOBAL;
+#X obj 146 75 t b;
+#X connect 0 0 4 0;
+#X connect 1 0 5 0;
+#X connect 2 0 1 0;
+#X connect 3 0 1 0;
+#X connect 4 0 2 0;
+#X connect 4 1 3 0;
+#X connect 6 0 7 0;
+#X connect 7 0 0 0;
+#X coords 0 -1 1 1 75 19 1 100 100;
+#X restore 293 602 pd dest;
+#X obj 311 38 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#N canvas 0 30 762 722 init 0;
 #X obj 29 18 inlet;
-#X msg 29 41 list set ( groups ( %0-INSTR %0-CONN ) );
-#X obj 29 64 sdReplace \$0;
-#X obj 29 87 sdPackFromHuman;
-#X obj 29 110 s GUI;
-#X connect 0 0 1 0;
+#X msg 89 86 list set ( groups ( %0-INSTR %0-CONN ) );
+#X obj 89 109 sdReplace \$0;
+#X obj 89 132 sdPackFromHuman;
+#X obj 89 155 s GUI;
+#X obj 29 41 t b b;
+#X msg 29 178 list init 0;
+#X obj 29 201 s \$0-GUI-INIT;
+#X text 344 85 (set groups);
+#X connect 0 0 5 0;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;
 #X connect 3 0 4 0;
-#X restore 472 66 pd init groups;
-#X obj 483 37 t b b;
-#X obj 7 25 sdObjState_ui GUI \$0-GUI-INIT;
-#X connect 0 0 15 0;
-#X connect 1 0 0 0;
-#X connect 2 0 14 0;
+#X connect 5 0 6 0;
+#X connect 5 1 1 0;
+#X connect 6 0 7 0;
+#X restore 311 57 pd init gui;
+#X obj 289 307 sdObjExampleManyProps \$0-manyProps \$0-GLOBAL \$0-INSTR
+, f 33;
+#X connect 1 0 3 0;
 #X connect 3 0 2 0;
-#X connect 4 0 2 0;
-#X connect 5 0 0 0;
-#X connect 7 0 38 0;
-#X connect 9 0 8 0;
-#X connect 10 0 16 0;
-#X connect 11 0 10 0;
-#X connect 12 0 10 0;
-#X connect 19 0 20 0;
-#X connect 33 0 17 0;
-#X connect 34 0 33 1;
-#X connect 35 0 18 0;
-#X connect 36 0 35 1;
-#X connect 38 0 37 0;
-#X connect 38 1 9 0;
-#X connect 39 0 33 0;
-#X connect 39 1 35 0;
+#X connect 21 0 8 0;
+#X connect 22 0 21 1;
+#X connect 23 0 9 0;
+#X connect 24 0 23 1;
+#X connect 25 0 21 0;
+#X connect 25 1 23 0;
+#X connect 26 0 6 0;
+#X connect 27 0 5 0;
+#X connect 28 0 7 0;
+#X connect 29 0 30 0;
