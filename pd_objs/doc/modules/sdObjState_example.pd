@@ -154,7 +154,6 @@ don't contain \$0 symbols.;
 #X obj 156 659 spigot;
 #X obj 201 659 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 7 25 sdObjState_ui GUI \$0-GUI-INIT;
 #N canvas 0 30 762 722 dest 0;
 #X obj 146 103 hradio 13 1 0 2 empty empty empty 0 -8 0 10 -262144
 -1 -1 0;
@@ -237,15 +236,16 @@ don't contain \$0 symbols.;
 #X restore 311 57 pd init gui;
 #X obj 289 307 sdObjExampleManyProps \$0-manyProps \$0-GLOBAL \$0-INSTR
 , f 33;
+#X obj 7 25 sdGui_ui GUI \$0-GUI-INIT;
 #X connect 1 0 3 0;
 #X connect 3 0 2 0;
 #X connect 21 0 8 0;
 #X connect 22 0 21 1;
 #X connect 23 0 9 0;
 #X connect 24 0 23 1;
-#X connect 25 0 21 0;
-#X connect 25 1 23 0;
-#X connect 26 0 6 0;
-#X connect 27 0 5 0;
-#X connect 28 0 7 0;
-#X connect 29 0 30 0;
+#X connect 25 0 6 0;
+#X connect 26 0 5 0;
+#X connect 27 0 7 0;
+#X connect 28 0 29 0;
+#X connect 31 0 21 0;
+#X connect 31 1 23 0;

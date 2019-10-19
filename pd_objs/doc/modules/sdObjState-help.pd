@@ -1,8 +1,8 @@
-#N canvas 683 30 681 156 10;
+#N canvas 0 30 681 722 10;
 #X text 12 9 This module is just a convention how to build high level
 objects in a patch.;
 #X text 29 141 usage example;
-#N canvas 0 30 762 736 basics 0;
+#N canvas 0 30 681 722 basics 0;
 #N canvas 0 30 681 722 test 0;
 #X obj 80 13 inlet;
 #X obj 63 337 s \$0-out1;
@@ -531,7 +531,7 @@ informed about the objs state:, f 21;
 #X text 17 99 if you design your objects following the paradigm \,
 you can use the utility objects to manage their state in advanced ways:
 ;
-#N canvas 0 30 681 722 gui 1;
+#N canvas 0 30 681 722 gui 0;
 #X msg 498 10 list init 0;
 #X obj 498 34 s \$0-GLOBAL.1;
 #X text 11 12 sdObjState_num_obj_ui name global dest count;
@@ -592,10 +592,6 @@ you can use the utility objects to manage their state in advanced ways:
 #X coords 0 -1 1 1 84 19 1 100 100;
 #X restore 344 24 pd header;
 #X obj 424 61 sdObjExample \$0-instr \$0-GLOBAL.1 \$0-gInstr;
-#X obj 424 104 sdObjState_combined_obj_ui \$0-instr.gui \$0-GLOBAL.1
-\$0-instr;
-#X obj 40 63 sdObjState_num_obj_ui \$0-conn \$0-GLOBAL.1 \$0-instr
-4;
 #N canvas 0 30 844 722 header 0;
 #X obj 147 195 outlet;
 #X obj 167 52 r \$0-GLOBAL;
@@ -635,8 +631,6 @@ you can use the utility objects to manage their state in advanced ways:
 #X connect 4 0 0 0;
 #X coords 0 -1 1 1 84 19 1 100 100;
 #X restore 326 370 pd header;
-#X obj 44 407 sdObjState_sym_obj_ui \$0-sym-test \$0-GLOBAL.1 \$0-instr
-3;
 #N canvas 0 30 844 722 header 0;
 #X obj 147 195 outlet;
 #X obj 167 52 r \$0-GLOBAL;
@@ -650,8 +644,6 @@ you can use the utility objects to manage their state in advanced ways:
 #X connect 4 0 0 0;
 #X coords 0 -1 1 1 84 19 1 100 100;
 #X restore 360 560 pd header;
-#X obj 40 602 sdObjState_events_compact_obj_ui \$0-events \$0-GLOBAL.1
-\$0-instr;
 #N canvas 0 30 844 722 header 0;
 #X obj 147 195 outlet;
 #X obj 167 52 r \$0-GLOBAL;
@@ -665,10 +657,6 @@ you can use the utility objects to manage their state in advanced ways:
 #X connect 4 0 0 0;
 #X coords 0 -1 1 1 84 19 1 100 100;
 #X restore 727 304 pd header;
-#X obj 421 329 sdObjState_events_obj_ui \$0-events-simple \$0-GLOBAL.1
-\$0-instr 3;
-#X obj 419 428 sdObjState_events_obj_ui \$0-hurz \$0-GLOBAL.1 \$0-instr
-stop;
 #N canvas 0 30 844 722 header 0;
 #X obj 147 195 outlet;
 #X obj 167 52 r \$0-GLOBAL;
@@ -682,15 +670,26 @@ stop;
 #X connect 4 0 0 0;
 #X coords 0 -1 1 1 84 19 1 100 100;
 #X restore 670 400 pd header;
-#X obj 40 274 sdObjState_bool_obj_ui \$0-test-bool \$0-GLOBAL.1 \$0-instr
+#X obj 40 63 sdGui_num_obj_ui \$0-conn \$0-GLOBAL.1 \$0-instr 4;
+#X obj 41 274 sdGui_bool_obj_ui \$0-test-bool \$0-GLOBAL.1 \$0-instr
 3;
+#X obj 44 407 sdGui_sym_obj_ui \$0-sym-test \$0-GLOBAL.1 \$0-instr
+3;
+#X obj 40 602 sdGui_events_compact_obj_ui \$0-events \$0-GLOBAL.1 \$0-instr
+;
+#X obj 424 105 sdGui_combined_obj_ui \$0-instr.gui \$0-GLOBAL.1 \$0-instr
+;
+#X obj 421 329 sdGui_events_obj_ui \$0-events-simple \$0-GLOBAL.1 \$0-instr
+3;
+#X obj 419 428 sdGui_events_obj_ui \$0-hurz \$0-GLOBAL.1 \$0-instr
+stop;
 #X connect 0 0 1 0;
-#X connect 15 0 18 1;
-#X connect 19 0 17 1;
-#X connect 20 0 29 1;
-#X connect 21 0 22 1;
-#X connect 23 0 24 1;
-#X connect 25 0 26 1;
-#X connect 28 0 27 1;
+#X connect 15 0 23 1;
+#X connect 17 0 27 1;
+#X connect 18 0 24 1;
+#X connect 19 0 25 1;
+#X connect 20 0 26 1;
+#X connect 21 0 28 1;
+#X connect 22 0 29 1;
 #X restore 43 236 pd gui parts;
 #X obj 43 163 sdObjState_example;

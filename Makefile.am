@@ -32,19 +32,25 @@ data_DATA = \
 	$(PATH_PD_OBJS)/sdObjInterface_obj.pd \
 	$(PATH_PD_OBJS)/sdObjGroupsInterface_obj.pd \
 	$(PATH_PD_OBJS)/sdTest.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_bool_dyn_props.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_bool_obj_ui.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_bool_ui.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_events_dyn_props.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_events_obj_ui.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_events_ui.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_num_dyn_props.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_num_obj_ui.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_num_ui.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_sym_dyn_props.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_sym_obj_ui.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_sym_ui.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_bool_dyn_props.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_bool_obj_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_bool_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_events_dyn_props.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_events_obj_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_events_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_num_dyn_props.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_num_obj_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_num_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_sym_dyn_props.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_sym_obj_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_sym_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_box_helper.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_combined_obj_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_combined_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_events_compact_dyn_props.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_events_compact_obj_ui.pd \
+	$(PATH_PD_OBJS)/gui/sdGui_events_compact_ui.pd \
 	$(PATH_PD_OBJS)/utils/sdListForEach.pd \
 	$(PATH_PD_OBJS)/math/sdCenterDelta.pd \
 	$(PATH_PD_OBJS)/math/sdMinDelta.pd \
@@ -54,12 +60,6 @@ data_DATA = \
 	$(PATH_PD_OBJS)/dyn_patch/sdDynPatch.pd \
 	$(PATH_PD_OBJS)/dyn_patch/sdLines_max.pd \
 	$(PATH_PD_OBJS)/dyn_patch/sdLines.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_box_helper.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_combined_obj_ui.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_combined_ui.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_events_compact_dyn_props.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_events_compact_obj_ui.pd \
-	$(PATH_PD_OBJS)/gui/sdObjState_events_compact_ui.pd \
   $(PATH_PD_OBJS)/doc/structuredDataC_doc.pd \
   $(PATH_PD_OBJS)/doc/modules/sdData-help.pd \
   $(PATH_PD_OBJS)/doc/modules/sdEvent-help.pd \
