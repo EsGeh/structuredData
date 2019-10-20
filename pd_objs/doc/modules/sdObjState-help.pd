@@ -578,98 +578,20 @@ you can use the utility objects to manage their state in advanced ways:
 #X connect 10 1 0 1;
 #X connect 11 0 10 0;
 #X restore 492 524 pd bounding boxes;
-#N canvas 0 30 844 722 header 0;
+#N canvas 0 30 681 722 header 0;
 #X obj 147 195 outlet;
-#X obj 167 52 r \$0-GLOBAL;
-#X obj 167 75 t b;
-#X obj 167 102 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 167 102 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
 1;
 #X msg 167 122 set header \$1;
+#X obj 167 52 loadbang;
+#X msg 167 76 1;
 #X connect 1 0 2 0;
-#X connect 2 0 3 0;
+#X connect 2 0 0 0;
 #X connect 3 0 4 0;
-#X connect 4 0 0 0;
+#X connect 4 0 1 0;
 #X coords 0 -1 1 1 84 19 1 100 100;
 #X restore 344 24 pd header;
 #X obj 424 61 sdObjExample \$0-instr \$0-GLOBAL.1 \$0-gInstr;
-#N canvas 0 30 844 722 header 0;
-#X obj 147 195 outlet;
-#X obj 167 52 r \$0-GLOBAL;
-#X obj 167 75 t b;
-#X obj 167 102 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
-#X msg 167 122 set header \$1;
-#X connect 1 0 2 0;
-#X connect 2 0 3 0;
-#X connect 3 0 4 0;
-#X connect 4 0 0 0;
-#X coords 0 -1 1 1 84 19 1 100 100;
-#X restore 674 80 pd header;
-#N canvas 0 30 844 722 header 0;
-#X obj 147 195 outlet;
-#X obj 167 52 r \$0-GLOBAL;
-#X obj 167 75 t b;
-#X obj 167 102 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
-#X msg 167 122 set header \$1;
-#X connect 1 0 2 0;
-#X connect 2 0 3 0;
-#X connect 3 0 4 0;
-#X connect 4 0 0 0;
-#X coords 0 -1 1 1 84 19 1 100 100;
-#X restore 330 244 pd header;
-#N canvas 0 30 844 722 header 0;
-#X obj 147 195 outlet;
-#X obj 167 52 r \$0-GLOBAL;
-#X obj 167 75 t b;
-#X obj 167 102 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
-#X msg 167 122 set header \$1;
-#X connect 1 0 2 0;
-#X connect 2 0 3 0;
-#X connect 3 0 4 0;
-#X connect 4 0 0 0;
-#X coords 0 -1 1 1 84 19 1 100 100;
-#X restore 326 370 pd header;
-#N canvas 0 30 844 722 header 0;
-#X obj 147 195 outlet;
-#X obj 167 52 r \$0-GLOBAL;
-#X obj 167 75 t b;
-#X obj 167 102 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
-#X msg 167 122 set header \$1;
-#X connect 1 0 2 0;
-#X connect 2 0 3 0;
-#X connect 3 0 4 0;
-#X connect 4 0 0 0;
-#X coords 0 -1 1 1 84 19 1 100 100;
-#X restore 360 560 pd header;
-#N canvas 0 30 844 722 header 0;
-#X obj 147 195 outlet;
-#X obj 167 52 r \$0-GLOBAL;
-#X obj 167 75 t b;
-#X obj 167 102 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
-#X msg 167 122 set header \$1;
-#X connect 1 0 2 0;
-#X connect 2 0 3 0;
-#X connect 3 0 4 0;
-#X connect 4 0 0 0;
-#X coords 0 -1 1 1 84 19 1 100 100;
-#X restore 727 304 pd header;
-#N canvas 0 30 844 722 header 0;
-#X obj 147 195 outlet;
-#X obj 167 52 r \$0-GLOBAL;
-#X obj 167 75 t b;
-#X obj 167 102 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
-#X msg 167 122 set header \$1;
-#X connect 1 0 2 0;
-#X connect 2 0 3 0;
-#X connect 3 0 4 0;
-#X connect 4 0 0 0;
-#X coords 0 -1 1 1 84 19 1 100 100;
-#X restore 670 400 pd header;
 #X obj 40 63 sdGui_num_obj_ui \$0-conn \$0-GLOBAL.1 \$0-instr 4;
 #X obj 41 274 sdGui_bool_obj_ui \$0-test-bool \$0-GLOBAL.1 \$0-instr
 3;
@@ -681,15 +603,93 @@ you can use the utility objects to manage their state in advanced ways:
 ;
 #X obj 421 329 sdGui_events_obj_ui \$0-events-simple \$0-GLOBAL.1 \$0-instr
 3;
-#X obj 419 428 sdGui_events_obj_ui \$0-hurz \$0-GLOBAL.1 \$0-instr
+#X obj 419 438 sdGui_events_obj_ui \$0-hurz \$0-GLOBAL.1 \$0-instr
 stop;
+#N canvas 0 30 681 722 header 0;
+#X obj 147 195 outlet;
+#X obj 167 102 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+1;
+#X msg 167 122 set header \$1;
+#X obj 167 52 loadbang;
+#X msg 167 76 1;
+#X connect 1 0 2 0;
+#X connect 2 0 0 0;
+#X connect 3 0 4 0;
+#X connect 4 0 1 0;
+#X coords 0 -1 1 1 84 19 1 100 100;
+#X restore 334 244 pd header;
+#N canvas 0 30 681 722 header 0;
+#X obj 147 195 outlet;
+#X obj 167 102 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+1;
+#X msg 167 122 set header \$1;
+#X obj 167 52 loadbang;
+#X msg 167 76 1;
+#X connect 1 0 2 0;
+#X connect 2 0 0 0;
+#X connect 3 0 4 0;
+#X connect 4 0 1 0;
+#X coords 0 -1 1 1 84 19 1 100 100;
+#X restore 334 374 pd header;
+#N canvas 0 30 681 722 header 0;
+#X obj 147 195 outlet;
+#X obj 167 102 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+1;
+#X msg 167 122 set header \$1;
+#X obj 167 52 loadbang;
+#X msg 167 76 1;
+#X connect 1 0 2 0;
+#X connect 2 0 0 0;
+#X connect 3 0 4 0;
+#X connect 4 0 1 0;
+#X coords 0 -1 1 1 84 19 1 100 100;
+#X restore 364 574 pd header;
+#N canvas 0 30 681 722 header 0;
+#X obj 147 195 outlet;
+#X obj 167 102 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+1;
+#X msg 167 122 set header \$1;
+#X obj 167 52 loadbang;
+#X msg 167 76 1;
+#X connect 1 0 2 0;
+#X connect 2 0 0 0;
+#X connect 3 0 4 0;
+#X connect 4 0 1 0;
+#X coords 0 -1 1 1 84 19 1 100 100;
+#X restore 692 75 pd header;
+#N canvas 0 30 681 722 header 0;
+#X obj 147 195 outlet;
+#X obj 167 102 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+1;
+#X msg 167 122 set header \$1;
+#X obj 167 52 loadbang;
+#X msg 167 76 1;
+#X connect 1 0 2 0;
+#X connect 2 0 0 0;
+#X connect 3 0 4 0;
+#X connect 4 0 1 0;
+#X coords 0 -1 1 1 84 19 1 100 100;
+#X restore 685 302 pd header;
+#N canvas 0 30 681 722 header 0;
+#X obj 147 195 outlet;
+#X obj 167 102 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+1;
+#X msg 167 122 set header \$1;
+#X obj 167 52 loadbang;
+#X msg 167 76 1;
+#X connect 1 0 2 0;
+#X connect 2 0 0 0;
+#X connect 3 0 4 0;
+#X connect 4 0 1 0;
+#X coords 0 -1 1 1 84 19 1 100 100;
+#X restore 684 412 pd header;
 #X connect 0 0 1 0;
-#X connect 15 0 23 1;
-#X connect 17 0 27 1;
-#X connect 18 0 24 1;
-#X connect 19 0 25 1;
-#X connect 20 0 26 1;
-#X connect 21 0 28 1;
-#X connect 22 0 29 1;
+#X connect 15 0 17 1;
+#X connect 24 0 18 1;
+#X connect 25 0 19 1;
+#X connect 26 0 20 1;
+#X connect 27 0 21 1;
+#X connect 28 0 22 1;
+#X connect 29 0 23 1;
 #X restore 43 236 pd gui parts;
 #X obj 43 163 sdObjState_example;
