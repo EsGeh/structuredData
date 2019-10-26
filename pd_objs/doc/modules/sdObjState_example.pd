@@ -1,4 +1,4 @@
-#N canvas 0 30 681 722 10;
+#N canvas 0 30 762 722 10;
 #X text 288 350 lets define a receiver to track the instruments state
 , f 35;
 #X obj 596 10 loadbang;
@@ -71,7 +71,7 @@
 #X connect 27 0 28 0;
 #X connect 28 0 0 0;
 #X restore 311 164 pd control gui;
-#N canvas 0 30 762 722 other 0;
+#N canvas 0 30 681 722 other 0;
 #X obj 55 117 sdPackFromHuman;
 #X msg 55 94 list set ( dest ( \$1 ) );
 #X msg 55 48 symbol %0-weirdInstrument;
@@ -176,7 +176,7 @@ don't contain \$0 symbols.;
 #X restore 291 384 pd dest;
 #N canvas 0 30 762 722 dest 0;
 #X obj 146 103 hradio 13 1 0 2 empty empty empty 0 -8 0 10 -262144
--1 -1 1;
+-1 -1 0;
 #X obj 104 234 sdReplace \$0;
 #X msg 104 191 raw set dest %0-obscureInstrument;
 #X msg 119 212 raw set dest %0-weirdInstrument;
@@ -216,22 +216,23 @@ don't contain \$0 symbols.;
 #X restore 293 602 pd dest;
 #X obj 311 38 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
-#N canvas 0 30 762 722 init 0;
+#N canvas 0 30 681 722 init 0;
 #X obj 29 18 inlet;
-#X msg 89 86 list set ( groups ( %0-INSTR %0-CONN ) );
-#X obj 89 109 sdReplace \$0;
-#X obj 89 132 sdPackFromHuman;
-#X obj 89 155 s GUI;
+#X msg 29 146 list set ( groups ( %0-INSTR %0-CONN ) );
+#X obj 29 169 sdReplace \$0;
+#X obj 29 192 sdPackFromHuman;
+#X obj 29 215 s GUI;
 #X obj 29 41 t b b;
-#X msg 29 178 list init 0;
-#X obj 29 201 s \$0-GUI-INIT;
-#X text 344 85 (set groups);
+#X msg 79 76 list init 0;
+#X obj 79 99 s \$0-GUI-INIT;
+#X text 284 145 (set groups);
+#X text 79 50 (we are not using init (which sets "groups" from init
+args));
 #X connect 0 0 5 0;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;
 #X connect 3 0 4 0;
-#X connect 5 0 6 0;
-#X connect 5 1 1 0;
+#X connect 5 0 1 0;
 #X connect 6 0 7 0;
 #X restore 311 57 pd init gui;
 #X obj 289 307 sdObjExampleManyProps \$0-manyProps \$0-GLOBAL \$0-INSTR

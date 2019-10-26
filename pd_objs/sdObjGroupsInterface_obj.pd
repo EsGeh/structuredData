@@ -1,4 +1,4 @@
-#N canvas 0 30 721 736 10;
+#N canvas 0 30 681 722 10;
 #X obj 33 10 inlet;
 #X obj 216 49 sdObjState \$1 \$2;
 #X obj 263 3 r \$0-fromProperties;
@@ -113,7 +113,7 @@
 #X connect 17 0 1 0;
 #X connect 18 0 0 0;
 #X restore 357 496 pd get_objs;
-#N canvas 0 30 721 736 init 0;
+#N canvas 0 30 681 722 init 0;
 #N canvas 0 30 681 722 initlist 0;
 #X obj 513 209 sdList;
 #X msg 513 167 serialize \, clear;
@@ -186,6 +186,7 @@
 #X obj 339 159 sdPackFilter get_all;
 #X obj 339 183 t b;
 #X obj 489 227 symbol;
+#X obj 394 337 print DB;
 #X connect 0 0 1 0;
 #X connect 1 0 55 0;
 #X connect 1 1 52 0;
@@ -229,6 +230,7 @@
 #X connect 41 0 40 0;
 #X connect 42 0 43 0;
 #X connect 42 1 17 1;
+#X connect 42 1 61 0;
 #X connect 43 0 44 0;
 #X connect 46 0 1 1;
 #X connect 47 0 48 0;
