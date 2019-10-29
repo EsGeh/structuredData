@@ -20,6 +20,7 @@ In more detail: The library provides utilities to realize specific design princi
 
 The goals/benefits are:
 
+- a generic GUI to inspect and manipulate stateful objects
 - record all "events" happening at runtime
 - stateful objs can track other objects state
 - the state of an object can be saved/loaded to/from RAM/disk
