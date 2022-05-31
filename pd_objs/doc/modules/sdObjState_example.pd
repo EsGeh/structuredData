@@ -1,4 +1,4 @@
-#N canvas 0 30 762 722 10;
+#N canvas 0 0 798 854 10;
 #X text 288 350 lets define a receiver to track the instruments state
 , f 35;
 #X obj 596 10 loadbang;
@@ -20,32 +20,32 @@
 #X obj 91 169 sdPackFromHuman;
 #X obj 91 192 send GUI;
 #X msg 91 146 list set ( destIndex ( \$1 ) );
-#X floatatom 91 124 5 0 0 0 - - -;
-#X floatatom 59 73 5 0 0 0 - - -;
+#X floatatom 91 124 5 0 0 0 - - - 0;
+#X floatatom 59 73 5 0 0 0 - - - 0;
 #X msg 59 95 list set ( groupIndex ( \$1 ) );
-#X floatatom 194 171 5 0 0 0 - - -;
+#X floatatom 194 171 5 0 0 0 - - - 0;
 #X obj 194 193 pack;
-#X floatatom 230 172 5 0 0 0 - - -;
+#X floatatom 230 172 5 0 0 0 - - - 0;
 #X msg 194 216 list set_num_by_ind ( \$2 \$1 );
 #X text 196 238 (generically set properties);
-#X floatatom 106 264 5 0 0 0 - - -;
+#X floatatom 106 264 5 0 0 0 - - - 0;
 #X obj 106 286 pack;
-#X floatatom 142 265 5 0 0 0 - - -;
+#X floatatom 142 265 5 0 0 0 - - - 0;
 #X msg 106 310 list set_num_by_ind_in_range ( \$2 \$1 );
 #X text 65 46 control GUI by sending messages;
-#X floatatom 349 38 5 0 0 0 - - -;
+#X floatatom 349 38 5 0 0 0 - - - 0;
 #X obj 320 61 f;
 #X msg 308 94 list send_event_by_ind ( \$1 );
-#X obj 306 33 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
--1;
+#X obj 306 33 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000;
 #X text 405 37 send event by index;
-#X floatatom 448 148 5 0 0 0 - - -;
-#X floatatom 484 149 5 0 0 0 - - -;
+#X floatatom 448 148 5 0 0 0 - - - 0;
+#X floatatom 484 149 5 0 0 0 - - - 0;
 #X obj 448 170 pack 0 0;
 #X msg 448 194 list set_bool_by_ind ( \$2 \$1 );
 #X text 445 219 (generically set boolean properties);
 #X text 355 308 (generically set properties from [0..1]);
-#X floatatom 500 76 5 0 0 0 - - -;
+#X floatatom 500 76 5 0 0 0 - - - 0;
 #X msg 500 98 list set ( numShift ( \$1 ) );
 #X connect 0 0 1 0;
 #X connect 2 0 0 0;
@@ -71,23 +71,23 @@
 #X connect 27 0 28 0;
 #X connect 28 0 0 0;
 #X restore 311 164 pd control gui;
-#N canvas 0 30 681 722 other 0;
+#N canvas 0 0 798 854 other 0;
 #X obj 55 117 sdPackFromHuman;
 #X msg 55 94 list set ( dest ( \$1 ) );
 #X msg 55 48 symbol %0-weirdInstrument;
 #X obj 55 71 sdReplace \$0;
-#X floatatom 241 50 5 0 0 0 - - -;
+#X floatatom 241 50 5 0 0 0 - - - 0;
 #X obj 241 72 pack;
-#X floatatom 277 51 5 0 0 0 - - -;
+#X floatatom 277 51 5 0 0 0 - - - 0;
 #X msg 241 95 list set_num_by_ind_in_range ( \$2 \$1 );
 #X obj 56 163 print;
 #X msg 382 305 load;
 #X msg 345 304 save;
-#X floatatom 73 207 5 0 0 0 - - -;
+#X floatatom 73 207 5 0 0 0 - - - 0;
 #X obj 44 230 f;
 #X msg 32 263 list send_event_by_ind ( \$1 );
-#X obj 30 202 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
--1;
+#X obj 30 202 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000;
 #X text 99 229 send event by index;
 #X text 546 140 (same api as gui);
 #X msg 376 570 save_hd;
@@ -149,14 +149,14 @@ don't contain \$0 symbols.;
 #X obj 289 265 sdObjExample \$0-weirdInstrument \$0-INSTR \$0-GLOBAL
 , f 33;
 #X obj 7 660 spigot;
-#X obj 52 660 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
+#X obj 52 660 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000 0 1;
 #X obj 156 659 spigot;
-#X obj 201 659 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
+#X obj 201 659 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000 0 1;
 #N canvas 0 30 762 722 dest 0;
-#X obj 146 103 hradio 13 1 0 2 empty empty empty 0 -8 0 10 -262144
--1 -1 0;
+#X obj 146 103 hradio 13 1 0 2 empty empty empty 0 -8 0 10 #fcfcfc
+#000000 #000000 0;
 #X obj 104 234 sdReplace \$0;
 #X msg 104 191 raw set dest %0-obscureInstrument;
 #X msg 119 212 raw set dest %0-weirdInstrument;
@@ -175,8 +175,8 @@ don't contain \$0 symbols.;
 #X coords 0 -1 1 1 75 19 1 100 100;
 #X restore 291 384 pd dest;
 #N canvas 0 30 762 722 dest 0;
-#X obj 146 103 hradio 13 1 0 2 empty empty empty 0 -8 0 10 -262144
--1 -1 0;
+#X obj 146 103 hradio 13 1 0 2 empty empty empty 0 -8 0 10 #fcfcfc
+#000000 #000000 0;
 #X obj 104 234 sdReplace \$0;
 #X msg 104 191 raw set dest %0-obscureInstrument;
 #X msg 119 212 raw set dest %0-weirdInstrument;
@@ -195,8 +195,8 @@ don't contain \$0 symbols.;
 #X coords 0 -1 1 1 75 19 1 100 100;
 #X restore 290 494 pd dest;
 #N canvas 0 30 762 722 dest 0;
-#X obj 146 103 hradio 13 1 0 2 empty empty empty 0 -8 0 10 -262144
--1 -1 0;
+#X obj 146 103 hradio 13 1 0 2 empty empty empty 0 -8 0 10 #fcfcfc
+#000000 #000000 0;
 #X obj 104 234 sdReplace \$0;
 #X msg 104 191 raw set dest %0-obscureInstrument;
 #X msg 119 212 raw set dest %0-weirdInstrument;
@@ -214,8 +214,8 @@ don't contain \$0 symbols.;
 #X connect 7 0 0 0;
 #X coords 0 -1 1 1 75 19 1 100 100;
 #X restore 293 602 pd dest;
-#X obj 311 38 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
--1;
+#X obj 311 38 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000;
 #N canvas 0 30 681 722 init 0;
 #X obj 29 18 inlet;
 #X msg 29 146 list set ( groups ( %0-INSTR %0-CONN ) );
