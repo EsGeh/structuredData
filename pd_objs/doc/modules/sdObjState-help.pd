@@ -1,8 +1,8 @@
-#N canvas 0 30 762 722 10;
+#N canvas 800 0 798 189 10;
 #X text 12 9 This module is just a convention how to build high level
 objects in a patch.;
 #X text 29 141 usage example;
-#N canvas 0 30 762 722 basics 0;
+#N canvas 0 443 798 411 basics 1;
 #N canvas 0 30 681 722 test 0;
 #X obj 80 13 inlet;
 #X obj 63 337 s \$0-out1;
@@ -17,8 +17,8 @@ objects in a patch.;
 #X obj 214 526 s \$0-out2;
 #X obj 61 583 s \$0-out3;
 #X obj 61 560 r \$0-sdPropSym;
-#X obj 626 176 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
--1 -1;
+#X obj 626 176 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc
+#000000 #000000;
 #N canvas 0 30 894 854 test-get 0;
 #X obj 217 472 s \$0-test;
 #X obj 202 537 s \$0-test;
@@ -77,10 +77,10 @@ foo ) expect3 ( foo );
 #X connect 8 0 0 0;
 #X connect 10 0 4 1;
 #X restore 522 203 pd test-set;
-#X obj 522 173 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 373 175 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
--1 -1;
+#X obj 522 173 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc
+#000000 #000000;
+#X obj 373 175 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc
+#000000 #000000;
 #N canvas 0 30 894 854 test-set-intern 0;
 #X obj 377 566 s \$0-test;
 #X obj 319 41 inlet;
@@ -143,8 +143,8 @@ foo ) expect3 ( foo );
 #X obj 351 84 t b b;
 #X obj 63 313 sdProperty sdProp \$0;
 #X obj 791 373 print 2;
-#X obj 280 171 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
--1 -1;
+#X obj 280 171 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc
+#000000 #000000;
 #N canvas 0 30 894 854 test-get 0;
 #X obj 217 472 s \$0-test;
 #X obj 202 537 s \$0-test;
@@ -203,10 +203,10 @@ get notDefined );
 #X connect 8 0 4 0;
 #X connect 10 0 4 1;
 #X restore 176 198 pd test-set;
-#X obj 176 168 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 27 170 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
--1;
+#X obj 176 168 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc
+#000000 #000000;
+#X obj 27 170 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000;
 #N canvas 0 30 894 854 test-set-intern 0;
 #X obj 377 566 s \$0-test;
 #X obj 319 41 inlet;
@@ -294,14 +294,14 @@ get notDefined );
 #X connect 34 0 32 0;
 #X connect 34 1 29 0;
 #X restore 251 88 pd test property;
-#X obj 251 68 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
--1;
+#X obj 251 68 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000;
 #N canvas 0 30 762 722 properties 0;
 #X obj 135 175 print propOut;
-#X floatatom 229 75 5 0 0 0 - - -;
+#X floatatom 229 75 5 0 0 0 - - - 0;
 #X obj 280 180 print redirect;
 #X text 321 205 redirect to other properties;
-#X symbolatom 192 275 10 0 0 0 - - -;
+#X symbolatom 192 275 10 0 0 0 - - - 0;
 #X obj 142 382 print propOut;
 #X obj 313 382 print redirect;
 #X obj 558 212 r \$0-testProp;
@@ -330,12 +330,12 @@ get notDefined );
 #X obj 589 360 r \$0-symProp;
 #X obj 589 383 print symProp.intern;
 #X obj 142 357 sdPropertySym symProp \$0 bla update;
-#X floatatom 194 17 5 0 0 0 - - -;
+#X floatatom 194 17 5 0 0 0 - - - 0;
 #X msg 194 41 set_no_out testProp \$1;
-#X floatatom 73 586 5 0 0 0 - - -;
+#X floatatom 73 586 5 0 0 0 - - - 0;
 #X obj 154 672 print propOut;
-#X floatatom 507 602 5 0 0 0 - - -;
-#X floatatom 642 601 5 0 0 0 - - -;
+#X floatatom 507 602 5 0 0 0 - - - 0;
+#X floatatom 642 601 5 0 0 0 - - - 0;
 #X text 493 558 a number property can have a range, f 23;
 #X msg 365 594 get_range;
 #X msg 367 621 get_with_range;
@@ -344,13 +344,13 @@ get notDefined );
 #X obj 154 649 sdProperty testRange \$0 42 intern -3 5 0.5;
 #X msg 664 510 priv.set_min \$1;
 #X msg 511 625 set_min testRange \$1;
-#X floatatom 664 487 5 0 0 0 - - -;
+#X floatatom 664 487 5 0 0 0 - - - 0;
 #X msg 646 624 set_max testRange \$1;
 #X obj 664 534 s \$0-testRange_rcv;
 #X obj 403 673 print redirect;
-#X floatatom 570 653 5 0 0 0 - - -;
+#X floatatom 570 653 5 0 0 0 - - - 0;
 #X msg 574 676 set_step testRange \$1;
-#X floatatom 547 470 5 0 0 0 - - -;
+#X floatatom 547 470 5 0 0 0 - - - 0;
 #X msg 547 493 priv.set_step \$1;
 #X obj 547 516 s \$0-testRange_rcv;
 #X text 507 144 args: name ["\$0" init min max];
@@ -420,7 +420,7 @@ informed about the objs state:, f 21;
 #X obj 554 615 print debug;
 #X msg 32 430 list out ( add listener );
 #X msg 33 457 list out ( del listener );
-#N canvas 0 30 681 736 inspect 0;
+#N canvas 0 0 798 854 inspect 0;
 #X obj 101 117 sdPackFromHuman;
 #X msg 114 37 list get ( pitch );
 #X msg 116 64 list get ( pitch out ( debug ) );
@@ -443,7 +443,7 @@ informed about the objs state:, f 21;
 #X connect 10 0 6 0;
 #X restore 247 376 pd inspect;
 #N canvas 0 30 681 736 manipulate 0;
-#X floatatom 124 97 5 0 0 0 - - -;
+#X floatatom 124 97 5 0 0 0 - - - 0;
 #X msg 124 119 list set ( pitch ( \$1 ) );
 #X obj 123 149 sdPackFromHuman;
 #X obj 123 172 outlet;
@@ -455,16 +455,17 @@ informed about the objs state:, f 21;
 #X connect 4 0 2 0;
 #X connect 5 0 2 0;
 #X restore 249 427 pd manipulate;
-#N canvas 0 30 681 345 range 0;
+#N canvas 0 0 798 411 range 1;
 #X obj 50 299 sdPackFromHuman;
 #X obj 50 322 outlet;
 #X msg 32 29 list get_range ( volume );
-#X floatatom 313 97 5 0 1 0 - - -;
-#X obj 328 16 vsl 15 64 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
-#X msg 312 118 list set_in_range ( volume ( \$1 ) );
-#X floatatom 71 200 5 0 0 0 - - -;
+#X floatatom 364 95 5 0 1 0 - - - 0;
+#X obj 379 14 vsl 15 64 0 1 0 0 empty empty empty 0 -9 0 10 #fcfcfc
+#000000 #000000 0 1;
+#X msg 363 116 list set_in_range ( volume ( \$1 ) );
+#X floatatom 71 200 5 0 0 0 - - - 0;
 #X msg 58 235 list set_min ( volume ( \$1 ) );
+#X msg 44 56 list get_with_range ( volume out ( debug ) );
 #X connect 0 0 1 0;
 #X connect 2 0 0 0;
 #X connect 3 0 5 0;
@@ -472,6 +473,7 @@ informed about the objs state:, f 21;
 #X connect 5 0 0 0;
 #X connect 6 0 7 0;
 #X connect 7 0 0 0;
+#X connect 8 0 0 0;
 #X restore 248 531 pd range infos;
 #X obj 247 399 s \$0-obj;
 #X obj 249 450 s \$0-obj;
@@ -486,7 +488,7 @@ informed about the objs state:, f 21;
 #X restore 249 478 pd send events;
 #X obj 412 593 r listener_2;
 #X obj 412 616 print listener_2;
-#X floatatom 422 421 5 0 0 0 - - -;
+#X floatatom 422 421 5 0 0 0 - - - 0;
 #X msg 422 443 raw set pitch \$1 \;;
 #X text 409 401 send simple pd messages (prepend by "raw");
 #X text 395 384 DEPRECATED:;
@@ -494,13 +496,13 @@ informed about the objs state:, f 21;
 #X obj 162 641 sdObjTrackAll;
 #X obj 35 644 sdObjTrack pitch;
 #X obj 35 667 sdUnPack;
-#X floatatom 35 690 5 0 0 0 - - -;
+#X floatatom 35 690 5 0 0 0 - - - 0;
 #X obj 35 597 t a a;
 #X obj 35 620 t a a;
 #X obj 162 664 sdPackToMessage;
 #X obj 162 687 route pitch volume;
-#X floatatom 162 710 5 0 0 0 - - -;
-#X floatatom 209 710 5 0 0 0 - - -;
+#X floatatom 162 710 5 0 0 0 - - - 0;
+#X floatatom 209 710 5 0 0 0 - - - 0;
 #X obj 422 466 s \$0-obj;
 #X connect 1 0 0 0;
 #X connect 9 0 10 0;
@@ -537,15 +539,15 @@ you can use the utility objects to manage their state in advanced ways:
 #X obj 220 348 sdBoundingBox;
 #X msg 229 308 clear;
 #X obj 220 371 print;
-#X obj 210 309 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
--1 -1;
-#X floatatom 290 186 5 0 0 0 - - -;
-#X floatatom 333 189 5 0 0 0 - - -;
-#X floatatom 374 186 5 0 0 0 - - -;
-#X floatatom 246 163 5 0 0 0 - - -;
+#X obj 210 309 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc
+#000000 #000000;
+#X floatatom 290 186 5 0 0 0 - - - 0;
+#X floatatom 333 189 5 0 0 0 - - - 0;
+#X floatatom 374 186 5 0 0 0 - - - 0;
+#X floatatom 246 163 5 0 0 0 - - - 0;
 #X obj 229 198 f;
-#X obj 212 173 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
--1 -1;
+#X obj 212 173 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc
+#000000 #000000;
 #X obj 231 271 t b a;
 #X obj 258 225 sdEvent box x y width height;
 #X text 311 349 calculates the bounding box of all events;
@@ -564,8 +566,8 @@ you can use the utility objects to manage their state in advanced ways:
 #X restore 405 570 pd bounding boxes;
 #N canvas 0 30 762 722 header 0;
 #X obj 147 195 outlet;
-#X obj 167 102 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
-1;
+#X obj 167 102 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000 0 1;
 #X obj 167 52 loadbang;
 #X msg 167 76 1;
 #X obj 167 145 sdPackFromHuman;
