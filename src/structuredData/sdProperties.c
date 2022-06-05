@@ -45,7 +45,7 @@ typedef struct s_property {
   t_object x_obj;
 	t_symbol* name;
 	t_property_type type;
-	t_atom range[4]; // name, min, max, step
+	t_atom range[5]; // name, min, max, step, protected
 	// t_float min, max;
 	AtomList value;
 	t_symbol* rcv_sym;
@@ -480,9 +480,9 @@ int property_initall(
 	}
 	else if( x->type == PROPTYPE_FLOAT )
 	{
-		if( argc < 1 || argc > 7 )
+		if( argc < 1 || argc > 8 )
 		{
-			pd_error( x, "wrong number of parameters. syntax: <prop_name> [$0 default init? min max step]" );
+			pd_error( x, "wrong number of parameters. syntax: <prop_name> [$0 default init? min max step protected]" );
 			return 1;
 		}
 	}
@@ -573,16 +573,27 @@ int property_initall(
 	if( x->type == PROPTYPE_FLOAT || x->type == PROPTYPE_SYMBOL)
 	{
 		t_atom* init_val = getbytes( sizeof( t_atom ) );
-		if( argc >= 3 )
+		if( x->type == PROPTYPE_FLOAT )
 		{
-			*init_val = argv[2];
-		}
-		else
-		{
-			if( x->type == PROPTYPE_FLOAT )
+			if( argc >= 3 )
+			{
+				*init_val = argv[2];
+			}
+			else
+			{
 				SETFLOAT( init_val, 0 );
-			if( x->type == PROPTYPE_SYMBOL )
+			}
+		}
+		else if( x->type == PROPTYPE_SYMBOL )
+		{
+			if( argc >= 3 && argv[2].a_type == A_SYMBOL )
+			{
+				*init_val = argv[2];
+			}
+			else
+			{
 				SETSYMBOL( init_val, gensym("") );
+			}
 		}
 		AtomList_append( & x->value, init_val );
 	}
@@ -615,6 +626,7 @@ int property_initall(
 	SETFLOAT( & x->range[1], 0 );
 	SETFLOAT( & x->range[2], 1000 );
 	SETFLOAT( & x->range[3], 0 ); // 0 means float, (= no steps)
+	SETFLOAT( & x->range[4], 0 ); // (protected)
 	if( argc >= 5 )
 	{
 		SETFLOAT( & x->range[1], atom_getfloat( &argv[4] ) );
@@ -626,6 +638,10 @@ int property_initall(
 	if( argc >= 7 )
 	{
 		SETFLOAT( & x->range[3], atom_getfloat( &argv[6] ) );
+	}
+	if( argc >= 8 )
+	{
+		SETFLOAT( & x->range[4], atom_getfloat( &argv[7] ) );
 	}
 
 	x->fromObjIn_in =
@@ -1623,11 +1639,11 @@ void property_output_range(
 	t_property* x
 )
 {
-	// output "range_info <property> min max"
-		outlet_anything(
+	// output "range_info <property> min max protected"
+	outlet_anything(
 		x->out,
 		gensym("range_info"),
-		4,
+		5,
 		x->range
 	);
 }
