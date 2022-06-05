@@ -22,4 +22,7 @@ set args \
 
 # gdb -ex "run $args" pd
 
-valgrind pd $args
+valgrind \
+	--track-origins=yes \
+	-- \
+	pd $args

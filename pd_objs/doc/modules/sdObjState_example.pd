@@ -1,4 +1,4 @@
-#N canvas 800 0 798 145 10;
+#N canvas 944 0 654 145 10;
 #X text 288 350 lets define a receiver to track the instruments state
 , f 35;
 #X obj 596 10 loadbang;
@@ -16,7 +16,7 @@
 #X text 298 93 3 select an object;
 #X text 298 76 2 select a group;
 #X text 298 19 1 init GUI:;
-#N canvas 0 0 798 854 control 0;
+#N canvas 0 0 942 854 control 0;
 #X obj 91 169 sdPackFromHuman;
 #X obj 91 192 send GUI;
 #X msg 91 146 list set ( destIndex ( \$1 ) );
@@ -71,7 +71,7 @@
 #X connect 27 0 28 0;
 #X connect 28 0 0 0;
 #X restore 311 164 pd control gui;
-#N canvas 0 443 798 411 other 1;
+#N canvas 0 0 942 854 other 1;
 #X obj 55 117 sdPackFromHuman;
 #X msg 55 94 list set ( dest ( \$1 ) );
 #X msg 55 48 symbol %0-weirdInstrument;
@@ -102,40 +102,39 @@
 #X obj 396 143 sdObjGroupsInterface_obj objGroupIF;
 #X text 319 478 NOTICE: This is only reliable \, if the object names
 don't contain \$0 symbols.;
-#X obj 56 140 sdObjInterface_obj objIF, f 32;
-#N canvas 0 0 798 411 set 1;
-#X floatatom 104 -331 5 0 0 0 - - - 0;
-#X obj 104 -291 pack;
-#X floatatom 660 -395 5 0 0 0 - - - 0;
-#X msg 104 -268 list set_num_by_ind_in_range ( \$2 \$1 );
-#X floatatom 398 -243 5 0 0 0 - - - 0;
-#X obj 355 -221 f;
-#X msg 355 -196 list send_event_by_ind ( \$1 );
-#X obj 355 -243 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc
+#N canvas 0 0 942 854 set 0;
+#X floatatom 104 112 5 0 0 0 - - - 0;
+#X obj 104 152 pack;
+#X floatatom 660 48 5 0 0 0 - - - 0;
+#X msg 104 175 list set_num_by_ind_in_range ( \$2 \$1 );
+#X floatatom 398 200 5 0 0 0 - - - 0;
+#X obj 355 222 f;
+#X msg 355 247 list send_event_by_ind ( \$1 );
+#X obj 355 200 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc
 #000000 #000000;
-#X text 424 -216 send event by index;
-#X floatatom 359 -296 5 0 0 0 - - - 0;
-#X msg 359 -274 list get_num_by_ind ( \$1 );
-#X text 699 -393 prop;
-#X text 139 -332 val;
-#X floatatom 603 -221 5 0 0 0 - - - 0;
-#X obj 598 -181 pack;
-#X msg 598 -158 list set_num_by_ind_from_ctrl ( \$2 \$1 );
-#X text 637 -226 ctrl val;
-#X obj 601 -294 vsl 15 64 0 1 0 0 empty empty empty 0 -9 0 10 #fcfcfc
+#X text 424 227 send event by index;
+#X floatatom 359 147 5 0 0 0 - - - 0;
+#X msg 359 169 list get_num_by_ind ( \$1 );
+#X text 699 50 prop;
+#X text 139 111 val;
+#X floatatom 603 222 5 0 0 0 - - - 0;
+#X obj 598 262 pack;
+#X msg 598 285 list set_num_by_ind_from_ctrl ( \$2 \$1 );
+#X text 637 217 ctrl val;
+#X obj 601 149 vsl 15 64 0 1 0 0 empty empty empty 0 -9 0 10 #fcfcfc
 #000000 #000000 0 1;
-#X msg 601 -318 0;
-#X text 642 -276 avoid jumps...;
-#X msg 593 -71 list set ctrl_res ( \$1 );
-#X msg 680 -118 0.05;
-#X floatatom 598 -95 5 0 0 0 - - - 0;
-#X msg 643 -117 0.1;
-#X msg 717 -119 0.01;
-#X obj 102 -72 sdPackFromHuman;
-#X obj 102 -48 outlet;
-#X obj 104 -403 vsl 15 64 0 1 0 0 empty empty empty 0 -9 0 10 #fcfcfc
+#X msg 601 125 0;
+#X text 642 167 avoid jumps...;
+#X msg 593 372 list set ctrl_res ( \$1 );
+#X msg 680 325 0.05;
+#X floatatom 598 348 5 0 0 0 - - - 0;
+#X msg 643 326 0.1;
+#X msg 717 324 0.01;
+#X obj 102 371 sdPackFromHuman;
+#X obj 102 395 outlet;
+#X obj 104 40 vsl 15 64 0 1 0 0 empty empty empty 0 -9 0 10 #fcfcfc
 #000000 #000000 0 1;
-#X text 754 -130 default: 0.05 Reminder: 1/128 = 0.0078;
+#X text 754 313 default: 0.05 Reminder: 1/128 = 0.0078;
 #X connect 0 0 1 0;
 #X connect 1 0 3 0;
 #X connect 2 0 1 1;
@@ -159,9 +158,14 @@ don't contain \$0 symbols.;
 #X connect 24 0 22 0;
 #X connect 25 0 26 0;
 #X connect 27 0 0 0;
-#X coords 0 411 1 410 200 60 0;
+#X coords 0 854 1 853 200 60 0;
 #X restore 305 53 pd set values;
-#X connect 0 0 27 0;
+#X text 315 95 creation arguments: name [init_rcv dest humble];
+#X msg 310 23 list init 0;
+#X obj 56 140 sdObjInterface_obj objIF \$0-GLOBAL \$0-weirdInstrument
+;
+#X msg 495 54 list set ( dest ( ) );
+#X connect 0 0 30 0;
 #X connect 1 0 0 0;
 #X connect 2 0 3 0;
 #X connect 3 0 1 0;
@@ -178,10 +182,12 @@ don't contain \$0 symbols.;
 #X connect 21 0 12 0;
 #X connect 23 0 24 0;
 #X connect 24 0 22 0;
-#X connect 27 0 4 0;
-#X connect 27 1 17 0;
-#X connect 27 2 18 0;
-#X connect 28 0 27 0;
+#X connect 27 0 30 0;
+#X connect 29 0 30 0;
+#X connect 30 0 4 0;
+#X connect 30 1 17 0;
+#X connect 30 2 18 0;
+#X connect 31 0 0 0;
 #X restore 311 190 pd other generic tools;
 #X text 289 476 ...and a sender to manipulate the instruments state
 ;
@@ -257,27 +263,29 @@ don't contain \$0 symbols.;
 #X restore 293 602 pd dest;
 #X obj 311 38 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc #000000
 #000000;
-#N canvas 0 30 681 722 init 0;
+#N canvas 0 0 942 854 init 0;
 #X obj 29 18 inlet;
-#X msg 29 146 list set ( groups ( %0-INSTR %0-CONN ) );
 #X obj 29 169 sdReplace \$0;
 #X obj 29 192 sdPackFromHuman;
 #X obj 29 215 s GUI;
 #X obj 29 41 t b b;
-#X msg 79 76 list init 0;
-#X obj 79 99 s \$0-GUI-INIT;
-#X text 284 145 (set groups);
 #X text 79 50 (we are not using init (which sets "groups" from init
 args));
-#X connect 0 0 5 0;
+#X msg 29 145 list init ( groups ( %0-INSTR %0-CONN ) );
+#X msg 343 209 list init ( );
+#X text 285 146 (init and set groups);
+#X text 440 213 (init \, and take groups from obj creation args);
+#X connect 0 0 4 0;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;
-#X connect 3 0 4 0;
-#X connect 5 0 1 0;
-#X connect 6 0 7 0;
+#X connect 4 0 6 0;
+#X connect 6 0 1 0;
+#X connect 7 0 1 0;
 #X restore 311 57 pd init gui;
 #X obj 289 307 sdObjExampleManyProps \$0-manyProps \$0-GLOBAL \$0-INSTR
 , f 33;
+#X text 553 114 protected fields can only be set by disabling "humble"
+mode, f 21;
 #X obj 7 25 sdGui_ui GUI \$0-GUI-INIT;
 #X connect 1 0 3 0;
 #X connect 3 0 2 0;
@@ -289,5 +297,5 @@ args));
 #X connect 26 0 5 0;
 #X connect 27 0 7 0;
 #X connect 28 0 29 0;
-#X connect 31 0 21 0;
-#X connect 31 1 23 0;
+#X connect 32 0 21 0;
+#X connect 32 1 23 0;
