@@ -1,49 +1,49 @@
-#N canvas 0 30 681 736 10;
-#X obj 55 69 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
--1;
+#N canvas 0 0 798 854 10;
+#X obj 55 69 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000;
 #X obj 97 109 print;
 #X obj 98 86 sdAny test;
 #X msg 34 24 list bla;
-#X floatatom 106 25 5 0 0 0 - - -;
+#X floatatom 106 25 5 0 0 0 - - - 0;
 #X msg 110 50 set bla;
 #X msg 61 50 a b c;
 #X msg 207 68 list bla;
-#X floatatom 207 11 5 0 0 0 - - -;
+#X floatatom 207 11 5 0 0 0 - - - 0;
 #X msg 203 41 a b c;
 #X msg 85 133 bla 3;
 #X msg 12 144 list hurz;
-#X floatatom 31 121 5 0 0 0 - - -;
-#X obj 165 149 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
+#X floatatom 31 121 5 0 0 0 - - - 0;
+#X obj 165 149 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000 0 1;
 #X obj 67 195 print accept;
 #X obj 153 192 print reject;
-#X obj 104 320 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
--1 -1;
+#X obj 104 320 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc
+#000000 #000000;
 #X obj 119 370 print value;
 #X obj 206 369 print overflow;
 #X msg 132 307 0;
 #X obj 120 347 sdCounter 3;
 #X obj 132 448 sdFirst;
-#X floatatom 25 404 5 0 0 0 - - -;
-#X obj 30 431 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
--1;
+#X floatatom 25 404 5 0 0 0 - - - 0;
+#X obj 30 431 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000;
 #X obj 85 471 print first;
 #X obj 183 469 print rest;
-#X msg 283 270 test;
-#X msg 297 293 symbol bla;
-#X msg 313 319 symbol hurz;
-#X msg 404 305 symbol bla;
-#X msg 413 329 symbol hurz;
-#X floatatom 308 370 5 0 0 0 - - -;
+#X msg 275 250 test;
+#X msg 289 273 symbol bla;
+#X msg 305 299 symbol hurz;
+#X msg 390 265 symbol bla;
+#X msg 399 289 symbol hurz;
+#X floatatom 308 370 5 0 0 0 - - - 0;
 #X obj 560 356 sdIsEq;
-#X floatatom 603 276 5 0 0 0 - - -;
-#X floatatom 496 356 5 0 0 0 - - -;
+#X floatatom 603 276 5 0 0 0 - - - 0;
+#X floatatom 496 356 5 0 0 0 - - - 0;
 #X msg 604 302 symbol bla;
 #X msg 497 307 symbol bla;
 #X msg 604 326 list a b c;
-#X floatatom 560 379 5 0 0 0 - - -;
+#X floatatom 560 379 5 0 0 0 - - - 0;
 #X msg 496 331 symbol a;
-#X floatatom 428 449 5 0 0 0 - - -;
+#X floatatom 428 449 5 0 0 0 - - - 0;
 #X obj 448 517 print accept;
 #X obj 544 518 print reject;
 #X msg 590 445 symbol bla;
@@ -72,12 +72,12 @@
 #X text 434 37 replaces %i by the corresponding creation argument (index
 starts with 0), f 39;
 #X text 160 321 (arg -1: no limit);
-#X floatatom 216 343 5 0 0 0 - - -;
+#X floatatom 216 343 5 0 0 0 - - - 0;
 #X msg 177 403 1;
 #X msg 189 428 0;
 #X text 212 427 close gate;
 #X text 203 396 (re)open gate (for next msg), f 14;
-#X floatatom 280 548 5 0 0 0 - - -;
+#X floatatom 280 548 5 0 0 0 - - - 0;
 #X msg 359 628 clear;
 #X text 220 669 init args: auto add variables;
 #X obj 66 691 print replaced;
@@ -90,6 +90,8 @@ starts with 0), f 39;
 #X msg 13 571 list $var1 $var2;
 #X obj 81 667 sdVarLookup var1 var2;
 #X text 402 629 (delete all variables);
+#X msg 319 321 symbol;
+#X msg 409 315 symbol;
 #X connect 0 0 2 0;
 #X connect 2 0 1 0;
 #X connect 3 0 2 0;
@@ -156,3 +158,5 @@ starts with 0), f 39;
 #X connect 81 0 83 0;
 #X connect 82 0 83 0;
 #X connect 83 0 75 0;
+#X connect 85 0 58 0;
+#X connect 86 0 58 1;

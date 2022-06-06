@@ -1,7 +1,7 @@
-#N canvas 0 0 942 854 10;
+#N canvas 0 0 798 854 10;
 #X obj 33 10 inlet;
 #X obj 422 168 sdPropertyList numProps \$0;
-#X obj 276 159 r \$0-dest;
+#X obj 276 158 r \$0-dest;
 #X obj 199 673 outlet;
 #X obj 285 351 sdPackFilter info update;
 #X obj 41 430 s \$0-fromDest.out;
@@ -1118,7 +1118,7 @@
 #X obj 403 110 sdPropertySym dest \$0 \$1 update;
 #X obj 186 327 sdPackFilter;
 #X obj 84 174 print sdObjInterface;
-#N canvas 0 0 942 854 if 0;
+#N canvas 0 0 798 854 if 0;
 #X obj 37 37 inlet;
 #X obj 56 147 sdGate;
 #X msg 89 194 destination not set;
@@ -1137,7 +1137,7 @@
 #X connect 7 0 1 1;
 #X connect 8 0 6 0;
 #X restore 38 145 pd if dest set;
-#X obj 139 141 r \$0-dest;
+#X obj 149 121 r \$0-dest;
 #X obj 709 431 loadbang;
 #X obj 709 454 f \$2;
 #X obj 774 427 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc

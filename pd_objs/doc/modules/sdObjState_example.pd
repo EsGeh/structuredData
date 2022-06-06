@@ -1,4 +1,4 @@
-#N canvas 944 0 654 145 10;
+#N canvas 0 0 798 854 10;
 #X text 288 350 lets define a receiver to track the instruments state
 , f 35;
 #X obj 596 10 loadbang;
@@ -8,8 +8,8 @@
 #X obj 290 517 sdObjSndExample \$0-sender \$0-CONN \$0-GLOBAL;
 #X obj 291 408 sdObjRcvExample \$0-receiver \$0-CONN \$0-GLOBAL;
 #X obj 293 625 sdObjDuplexExample \$0-dupl \$0-CONN \$0-GLOBAL;
-#X obj 7 682 print GUI.out;
-#X obj 156 681 print genericObj.out;
+#X obj 8 684 print GUI.out;
+#X obj 137 687 print genericObj.out;
 #X text 297 110 now you can:;
 #X text 318 126 read or write the objects properties;
 #X text 318 140 send messages to the object;
@@ -71,38 +71,37 @@
 #X connect 27 0 28 0;
 #X connect 28 0 0 0;
 #X restore 311 164 pd control gui;
-#N canvas 0 0 942 854 other 1;
+#N canvas 0 0 798 854 other 0;
 #X obj 55 117 sdPackFromHuman;
 #X msg 55 94 list set ( dest ( \$1 ) );
 #X msg 55 48 symbol %0-weirdInstrument;
 #X obj 55 71 sdReplace \$0;
-#X obj 56 163 print;
-#X msg 382 305 load;
-#X msg 345 304 save;
-#X text 620 141 (same api as gui);
-#X msg 376 570 save_hd;
-#X msg 445 585 set filename ../save.save;
-#X obj 445 561 loadbang;
-#X msg 346 546 load_hd;
-#X obj 378 330 sdObjSaveAll \$0-INSTR;
-#X msg 424 301 get state;
-#X obj 404 611 sdObjSaveAllToDisk \$0-INSTR;
-#X text 316 243 remember the state of some group of objects in RAM
+#X obj 56 193 print;
+#X msg 512 332 load;
+#X msg 475 331 save;
+#X text 50 252 (same api as gui);
+#X msg 506 597 save_hd;
+#X msg 575 612 set filename ../save.save;
+#X obj 575 588 loadbang;
+#X msg 476 573 load_hd;
+#X obj 508 357 sdObjSaveAll \$0-INSTR;
+#X msg 554 328 get state;
+#X obj 534 638 sdObjSaveAllToDisk \$0-INSTR;
+#X text 446 270 remember the state of some group of objects in RAM
 ;
-#X text 318 460 remember the state of some group of objects in a FILE:
+#X text 448 487 remember the state of some group of objects in a FILE:
 ;
 #X obj 150 200 print fromDest.generic;
-#X obj 244 166 print fromDest;
-#X msg 531 264 set dest %0-CONN;
-#X msg 545 285 set dest %0-INSTR;
-#X obj 528 305 sdReplace \$0;
-#X obj 378 399 print state-in-RAM;
-#X obj 378 353 route state;
-#X obj 378 376 list;
-#X obj 396 143 sdObjGroupsInterface_obj objGroupIF;
-#X text 319 478 NOTICE: This is only reliable \, if the object names
+#X obj 309 200 print fromDest;
+#X msg 661 291 set dest %0-CONN;
+#X msg 675 312 set dest %0-INSTR;
+#X obj 658 332 sdReplace \$0;
+#X obj 508 426 print state-in-RAM;
+#X obj 508 380 route state;
+#X obj 508 403 list;
+#X text 449 505 NOTICE: This is only reliable \, if the object names
 don't contain \$0 symbols.;
-#N canvas 0 0 942 854 set 0;
+#N canvas 0 0 798 854 set 0;
 #X floatatom 104 112 5 0 0 0 - - - 0;
 #X obj 104 152 pack;
 #X floatatom 660 48 5 0 0 0 - - - 0;
@@ -165,7 +164,80 @@ don't contain \$0 symbols.;
 #X obj 56 140 sdObjInterface_obj objIF \$0-GLOBAL \$0-weirdInstrument
 ;
 #X msg 495 54 list set ( dest ( ) );
-#X connect 0 0 30 0;
+#N canvas 0 0 942 854 debug 0;
+#X obj 168 104 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000 0 1;
+#X obj 27 20 inlet;
+#X obj 68 146 sdGate;
+#X obj 68 169 outlet;
+#X connect 0 0 2 1;
+#X connect 1 0 2 0;
+#X connect 2 0 3 0;
+#X coords 0 -1 1 1 85 20 1 100 100;
+#X restore 56 165 pd debug;
+#N canvas 0 0 942 854 debug 0;
+#X obj 168 104 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000 0 1;
+#X obj 27 20 inlet;
+#X obj 68 146 sdGate;
+#X obj 68 169 outlet;
+#X connect 0 0 2 1;
+#X connect 1 0 2 0;
+#X connect 2 0 3 0;
+#X coords 0 -1 1 1 85 20 1 100 100;
+#X restore 150 175 pd debug;
+#N canvas 0 0 942 854 debug 0;
+#X obj 168 104 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000 0 1;
+#X obj 27 20 inlet;
+#X obj 68 146 sdGate;
+#X obj 68 169 outlet;
+#X connect 0 0 2 1;
+#X connect 1 0 2 0;
+#X connect 2 0 3 0;
+#X coords 0 -1 1 1 85 20 1 100 100;
+#X restore 309 175 pd debug;
+#X obj 53 371 sdObjGroupsInterface_obj objGroupIF \$0-initGroup \$0-INSTR
+;
+#X msg 80 340 list init 0;
+#X obj 58 452 print;
+#X obj 152 459 print fromDest.generic;
+#X obj 311 459 print fromDest;
+#N canvas 0 0 942 854 debug 0;
+#X obj 168 104 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000 0 1;
+#X obj 27 20 inlet;
+#X obj 68 146 sdGate;
+#X obj 68 169 outlet;
+#X connect 0 0 2 1;
+#X connect 1 0 2 0;
+#X connect 2 0 3 0;
+#X coords 0 -1 1 1 85 20 1 100 100;
+#X restore 58 424 pd debug;
+#N canvas 0 0 942 854 debug 0;
+#X obj 168 104 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000 0 1;
+#X obj 27 20 inlet;
+#X obj 68 146 sdGate;
+#X obj 68 169 outlet;
+#X connect 0 0 2 1;
+#X connect 1 0 2 0;
+#X connect 2 0 3 0;
+#X coords 0 -1 1 1 85 20 1 100 100;
+#X restore 152 434 pd debug;
+#N canvas 0 0 942 854 debug 0;
+#X obj 168 104 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000 0 1;
+#X obj 27 20 inlet;
+#X obj 68 146 sdGate;
+#X obj 68 169 outlet;
+#X connect 0 0 2 1;
+#X connect 1 0 2 0;
+#X connect 2 0 3 0;
+#X coords 0 -1 1 1 85 20 1 100 100;
+#X restore 311 434 pd debug;
+#X text 484 30 empty dest disables object;
+#X connect 0 0 29 0;
 #X connect 1 0 0 0;
 #X connect 2 0 3 0;
 #X connect 3 0 1 0;
@@ -182,12 +254,22 @@ don't contain \$0 symbols.;
 #X connect 21 0 12 0;
 #X connect 23 0 24 0;
 #X connect 24 0 22 0;
-#X connect 27 0 30 0;
-#X connect 29 0 30 0;
-#X connect 30 0 4 0;
-#X connect 30 1 17 0;
-#X connect 30 2 18 0;
-#X connect 31 0 0 0;
+#X connect 26 0 29 0;
+#X connect 28 0 29 0;
+#X connect 29 0 31 0;
+#X connect 29 1 32 0;
+#X connect 29 2 33 0;
+#X connect 30 0 0 0;
+#X connect 31 0 4 0;
+#X connect 32 0 17 0;
+#X connect 33 0 18 0;
+#X connect 34 0 39 0;
+#X connect 34 1 40 0;
+#X connect 34 2 41 0;
+#X connect 35 0 34 0;
+#X connect 39 0 36 0;
+#X connect 40 0 37 0;
+#X connect 41 0 38 0;
 #X restore 311 190 pd other generic tools;
 #X text 289 476 ...and a sender to manipulate the instruments state
 ;
@@ -195,12 +277,6 @@ don't contain \$0 symbols.;
 , f 33;
 #X obj 289 265 sdObjExample \$0-weirdInstrument \$0-INSTR \$0-GLOBAL
 , f 33;
-#X obj 7 660 spigot;
-#X obj 52 660 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
-#000000 0 1;
-#X obj 156 659 spigot;
-#X obj 201 659 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
-#000000 0 1;
 #N canvas 0 30 762 722 dest 0;
 #X obj 146 103 hradio 13 1 0 2 empty empty empty 0 -8 0 10 #fcfcfc
 #000000 #000000 0;
@@ -263,7 +339,7 @@ don't contain \$0 symbols.;
 #X restore 293 602 pd dest;
 #X obj 311 38 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc #000000
 #000000;
-#N canvas 0 0 942 854 init 0;
+#N canvas 0 0 798 854 init 0;
 #X obj 29 18 inlet;
 #X obj 29 169 sdReplace \$0;
 #X obj 29 192 sdPackFromHuman;
@@ -275,27 +351,51 @@ args));
 #X msg 343 209 list init ( );
 #X text 285 146 (init and set groups);
 #X text 440 213 (init \, and take groups from obj creation args);
+#X msg 96 107 list init ( groups ( %0-INSTR %0-CONN gbla ) );
+#X msg 253 78 list init ( groups ( %0-INSTR ) );
 #X connect 0 0 4 0;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;
 #X connect 4 0 6 0;
 #X connect 6 0 1 0;
 #X connect 7 0 1 0;
+#X connect 10 0 1 0;
+#X connect 11 0 1 0;
 #X restore 311 57 pd init gui;
 #X obj 289 307 sdObjExampleManyProps \$0-manyProps \$0-GLOBAL \$0-INSTR
 , f 33;
 #X text 553 114 protected fields can only be set by disabling "humble"
 mode, f 21;
-#X obj 7 25 sdGui_ui GUI \$0-GUI-INIT;
+#X obj 7 25 sdGui_ui GUI \$0-GUI-INIT \$0-INSTR;
+#N canvas 0 0 942 854 debug 0;
+#X obj 168 104 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000 0 1;
+#X obj 27 20 inlet;
+#X obj 68 146 sdGate;
+#X obj 68 169 outlet;
+#X connect 0 0 2 1;
+#X connect 1 0 2 0;
+#X connect 2 0 3 0;
+#X coords 0 -1 1 1 85 20 1 100 100;
+#X restore 7 659 pd debug;
+#N canvas 0 0 942 854 debug 0;
+#X obj 168 104 tgl 15 0 empty empty empty 17 7 0 10 #fcfcfc #000000
+#000000 0 1;
+#X obj 27 20 inlet;
+#X obj 68 146 sdGate;
+#X obj 68 169 outlet;
+#X connect 0 0 2 1;
+#X connect 1 0 2 0;
+#X connect 2 0 3 0;
+#X coords 0 -1 1 1 85 20 1 100 100;
+#X restore 130 661 pd debug;
 #X connect 1 0 3 0;
 #X connect 3 0 2 0;
-#X connect 21 0 8 0;
-#X connect 22 0 21 1;
-#X connect 23 0 9 0;
-#X connect 24 0 23 1;
-#X connect 25 0 6 0;
-#X connect 26 0 5 0;
-#X connect 27 0 7 0;
+#X connect 21 0 6 0;
+#X connect 22 0 5 0;
+#X connect 23 0 7 0;
+#X connect 24 0 25 0;
 #X connect 28 0 29 0;
-#X connect 32 0 21 0;
-#X connect 32 1 23 0;
+#X connect 28 1 30 0;
+#X connect 29 0 8 0;
+#X connect 30 0 9 0;
