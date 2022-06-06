@@ -841,13 +841,13 @@ void property_on_set(
 		 x->type == PROPTYPE_SYMBOL
 		)
 		{
-			if( argc != 2 || (argc == 2 && argv[1].a_type != A_SYMBOL ) )
+			if( argc < 1 || argc >= 3 || (argc == 2 && argv[1].a_type != A_SYMBOL ) )
 			{
 				char name_buf[256];
 				t_atom name;
 				SETSYMBOL( & name, x->name );
 				atom_string( & name, name_buf, 255 );
-				pd_error( x, "error in sdPropertySym %s: type error! expected 'set <prop_name> <symbol>'", name_buf );
+				pd_error( x, "error in sdPropertySym %s: type error! expected 'set <prop_name> [<symbol>]'", name_buf );
 				return;
 			}
 		}
@@ -880,20 +880,51 @@ void property_on_set(
 			}
 		}
 
-		property_set(
-				x,
-				argc-1,
-				& argv[1]
-		);
-		if( x->send_sym && x->send_sym->s_thing )
+		if(
+		 x->type == PROPTYPE_SYMBOL
+		)
 		{
-			typedmess(
-				x->send_sym->s_thing,
-				&s_list,
-				argc-1,
-				& argv[1]
+			t_atom* new_val_p = &argv[1];
+			t_atom new_val;
+
+			if( argc == 1 )
+			{
+				SETSYMBOL( &new_val, gensym("") );
+				new_val_p = &new_val;
+			}
+			property_set(
+					x,
+					1,
+					new_val_p
 			);
+			if( x->send_sym && x->send_sym->s_thing )
+			{
+				typedmess(
+					x->send_sym->s_thing,
+					&s_symbol,
+					1,
+					new_val_p
+				);
+			}
 		}
+		else
+		{
+			property_set(
+					x,
+					argc-1,
+					& argv[1]
+			);
+			if( x->send_sym && x->send_sym->s_thing )
+			{
+				typedmess(
+					x->send_sym->s_thing,
+					&s_list,
+					argc-1,
+					& argv[1]
+				);
+			}
+		}
+		
 		property_output(
 			x
 		);
@@ -1200,13 +1231,13 @@ void property_on_set_no_out(
 		 x->type == PROPTYPE_SYMBOL
 		)
 		{
-			if( argc != 2 || (argc == 2 && argv[1].a_type != A_SYMBOL ) )
+			if( argc < 1 || argc >= 3 || (argc == 2 && argv[1].a_type != A_SYMBOL ) )
 			{
 				char name_buf[256];
 				t_atom name;
 				SETSYMBOL( & name, x->name );
 				atom_string( & name, name_buf, 255 );
-				pd_error( x, "error in sdPropertySym %s: type error! expected 'set <prop_name> <symbol>'", name_buf );
+				pd_error( x, "error in sdPropertySym %s: type error! expected 'set <prop_name> [<symbol>]'", name_buf );
 				return;
 			}
 		}
@@ -1239,19 +1270,48 @@ void property_on_set_no_out(
 			}
 		}
 
-		property_set(
-				x,
-				argc-1,
-				& argv[1]
-		);
-		if( x->send_sym && x->send_sym->s_thing )
+		if(
+		 x->type == PROPTYPE_SYMBOL
+		)
 		{
-			typedmess(
-				x->send_sym->s_thing,
-				&s_list,
-				argc-1,
-				& argv[1]
+			t_atom* new_val_p = &argv[1];
+			t_atom new_val;
+			if( argc == 1 )
+			{
+				SETSYMBOL( &new_val, gensym("") );
+				new_val_p = &new_val;
+			}
+			property_set(
+					x,
+					1,
+					new_val_p
 			);
+			if( x->send_sym && x->send_sym->s_thing )
+			{
+				typedmess(
+					x->send_sym->s_thing,
+					&s_list,
+					1,
+					new_val_p
+				);
+			}
+		}
+		else
+		{
+			property_set(
+					x,
+					argc-1,
+					& argv[1]
+			);
+			if( x->send_sym && x->send_sym->s_thing )
+			{
+				typedmess(
+					x->send_sym->s_thing,
+					&s_list,
+					argc-1,
+					& argv[1]
+				);
+			}
 		}
 	}
 	else
@@ -1274,7 +1334,10 @@ void property_on_priv_set(
 )
 {
 	if(
-		x->type == PROPTYPE_SYMBOL && (argc != 1 || argv[0].a_type != A_SYMBOL)
+		x->type == PROPTYPE_SYMBOL && (
+			(argc < 0 || argc >= 2 ) ||
+			(argc == 1 && argv[0].a_type != A_SYMBOL)
+		)
 	)
 	{
 		char name_buf[256];
@@ -1287,7 +1350,7 @@ void property_on_priv_set(
 		SETSYMBOL( & selector, s );
 		atom_string( & selector, sel_buf, 255 );
 
-		pd_error( x, "error in sdProperty %s: type error! expected '%s <symbol>'", name_buf, sel_buf );
+		pd_error( x, "error in sdProperty %s: type error! expected '%s [<symbol>]'", name_buf, sel_buf );
 		return;
 	}
 	if(
@@ -1307,19 +1370,49 @@ void property_on_priv_set(
 		pd_error( x, "error in sdProperty %s: type error! expected '%s <float>'", name_buf, sel_buf);
 		return;
 	}
-	property_set(
-			x,
-			argc,
-			argv
-	);
-	if( x->send_sym && x->send_sym->s_thing )
+	if(
+	 x->type == PROPTYPE_SYMBOL
+	)
 	{
-		typedmess(
-			x->send_sym->s_thing,
-			&s_list,
-			argc,
-			argv
+		t_atom* new_val_p = &argv[0];
+		t_atom new_val;
+
+		if( argc == 0 )
+		{
+			SETSYMBOL( &new_val, gensym("") );
+			new_val_p = &new_val;
+		}
+		property_set(
+				x,
+				1,
+				new_val_p
 		);
+		if( x->send_sym && x->send_sym->s_thing )
+		{
+			typedmess(
+				x->send_sym->s_thing,
+				&s_symbol,
+				1,
+				new_val_p
+			);
+		}
+	}
+	else
+	{
+		property_set(
+				x,
+				argc,
+				argv
+		);
+		if( x->send_sym && x->send_sym->s_thing )
+		{
+			typedmess(
+				x->send_sym->s_thing,
+				&s_list,
+				argc,
+				argv
+			);
+		}
 	}
 	property_output(
 		x
@@ -1494,7 +1587,10 @@ void property_on_priv_set_noupdate(
 )
 {
 	if(
-		x->type == PROPTYPE_SYMBOL && (argc != 1 || argv[0].a_type != A_SYMBOL)
+		x->type == PROPTYPE_SYMBOL && (
+			(argc < 0 || argc >= 2 ) ||
+			(argc == 1 && argv[0].a_type != A_SYMBOL)
+		)
 	)
 	{
 		char name_buf[256];
@@ -1507,7 +1603,7 @@ void property_on_priv_set_noupdate(
 		SETSYMBOL( & selector, s );
 		atom_string( & selector, sel_buf, 255 );
 
-		pd_error( x, "error in sdProperty %s: type error! expected '%s <symbol>'", name_buf, sel_buf );
+		pd_error( x, "error in sdProperty %s: type error! expected '%s [<symbol>]'", name_buf, sel_buf );
 		return;
 	}
 	if(
