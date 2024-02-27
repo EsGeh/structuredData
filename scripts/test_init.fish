@@ -21,8 +21,7 @@ set doc_dir $BASE_DIR/doc
 #################################################
 
 function print_help
-	echo "install to '$doc_dir'"
-	echo "USAGE: "(status -f)
+	echo "call './build.fish --dest '$doc_dir' install"
 end
 
 #################################################
@@ -34,19 +33,8 @@ if [ "$argv[1]" = "-h" ]; or [ "$argv[1]" = "--help" ]
 	exit 1
 end
 
-if test (count $argv) != 0
-	set cmds $argv
-end
-
 and begin
-	set cmd "$SCRIPTS_DIR/build.fish --prefix '$doc_dir' build install"
-	echo "executing: '$cmd'"
-	eval "$cmd"
-end
-# replace copies with links:
-and begin
-	and rm $doc_dir/*.pd
-	set cmd "$SCRIPTS_DIR/utils/install_only_abstractions.fish --source '$BASE_DIR/pd_objs' --dest '$doc_dir' --link"
+	set cmd "$SCRIPTS_DIR/build.fish --prefix '$doc_dir' install"
 	echo "executing: '$cmd'"
 	eval "$cmd"
 end

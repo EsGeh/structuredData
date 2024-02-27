@@ -18,19 +18,19 @@ set --erase build_dir
 set --erase debug # release mode is default
 set --erase only_configure # install after build
 
-# one of these is used if not overwritten on cmd line:
-set build_dir_dbg "$BASE_DIR/build/debug"
-set build_dir_release "$BASE_DIR/build/release"
-
 # where to install:
 set install_prefix "$HOME/.local/lib/pd/extra/structuredDataC"
+
+#################################################
+# cmd line opts:
+#################################################
 
 # (syntax: short/long/description)
 set options_descr \
 	'h/help/print help' \
 	"p/prefix=/where to install (default: '$install_prefix')" \
 	"d/debug/build in debug mode" \
-	"b/build-dir=/where to build (default: one of '$build_dir_release' or '$build_dir_dbg')" \
+	"s/symlink/symlink pd patches" \
 	"c/only-configure/stop after configuring, don\'t run 'make'"
 
 #################################################
@@ -38,8 +38,8 @@ set options_descr \
 #################################################
 
 function print_help
-	echo "usage: "(status -f)" [OPTIONS...] [CMD...]"
-	echo "  calls 'configure', then run 'make' for every CMD (or just 'make' in the case no CMD is given)"
+	echo "usage: "(status -f)" [OPTIONS...] [ARGS...]"
+	echo "  build source code. ARGS are passed to make"
 	echo "OPTIONS:"
 	print_options_descr $options_descr
 end
@@ -66,11 +66,11 @@ else
 	if set -q _flag_debug
 		set debug
 	end
-	if set -q _flag_build_dir
-		set build_dir $_flag_build_dir
-	end
 	if set -q _flag_only_configure
 		set only_configure
+	end
+	if set -q _flag_symlink
+		set symlink
 	end
 end
 
@@ -78,47 +78,25 @@ end
 # actual script
 #################################################
 
-if not set -q build_dir
-	if not set -q debug
-		set build_dir $build_dir_release
-	else
-		set build_dir $build_dir_dbg
-	end
-end
-
-mkdir -p -v "$build_dir"
-
 # build
 begin
-	echo "cd $build_dir"
-	cd $build_dir
-
-	# configure:
-	if not set -q debug
-		set cmd "$BASE_DIR/configure --prefix=$install_prefix"
-	else
-		set flags -g -DDEBUG -O0
-		set cmd "$BASE_DIR/configure CFLAGS='$flags' --prefix=$install_prefix"
-	end
-	eval $cmd
 
 	if set -q only_configure
 		exit
 	end
 
-	set make_cmds $argv
-	if test (count $make_cmds) -eq 0
-		set make_cmds ''
-	end
+	set make_args $argv
 
 	# make:
-	for cmd in $make_cmds
-		echo "executing: '$cmd'"
-		if test $cmd = ''
-			make
-		else
-			make $cmd
-		end
-		or exit 1
+	set cmd make
+	if test $install_prefix != ''
+		set --append cmd DESTDIR=$install_prefix
 	end
+	if set --query symlink
+		set --append cmd INSTALL_DATA='ln -s'
+	end
+	set --append cmd $make_args
+	echo -e "executing: $cmd"
+	$cmd
+	or exit 1
 end

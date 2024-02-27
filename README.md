@@ -36,69 +36,19 @@ Most objects are written in C, a few are provided as puredata "abstractions".
 ## build dependencies
 
 - fish shell
-- autotools
 - git
 
-## installation
+## utility scripts
 
-### into some local dir (recommended)
-
-see how the scripts used in chapter "testing" work...!
-
-### into the system dir
-
-1. init project (download dependencies, ...):
+- init project (download dependencies, ...):
 
 		$ ./scripts/init.fish
-
-2. build and install:
-
-	build the library:
-
-		$ ./scripts/build.fish build install
-
-	(for options append `--help`)
-
-3. add to pd libraries:
-
-	you have two options:
-
-	- start pd from the command line like this:
-
-			$ pd [-path <install_path>] -lib structuredDataC
-
-	- add this to `~/.pdsettings` :
-
-			...
-			loadlib1: structuredDataC
-			...
-
-		you might also have to adjust the library search path:
-
-			...
-			path1: <install_path>
-			...
-
-	(manuall adjust the numbering!)
-
-## other scripts
-
-- uninstall:
-
-		$ ./scripts/build.fish uninstall
 
 - clean project (remove all all temporary files, ...)
 
 		$ ./scripts/exit.fish
 
-## documentation
-
-The Documentation is provided as puredata example patches.
-Right click, select "help" opens an example.
-
-## testing
-
-to test the library, issue these commands:
+## test without installing to system
 
 1. install library to a local dir
 
@@ -113,3 +63,32 @@ to test the library, issue these commands:
 3. uninstall library from the local dir
 
 		$ ./scripts/test_exit.fish
+
+## installation
+
+- build and install:
+
+        $ ./scripts/build.fish build install
+
+    (for options append `--help`)
+
+- add to pd libraries:
+
+	you have two options:
+
+	- start pd from the command line like this:
+
+			$ pd -lib structuredDataC
+
+	- add this to `~/.pdsettings` :
+
+			...
+			loadlib1: structuredDataC
+			...
+
+	    (manuall adjust the numbering!)
+
+## documentation
+
+The Documentation is provided as puredata example patches.
+Right click, select "help" opens an example.

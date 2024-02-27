@@ -16,6 +16,5 @@ pd \
 	-nrt \
 	-path "$DEP_DIR/zexy" \
 	-lib zexy \
-	-path "$doc_dir" \
 	-lib "structuredDataC" \
-	"$doc_dir/structuredDataC_doc.pd"
+	"$doc_dir/usr/local/lib/pd-externals/structuredDataC/structuredDataC_doc.pd"
