@@ -1,5 +1,10 @@
+*.[oa]
+*~
+*.pd_linux
+*.pd_darwin
+*.dll
+
 /dependencies/
-/build/
 /doc/
 
 /save.save

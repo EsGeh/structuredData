@@ -2,6 +2,7 @@
 
 set BASE_DIR (dirname (readlink -m (status filename)))/..
 set SCRIPTS_DIR (dirname (readlink -m (status filename)))
+set DEP_DIR $BASE_DIR/dependencies
 
 if test ! -e $SCRIPTS_DIR/utils/cmd_args.fish
 	echo "error: fishshell-cmd-opts not installed!"
@@ -21,8 +22,7 @@ set doc_dir $BASE_DIR/doc
 #################################################
 
 function print_help
-	echo "install to '$doc_dir'"
-	echo "USAGE: "(status -f)
+	echo "call './build.fish --dest '$doc_dir' install"
 end
 
 #################################################
@@ -34,19 +34,20 @@ if [ "$argv[1]" = "-h" ]; or [ "$argv[1]" = "--help" ]
 	exit 1
 end
 
-if test (count $argv) != 0
-	set cmds $argv
+and begin
+	set cmd "$SCRIPTS_DIR/build.fish --prefix '$doc_dir' install"
+	echo "executing: '$cmd'"
+	eval "$cmd"
 end
 
-and begin
-	set cmd "$SCRIPTS_DIR/build.fish --prefix '$doc_dir' build install"
+# dependencies:
+
+# zexy:
+begin
+	echo "installing zexy into '$doc_dir'"
+	cd $DEP_DIR/zexy
+	set cmd make DESTDIR="$doc_dir" install
 	echo "executing: '$cmd'"
-	eval "$cmd"
-end
-# replace copies with links:
-and begin
-	and rm $doc_dir/*.pd
-	set cmd "$SCRIPTS_DIR/utils/install_only_abstractions.fish --source '$BASE_DIR/pd_objs' --dest '$doc_dir' --link"
-	echo "executing: '$cmd'"
-	eval "$cmd"
+	$cmd
+	cd -
 end

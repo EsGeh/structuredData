@@ -1,23 +1,28 @@
-# @configure_input@
+# library name
+lib.name = \
+	structuredDataC
 
-# this is only needed for recursive Makefiles, to point to Makefiles
-# in other source dirs
-# SUBDIRS = src
-
-PATH_GLOBAL = src/global
-PATH_CODE = src/structuredData
-PATH_SCRIPT = src/sdScript
+PATH_SRC = src
+PATH_GLOBAL = $(PATH_SRC)/global
+PATH_CODE = $(PATH_SRC)/structuredData
+PATH_SCRIPT = $(PATH_SRC)/sdScript
 PATH_PD_OBJS = pd_objs
 
-AM_CFLAGS = -Wall -fpic -std=c99 -Winline -fgnu89-inline -I$(top_srcdir)/$(PATH_GLOBAL) -I$(top_srcdir)/$(PATH_SCRIPT)
+make-lib-executable=yes
 
-# by default, copy all to the prefix dir, no subdirs
-libdir = $(prefix)
-datadir = $(prefix)
+class.sources = \
+	$(filter-out $(PATH_CODE)/structuredData.c, $(wildcard $(PATH_CODE)/*.c) $(wildcard $(PATH_SCRIPT)/*.c))
 
-# list of all products:
-lib_LTLIBRARIES = structuredDataC.la
-data_DATA = \
+lib.setup.sources = \
+	$(PATH_CODE)/structuredData.c
+
+cflags = -Wall -fpic -std=c99 -Winline -fgnu89-inline -I$(PATH_GLOBAL) -I$(PATH_SCRIPT)
+
+# sdScript.class.sources = \
+# 	$(PATH_SCRIPT)
+
+datafiles = \
+	README.md \
 	$(PATH_PD_OBJS)/sdAnyBang.pd \
 	$(PATH_PD_OBJS)/sdFloatBang.pd \
 	$(PATH_PD_OBJS)/sdSymbolBang.pd \
@@ -77,18 +82,6 @@ data_DATA = \
 	$(PATH_PD_OBJS)/doc/sdObjRcvExample.pd \
 	$(PATH_PD_OBJS)/doc/sdObjExampleManyProps.pd
 
-structuredDataC_la_SOURCES = \
-  $(PATH_CODE)/structuredData.c $(PATH_CODE)/structuredData.h \
-  $(PATH_CODE)/sdList.c $(PATH_CODE)/sdList.h \
-  $(PATH_CODE)/sdPack.c $(PATH_CODE)/sdPack.h \
-  $(PATH_CODE)/sdPackMatch.c $(PATH_CODE)/sdPackMatch.h \
-  $(PATH_CODE)/sdData.c $(PATH_CODE)/sdData.h \
-  $(PATH_CODE)/sdEvent.c $(PATH_CODE)/sdEvent.h \
-  $(PATH_CODE)/sdProperties.c $(PATH_CODE)/sdProperties.h \
-  $(PATH_CODE)/sdObjState.c $(PATH_CODE)/sdObjState.h \
-	$(PATH_SCRIPT)/sdScriptObj.c $(PATH_SCRIPT)/sdScriptObj.h \
-	$(PATH_SCRIPT)/sdScript.c $(PATH_SCRIPT)/sdScript.h \
-	$(PATH_SCRIPT)/SymbolTable.c $(PATH_SCRIPT)/SymbolTable.h \
-	$(PATH_SCRIPT)/Commands.c $(PATH_SCRIPT)/Commands.h
-
-structuredDataC_la_LDFLAGS = -module
+# include pd-lib-builder
+PDLIBBUILDER_DIR=dependencies/pd-lib-builder
+include $(PDLIBBUILDER_DIR)/Makefile.pdlibbuilder

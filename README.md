@@ -36,36 +36,49 @@ Most objects are written in C, a few are provided as puredata "abstractions".
 ## build dependencies
 
 - fish shell
-- autotools
 - git
 
-## installation
+## utility scripts
 
-### into some local dir (recommended)
-
-see how the scripts used in chapter "testing" work...!
-
-### into the system dir
-
-1. init project (download dependencies, ...):
+- init project (download dependencies, ...):
 
 		$ ./scripts/init.fish
 
-2. build and install:
+- clean project (remove all all temporary files, ...)
 
-	build the library:
+		$ ./scripts/exit.fish
 
-		$ ./scripts/build.fish build install
+## test locally without installing to system
 
-	(for options append `--help`)
+1. install library to a local dir
 
-3. add to pd libraries:
+		$ ./scripts/local_init.fish
+
+2. run docu
+
+		$ ./scripts/local_run.fish
+
+	all objects should appear and work as expected...
+
+3. uninstall library from the local dir
+
+		$ ./scripts/local_exit.fish
+
+## installation
+
+- build and install:
+
+        $ ./scripts/build.fish build install
+
+    (for options append `--help`)
+
+- add to pd libraries:
 
 	you have two options:
 
 	- start pd from the command line like this:
 
-			$ pd [-path <install_path>] -lib structuredDataC
+			$ pd -lib structuredDataC
 
 	- add this to `~/.pdsettings` :
 
@@ -73,43 +86,9 @@ see how the scripts used in chapter "testing" work...!
 			loadlib1: structuredDataC
 			...
 
-		you might also have to adjust the library search path:
-
-			...
-			path1: <install_path>
-			...
-
-	(manuall adjust the numbering!)
-
-## other scripts
-
-- uninstall:
-
-		$ ./scripts/build.fish uninstall
-
-- clean project (remove all all temporary files, ...)
-
-		$ ./scripts/exit.fish
+	    (manuall adjust the numbering!)
 
 ## documentation
 
 The Documentation is provided as puredata example patches.
 Right click, select "help" opens an example.
-
-## testing
-
-to test the library, issue these commands:
-
-1. install library to a local dir
-
-		$ ./scripts/test_init.fish
-
-2. run docu
-
-		$ ./scripts/test_run.fish
-
-	all objects should appear and work as expected...
-
-3. uninstall library from the local dir
-
-		$ ./scripts/test_exit.fish

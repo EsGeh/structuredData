@@ -24,5 +24,3 @@ end
 and begin
 	eval "$DEP_DIR_DEFAULT/get_deps.fish" $argv
 end
-
-eval "$SCRIPTS_DIR/utils/run_autotools.fish"
