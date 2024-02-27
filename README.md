@@ -48,21 +48,21 @@ Most objects are written in C, a few are provided as puredata "abstractions".
 
 		$ ./scripts/exit.fish
 
-## test without installing to system
+## test locally without installing to system
 
 1. install library to a local dir
 
-		$ ./scripts/test_init.fish
+		$ ./scripts/local_init.fish
 
 2. run docu
 
-		$ ./scripts/test_run.fish
+		$ ./scripts/local_run.fish
 
 	all objects should appear and work as expected...
 
 3. uninstall library from the local dir
 
-		$ ./scripts/test_exit.fish
+		$ ./scripts/local_exit.fish
 
 ## installation
 
