@@ -84,6 +84,7 @@ begin
 	if set -q only_configure
 		exit
 	end
+	cd $BASE_DIR/
 
 	set make_args $argv
 
