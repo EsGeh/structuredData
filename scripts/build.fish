@@ -14,9 +14,6 @@ source $SCRIPTS_DIR/utils/cmd_args.fish
 # variables
 #################################################
 
-set --erase build_dir
-set --erase debug # release mode is default
-set --erase only_configure # install after build
 
 # where to install:
 set install_prefix "$HOME/.local/lib/pd/extra/structuredDataC"
@@ -29,9 +26,7 @@ set install_prefix "$HOME/.local/lib/pd/extra/structuredDataC"
 set options_descr \
 	'h/help/print help' \
 	"p/prefix=/where to install (default: '$install_prefix')" \
-	"d/debug/build in debug mode" \
-	"s/symlink/symlink pd patches" \
-	"c/only-configure/stop after configuring, don\'t run 'make'"
+	"s/symlink/symlink pd patches"
 
 #################################################
 # functions
@@ -63,12 +58,6 @@ else
 	if set -q _flag_prefix
 		set install_prefix (readlink -m $_flag_prefix)
 	end
-	if set -q _flag_debug
-		set debug
-	end
-	if set -q _flag_only_configure
-		set only_configure
-	end
 	if set -q _flag_symlink
 		set symlink
 	end
@@ -81,9 +70,6 @@ end
 # build
 begin
 
-	if set -q only_configure
-		exit
-	end
 	cd $BASE_DIR/
 
 	set make_args $argv
