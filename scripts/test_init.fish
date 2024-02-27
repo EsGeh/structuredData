@@ -2,6 +2,7 @@
 
 set BASE_DIR (dirname (readlink -m (status filename)))/..
 set SCRIPTS_DIR (dirname (readlink -m (status filename)))
+set DEP_DIR $BASE_DIR/dependencies
 
 if test ! -e $SCRIPTS_DIR/utils/cmd_args.fish
 	echo "error: fishshell-cmd-opts not installed!"
@@ -37,4 +38,16 @@ and begin
 	set cmd "$SCRIPTS_DIR/build.fish --prefix '$doc_dir' install"
 	echo "executing: '$cmd'"
 	eval "$cmd"
+end
+
+# dependencies:
+
+# zexy:
+begin
+	echo "installing zexy into '$doc_dir'"
+	cd $DEP_DIR/zexy
+	set cmd make DESTDIR="$doc_dir" install
+	echo "executing: '$cmd'"
+	$cmd
+	cd -
 end

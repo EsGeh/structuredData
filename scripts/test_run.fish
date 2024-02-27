@@ -14,15 +14,21 @@ set cmd pd
 # 	-- \
 # 	pd $args
 
+set doc_path "$doc_dir/usr/local/lib/pd-externals"
+
+set zexy_path "$doc_path/zexy"
+set sd_path "$doc_path/structuredDataC"
+
 set --append cmd \
 	-noprefs \
 	-nostdpath \
 	-stderr \
 	-jack \
 	-nrt \
-	-path "$DEP_DIR/zexy" \
+	-path "$zexy_path" \
+	-path "$sd_path" \
 	-lib zexy \
 	-lib "structuredDataC" \
-	"$doc_dir/usr/local/lib/pd-externals/structuredDataC/structuredDataC_doc.pd"
+	"$sd_path/structuredDataC_doc.pd"
 
 $cmd

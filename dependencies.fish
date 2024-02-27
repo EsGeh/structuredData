@@ -25,8 +25,7 @@ set c_container_types \
 set zexy \
 	zexy \
 	https://git.iem.at/pd/zexy \
-	b078a0ed5f32444b65d2fd6235127d72e4129646 \
-	"make"
+	b078a0ed5f32444b65d2fd6235127d72e4129646
 
 set pd_lib_builder \
 	pd-lib-builder \
