@@ -3,6 +3,12 @@
 
 #include "m_pd.h"
 
+#ifdef __GNUC__
+#  define UNUSED(x) UNUSED_ ## x __attribute__((__unused__))
+#else
+#  define UNUSED(x) UNUSED_ ## x
+#endif
+
 
 static t_class* data_class;
 
@@ -288,7 +294,7 @@ void data_outputAt(
 }
 
 void* data_init(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -317,7 +323,7 @@ void* data_init(
 		x -> outlet_count = argc;
 		x->outletDescriptions = getbytes( sizeof( t_symbol* ) * argc );
 		x->outlets = getbytes( sizeof( t_outlet* ) * argc );
-		for(unsigned int i=0; i<argc; i++)
+		for(unsigned int i=0; i<(unsigned int )argc; i++)
 		{
 			t_symbol* sym = atom_getsymbol( & argv[i] );
 			if(
@@ -375,13 +381,13 @@ void data_set(
 
 void data_append(
 	t_data* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
 {
 	unsigned int pos = 0;
-	while( pos < argc )
+	while( pos < (unsigned int )argc )
 	{
 		if(
 			argc < 2
@@ -412,13 +418,13 @@ void data_append(
 
 void data_prepend(
 	t_data* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
 {
 	unsigned int pos = 0;
-	while( pos < argc )
+	while( pos < (unsigned int )argc )
 	{
 		if(
 			argc < 2
@@ -456,7 +462,7 @@ void data_clear(
 
 void data_filterPacksAccept(
 	t_data *x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -495,7 +501,7 @@ void data_filterPacksAccept(
 
 void data_filterPacksReject(
 	t_data *x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -657,7 +663,7 @@ void data_get(
 
 void data_get_accept(
 	t_data *x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -701,7 +707,7 @@ void data_get_accept(
 
 void data_get_reject(
 	t_data *x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )

@@ -15,6 +15,13 @@
 	post(message, ## __VA_ARGS__)
 #endif
 
+#ifdef __GNUC__
+#  define UNUSED(x) UNUSED_ ## x __attribute__((__unused__))
+#else
+#  define UNUSED(x) UNUSED_ ## x
+#endif
+
+
 /************************
  * safe string handling:
  ***********************/
@@ -26,7 +33,7 @@
 #define SPRINTF(ret, fmt, ...) \
 { \
 	int ret_size = snprintf( ret, sizeof(ret), fmt, ## __VA_ARGS__ ); \
-	if(ret_size > sizeof(ret)-1) { \
+	if(ret_size > (int )sizeof(ret)-1) { \
 		if( ! strlen(ELLIPSIS)+1 > sizeof(ret) ) { \
 			int pos_ellipsis = sizeof(ret)-1-strlen(ELLIPSIS); \
 			strcpy( &ret[pos_ellipsis], ELLIPSIS ); \

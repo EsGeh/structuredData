@@ -256,11 +256,12 @@ t_class* register_list(
 }
 
 void* list_init(
-	t_symbol *s,
-	int argc,
+	t_symbol* UNUSED(s),
+	int _argc,
 	t_atom *argv
 )
 {
+	unsigned int argc = _argc;
   t_list *x = (t_list *)pd_new(list_class);
 
 
@@ -341,11 +342,12 @@ void list_set(
 
 void list_append(
 	t_list* x,
-	t_symbol *s,
-	int argc,
+	t_symbol* UNUSED(s),
+	int _argc,
 	t_atom *argv
 )
 {
+	unsigned int argc = _argc;
 	for( unsigned int i=0; i<argc; i++ )
 	{
 		t_atom* p = getbytes( sizeof( t_atom ) );
@@ -356,11 +358,12 @@ void list_append(
 
 void list_prepend(
 	t_list *x,
-	t_symbol *s,
-	int argc,
+	t_symbol* UNUSED(s),
+	int _argc,
 	t_atom *argv
 )
 {
+	unsigned int argc = _argc;
 	for( unsigned int i=0; i<argc; i++ )
 	{
 		t_atom* p = getbytes( sizeof( t_atom ) );
@@ -371,12 +374,12 @@ void list_prepend(
 
 void list_setAdd(
 	t_list *x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
 {
-	for( unsigned int i=0; i<argc; i++ )
+	for( unsigned int i=0; i<(unsigned int )argc; i++ )
 	{
 		if(
 			! AtomList_get_element( & x->atoms, &argv[i], compareAtoms )
@@ -394,7 +397,7 @@ void list_del(
 	t_float index
 )
 {
-	int count = AtomList_get_size( & x->atoms );
+	unsigned int count = AtomList_get_size( & x->atoms );
 	if( index >= 0 )
 	{
 		unsigned int index_int = (unsigned int )index;
@@ -538,7 +541,7 @@ void list_get(
 	t_float index
 )
 {
-	int count = AtomList_get_size( & x->atoms );
+	unsigned int count = AtomList_get_size( & x->atoms );
 	if( index >= 0 )
 	{
 		unsigned int index_int = (unsigned int )index;
@@ -596,7 +599,7 @@ void list_count(
 
 void list_find(
 	t_list *x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -609,7 +612,7 @@ void list_find(
 
 	t_atom ret;
 	AtomListEl* pElStart = AtomList_get_first( & x->atoms );
-	for( int i=0; i<AtomList_get_size( & x->atoms ) - argc + 1; i++ )
+	for( int i=0; i<(int )AtomList_get_size( & x->atoms ) - argc + 1; i++ )
 	{
 		AtomListEl* pEl = pElStart;
 		int isSame = 1;
@@ -647,7 +650,7 @@ void list_find(
 
 void list_findAll(
 	t_list *x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -664,7 +667,7 @@ void list_findAll(
 
 
 	AtomListEl* pElStart = AtomList_get_first( & x->atoms );
-	for( int i=0; i<AtomList_get_size( & x->atoms ) - argc + 1; i++ )
+	for( int i=0; i<(int )AtomList_get_size( & x->atoms ) - argc + 1; i++ )
 	{
 		AtomListEl* pEl = pElStart;
 		int isSame = 1;
@@ -697,13 +700,13 @@ void list_findAll(
 
 void list_equal(
 	t_list *x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
 {
 	t_atom ret;
-	if (argc != AtomList_get_size( & x->atoms ) )
+	if (argc != (int )AtomList_get_size( & x->atoms ) )
 	{
 		SETFLOAT( &ret, 0);
 		list_outputAt(
@@ -870,13 +873,13 @@ void listEqual_exit(
 
 void listEqual_set(
 	t_listEqual *x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
 {
 	AtomList_clear( & x-> atoms );
-	for( unsigned int i=0; i<argc; i++ )
+	for( unsigned int i=0; i<(unsigned int )argc; i++ )
 	{
 		t_atom* p = getbytes( sizeof( t_atom ) );
 		*p = argv[i];
@@ -886,12 +889,12 @@ void listEqual_set(
 
 void listEqual_exec(
 	t_listEqual *x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
 {
-	if (argc != AtomList_get_size( & x->atoms ) )
+	if (argc != (int )AtomList_get_size( & x->atoms ) )
 	{
 		outlet_float(
 			x->outlet,

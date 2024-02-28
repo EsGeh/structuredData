@@ -41,10 +41,14 @@ void sdEvent_setup()
 
 #define FREE_DYN_A(p,size) (AtomDynA_exit(p))
 #define HASH_SYMBOL(sym) \
-	((unsigned int )sym)
+	((uintptr_t ) sym)
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
+#pragma GCC diagnostic ignored "-Wsign-compare"
 DECL_MAP(ParamMap,t_symbol*,AtomDynA,getbytes,freebytes,FREE_DYN_A,HASH_SYMBOL,COMPARE_SYMBOLS)
 DEF_MAP(ParamMap,t_symbol*,AtomDynA,getbytes,freebytes,FREE_DYN_A,HASH_SYMBOL,COMPARE_SYMBOLS)
+#pragma GCC diagnostic pop
 
 typedef struct s_event {
   t_object x_obj;
@@ -132,7 +136,7 @@ t_class* register_event(
 }
 
 void* event_init(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -163,7 +167,7 @@ void* event_init(
 	}
 	else
 	{
-		for(unsigned int i=0; i< argc-1; i++)
+		for(unsigned int i=0; i<(unsigned int )argc-1; i++)
 		{
 			if(
 					argv[1+i].a_type != A_SYMBOL
@@ -246,7 +250,7 @@ void event_bang(
 	}
 
 	// accumulate args:
-	for( int i=0; i< SymBuf_get_size( &x->args ); i++ )
+	for( unsigned int i=0; i< SymBuf_get_size( &x->args ); i++ )
 	{
 		t_symbol* param_name = SymBuf_get_array( &x->args )[i];
 		t_atom param_name_a;
@@ -285,7 +289,7 @@ void event_bang(
 					count
 			);
 		}
-		for( int val_ind=0; val_ind< AtomDynA_get_size( value ); val_ind++ )
+		for( unsigned int val_ind=0; val_ind< AtomDynA_get_size( value ); val_ind++ )
 		{
 			AtomDynA_append(
 					&acc,
@@ -331,7 +335,7 @@ void event_bang(
 					count
 			);
 		}
-		for( int val_ind=0; val_ind< AtomDynA_get_size( value ); val_ind++ )
+		for( unsigned int val_ind=0; val_ind< AtomDynA_get_size( value ); val_ind++ )
 		{
 			AtomDynA_append(
 					&acc,
@@ -359,14 +363,14 @@ void event_bang(
 
 void event_other_args(
 	t_event* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
 {
 	DB_PRINT("event_other_args");
 	unsigned int pos = 0;
-	while( pos < argc )
+	while( pos < (unsigned int )argc )
 	{
 		if(
 			argc < 2
@@ -530,7 +534,7 @@ t_class* register_unevent(
 }
 
 void* unevent_init(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -540,7 +544,7 @@ void* unevent_init(
 	x->paramsCount = argc;
 	x->params = getbytes( sizeof( t_symbol* ) * x->paramsCount );
 	x->outlets = getbytes( sizeof( t_outlet* ) * x->paramsCount );
-	for(unsigned int i=0; i< argc; i++)
+	for(unsigned int i=0; i<(unsigned int )argc; i++)
 	{
 		if(
 				argv[i].a_type != A_SYMBOL
@@ -577,7 +581,7 @@ void unevent_exit(
 
 void unevent_input(
 	t_unevent* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -607,12 +611,12 @@ void unevent_input(
 	IntArray_init( &otherPacks );
 
 	// init indices:
-	for( int i=0; i< x->paramsCount; i++)
+	for( unsigned int i=0; i< x->paramsCount; i++)
 		param_indices[i] = -1;
 
 	{
 		unsigned int pos = 2;
-		while( pos < argc )
+		while( pos < (unsigned int )argc )
 		{
 			if(
 				argc < 2
@@ -627,7 +631,7 @@ void unevent_input(
 			t_symbol* type = atom_getsymbol( &argv[pos+0] );
 			unsigned int count = atom_getint( &argv[pos+1] );
 			BOOL found = FALSE;
-			for( int i = 0; i < x->paramsCount; i++ )
+			for( unsigned int i = 0; i < x->paramsCount; i++ )
 			{
 				if( x->params[i] == type )
 				{
@@ -645,7 +649,7 @@ void unevent_input(
 
 	// output "other" parameters:
 	{
-		for(int i = 0; i<IntArray_get_size( &otherPacks ); i++)
+		for(unsigned int i = 0; i<IntArray_get_size( &otherPacks ); i++)
 		{
 			t_int pos = IntArray_get_array( &otherPacks )[i];
 			if(
@@ -679,7 +683,7 @@ void unevent_input(
 			if( currentSym == gensym("all") )
 			{
 				unsigned int pos = 2;
-				while( pos < argc )
+				while( pos < (unsigned int )argc )
 				{
 					if(
 						argv[pos+0].a_type != A_SYMBOL
@@ -806,9 +810,9 @@ t_class* register_eventAddParam(
 }
 
 void* eventAddParam_init(
-	t_symbol *s,
-	int argc,
-	t_atom *argv
+	t_symbol* UNUSED(s),
+	int UNUSED(argc),
+	t_atom* UNUSED(argv)
 )
 {
   t_eventAddParam *x = (t_eventAddParam *)pd_new(eventAddParam_class);
@@ -840,7 +844,7 @@ void eventAddParam_exit(
 
 void eventAddParam_set(
 	t_eventAddParam* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -862,7 +866,7 @@ void eventAddParam_set(
 	//if( argc > 0)
 		x->otherPack = getbytes( sizeof( t_atom ) * argc );
 		x->otherPackCount = argc;
-	for(unsigned int i=0; i < argc; i++)
+	for(unsigned int i=0; i < (unsigned int )argc; i++)
 	{
 		x->otherPack[i] = argv[i];
 		/*
@@ -875,7 +879,7 @@ void eventAddParam_set(
 
 void eventAddParam_input(
 	t_eventAddParam* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -893,7 +897,7 @@ void eventAddParam_input(
 	//post("input, argc: %i", argc);
 	t_int new_size = argc + x->otherPackCount;
 	t_atom* ret = getbytes( sizeof( t_atom ) * new_size );
-	for( unsigned int i=0; i<argc; i++ )
+	for( unsigned int i=0; i<(unsigned int )argc; i++ )
 	{
 		ret[i] = argv[i];
 	}
@@ -926,7 +930,7 @@ void* eventToProperties_init();
 
 void eventToProperties_input(
 	t_eventToProperties* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 );
@@ -970,7 +974,7 @@ void* eventToProperties_init()
 
 void eventToProperties_input(
 	t_eventToProperties* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )

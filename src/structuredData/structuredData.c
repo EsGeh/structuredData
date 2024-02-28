@@ -125,9 +125,9 @@ t_class* register_any(
 }
 
 void *any_new(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* argv
 )
 {
   t_any *x = (t_any *)pd_new(any_class);
@@ -397,7 +397,7 @@ void* first_new();
 
 void first_input(
 	t_first *x,
-	t_symbol *s,
+	t_symbol* s,
 	int argc,
 	t_atom *argv
 );
@@ -513,9 +513,9 @@ t_class* register_symbolIsEq(
 }
 
 void* symbolIsEq_new(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* argv
 )
 {
   t_symbolIsEq *x = (t_symbolIsEq *)pd_new(symbolIsEq_class);
@@ -540,7 +540,7 @@ void* symbolIsEq_new(
 }
 
 void symbolIsEq_compare(
-	t_symbolIsEq *x,
+	t_symbolIsEq* x,
 	t_symbol* sym
 )
 {
@@ -611,7 +611,7 @@ t_class* register_isEq(
 }
 
 void* isEq_new(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -641,10 +641,10 @@ void* isEq_new(
 }
 
 void isEq_compare(
-	t_isEq *x,
-	t_symbol *s,
+	t_isEq* x,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* argv
 )
 {
 	if( argc == 0 )
@@ -661,10 +661,10 @@ void isEq_compare(
 }
 
 void isEq_setOther(
-	t_isEq *x,
-	t_symbol *s,
+	t_isEq* x,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* argv
 )
 {
 	if( argc == 0 )
@@ -785,7 +785,7 @@ void filter_input(
 		return;
 	}
 	BOOL matched = FALSE;
-	for(int i=0; i<AtomBuf_get_size( &x->args ); i++ )
+	for(unsigned int i=0; i<AtomBuf_get_size( &x->args ); i++ )
 	{
 		t_atom* current = & AtomBuf_get_array( &x->args )[i];
 		if( compareAtoms( current, & argv[0] ) )
@@ -811,10 +811,10 @@ void filter_input(
 }
 
 void filter_set_args(
-	t_filter *x,
-	t_symbol *s,
+	t_filter* x,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* argv
 )
 {
 	if( argc == 0 )
@@ -886,9 +886,9 @@ t_class* register_replace(
 }
 
 void* replace_init(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* argv
 )
 {
   t_replace *x = (t_replace *)pd_new(replace_class);
@@ -1054,7 +1054,7 @@ t_class* register_setselector(
 }
 
 void* setselector_init(
-	t_symbol *arg
+	t_symbol* arg
 )
 {
   t_setselector *x = (t_setselector *)pd_new(setselector_class);
@@ -1066,10 +1066,10 @@ void* setselector_init(
 }
 
 void setselector_input(
-	t_setselector *x,
-	t_symbol *s,
+	t_setselector* x,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* argv
 )
 {
 	outlet_anything(
@@ -1157,9 +1157,9 @@ t_class* register_replace_by_name(
 }
 
 void* replace_by_name_init(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* argv
 )
 {
 	for( int i=0; i<argc; i++ )
@@ -1167,7 +1167,7 @@ void* replace_by_name_init(
 		t_atom* current = & argv[i];
 		if( current->a_type != A_SYMBOL )
 		{
-			error( "wrong syntax: expected 'varname1 ...'" );
+			pd_error( NULL, "wrong syntax: expected 'varname1 ...'" );
 			return NULL;
 		}
 	}
@@ -1209,7 +1209,7 @@ void replace_by_name_exit(
 
 void replace_by_name_on_set_var(
 	t_replace_by_name* this,
-	t_symbol* s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom* argv
 )
@@ -1250,7 +1250,7 @@ void replace_by_name_on_set_var(
 
 void replace_by_name_on_clear(
 	t_replace_by_name* this,
-	t_symbol* s
+	t_symbol* UNUSED(s)
 )
 {
 	DB_PRINT("replace_by_name_on_set_var");
@@ -1526,7 +1526,7 @@ void replace_by_name_input(
 						&atoms,
 						src
 				);
-				for( int j=0; j<AtomDynA_get_size( &atoms ); j++ )
+				for( unsigned int j=0; j<AtomDynA_get_size( &atoms ); j++ )
 				{
 					AtomDynA_append(
 							&ret,

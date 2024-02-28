@@ -130,7 +130,7 @@ t_class* register_script_class( t_symbol* class_name )
 }
 
 void* t_script_obj_init(
-	t_symbol* name,
+	t_symbol* UNUSED(name),
 	int argc,
 	t_atom* argv
 )
@@ -202,7 +202,7 @@ void t_script_obj_exit(
 
 void script_obj_on_set_program(
 	t_script_obj* this,
-	t_symbol* s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom* argv
 )
@@ -241,7 +241,7 @@ void script_obj_on_set_program(
 
 void script_obj_on_set_bang(
 		t_script_obj* this,
-		t_symbol* s,
+		t_symbol* UNUSED(s),
 		int argc,
 		t_atom* argv
 )
@@ -282,7 +282,7 @@ void script_obj_on_del_program(
 
 void script_obj_on_set_var(
 	t_script_obj* this,
-	t_symbol* s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom* argv
 )
@@ -322,7 +322,7 @@ void script_obj_on_exec(
 	t_script_obj* this,
 	t_symbol* prog_name,
 	int argc,
-	t_atom* argv
+	t_atom* UNUSED(argv)
 )
 {
 	if(

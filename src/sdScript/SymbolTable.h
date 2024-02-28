@@ -14,11 +14,12 @@
 	freebytes( var, size )
 
 #define HASH_SYMBOL(sym) \
-	((unsigned int )sym)
+	((uintptr_t )sym)
 
 // variable name -> value(s)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
+#pragma GCC diagnostic ignored "-Wsign-compare"
 DECL_MAP(Scope,t_symbol*,AtomDynA,getbytes,freebytes,DEL_VAR,HASH_SYMBOL, COMPARE_SYMBOLS)
 DEF_MAP(Scope,t_symbol*,AtomDynA,getbytes,freebytes,DEL_VAR,HASH_SYMBOL, COMPARE_SYMBOLS)
 #pragma GCC diagnostic pop
@@ -30,6 +31,7 @@ DEF_MAP(Scope,t_symbol*,AtomDynA,getbytes,freebytes,DEL_VAR,HASH_SYMBOL, COMPARE
 // program name -> Scope
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
+#pragma GCC diagnostic ignored "-Wsign-compare"
 DECL_MAP(SymbolTable,t_symbol*,Scope,getbytes,freebytes,DEL_SCOPE,HASH_SYMBOL, COMPARE_SYMBOLS)
 DEF_MAP(SymbolTable,t_symbol*,Scope,getbytes,freebytes,DEL_SCOPE,HASH_SYMBOL, COMPARE_SYMBOLS)
 #pragma GCC diagnostic pop

@@ -1,6 +1,7 @@
 #include "sdObjState.h"
 #include "LinkedList.h"
 #include "DynArray.h"
+#include "Global.h"
 
 #include "m_pd.h"
 
@@ -165,9 +166,9 @@ t_class* register_objState(
 }
 
 void* objState_init(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* argv
 )
 {
   t_objState *x = (t_objState *)pd_new(objState_class);
@@ -396,7 +397,7 @@ void objState_input(
 			//post("set accuml");
 			int out_count = atom_getint( & argv[3] );
 			t_atom* out = getbytes( sizeof( t_symbol ) * out_count );
-			for(unsigned int i=0; i<out_count; i++)
+			for(int i=0; i<out_count; i++)
 			{
 				out[i] = argv[4+i];
 			}
@@ -421,7 +422,7 @@ void objState_input(
 			t_atom* prop = &argv[2];
 			int out_count = atom_getint( & argv[4] );
 			t_atom* out = getbytes( sizeof( t_symbol ) * out_count );
-			for(unsigned int i=0; i<out_count; i++)
+			for(int i=0; i<out_count; i++)
 			{
 				out[i] = argv[5+i];
 			}
@@ -518,9 +519,9 @@ void objState_input(
 
 void objState_rawinput(
 	t_objState* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* argv
 )
 {
 
@@ -708,7 +709,7 @@ void objState_fromProps(
 			AtomBuffer_append( & x->accumlArray, val_count_atom);
 		}
 		// <property> ( <val1> ... ) )
-		for( unsigned int i=0; i< val_count; i++ )
+		for( int i=0; i< val_count; i++ )
 		{
 			AtomBuffer_append( & x-> accumlArray, argv[ 1+i ] );
 		}
@@ -717,7 +718,7 @@ void objState_fromProps(
 
 void objState_sendEvent(
 	t_objState* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -767,7 +768,7 @@ void objState_get(
 		SymList* old_outList = x->outList;
 		x->outList = getbytes( sizeof( SymList ) );
 		SymList_init( x->outList );
-		for(unsigned int i=0; i< out_count; i++)
+		for(int i=0; i< out_count; i++)
 		{
 			SymList_append( x->outList, atom_getsymbol( & out[i] ) );
 		}

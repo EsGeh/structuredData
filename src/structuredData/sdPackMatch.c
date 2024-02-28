@@ -125,6 +125,7 @@ DEF_LIST(SubPatternsList, SubPatternsListEl, SubPatternInfo, getbytes, freebytes
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
+#pragma GCC diagnostic ignored "-Wsign-compare"
 DECL_MAP(BoundData,t_symbol*, AtomDynA,getbytes, freebytes, DEL_ATOM_DYNA, HASH_SYMBOL, COMPARE_SYMBOLS)
 DEF_MAP(BoundData,t_symbol*, AtomDynA,getbytes, freebytes, DEL_ATOM_DYNA, HASH_SYMBOL, COMPARE_SYMBOLS)
 #pragma GCC diagnostic pop
@@ -414,7 +415,7 @@ t_class* register_packMatch(
 }
 
 void* packMatch_init(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -460,7 +461,7 @@ void packMatch_exit(
 
 void packMatch_patterns_add(
 	t_packMatch* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -482,7 +483,7 @@ void packMatch_patterns_add(
 
 void packMatch_patterns_add_script(
 	t_packMatch* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -591,7 +592,7 @@ void packMatch_patterns_clear(
 
 void packMatch_set_global_var(
 	t_packMatch* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -887,11 +888,11 @@ void bind_ret_to_atom_list(
 					atom
 			);
 		}
-		for(int i=0; i< AtomDynA_get_size( content ); i++)
+		for(unsigned int j=0; j< AtomDynA_get_size( content ); j++)
 		{
 			AtomDynA_append(
 					ret,
-					AtomDynA_get_array( content )[i]
+					AtomDynA_get_array( content )[j]
 			);
 		}
 	MAP_FORALL_KEYS_END(BoundData,t_symbol*,x,sym)
@@ -943,22 +944,30 @@ BOOL match_rec(
 		// if '*' was the last symbol in the pattern:
 		if(
 			// "* eof" || "* )" || ...
-			lexer_pattern_peek( rt, 0) == STAR
+			(
+				lexer_pattern_peek( rt, 0) == STAR
 				&& (
 					(lexer_pattern_peek( rt, 1) == END || lexer_pattern_peek( rt, 1) == RIGHT_PARENT)
 					||
-					( lexer_pattern_peek( rt, 1) == START_BIND || lexer_pattern_peek( rt, 1) == END_BIND )
+					(
+					 ( lexer_pattern_peek( rt, 1) == START_BIND || lexer_pattern_peek( rt, 1) == END_BIND )
 						&& (lexer_pattern_peek( rt, 2) == END || lexer_pattern_peek( rt, 2) == RIGHT_PARENT)
+					)
 				)
+			)
 			||
 			// "? * eof" || ? "* )"  || ...
-			lexer_pattern_peek( rt, 1) == STAR
+			(
+				lexer_pattern_peek( rt, 1) == STAR
 				&& (
 					(lexer_pattern_peek( rt, 2) == END || lexer_pattern_peek( rt, 2) == RIGHT_PARENT)
 					||
-					( lexer_pattern_peek( rt, 2) == START_BIND || lexer_pattern_peek( rt, 2) == END_BIND )
+					(
+					 ( lexer_pattern_peek( rt, 2) == START_BIND || lexer_pattern_peek( rt, 2) == END_BIND )
 						&& (lexer_pattern_peek( rt, 3) == END || lexer_pattern_peek( rt, 3) == RIGHT_PARENT)
+					)
 				)
+			)
 		)
 		{
 			match_db_print(
@@ -1230,6 +1239,7 @@ BOOL pack_mode(
 	);
 	
 	// debug print:
+	#ifdef DEBUG
 	SubPatternsListEl* pEl = SubPatternsList_get_first( &expected_packages );
 	while( pEl != NULL )
 	{
@@ -1246,6 +1256,7 @@ BOOL pack_mode(
 				pEl
 		);
 	}
+	#endif
 
 	// 2. try to find all patterns in the input:
 	if( !pack_mode_match_input( rt, & expected_packages, CharBuf_get_array( & bind_arbitrary_sym ) ) )
@@ -1587,9 +1598,9 @@ void pack_mode_merge_bound_symbols(
 	
 	MAP_FORALL_KEYS_BEGIN(BoundData,t_symbol*,new_bound_symbols,sym)
 		AtomDynA* content = BoundData_get( new_bound_symbols, sym );
-		for(int i=0; i< AtomDynA_get_size( content ); i++)
+		for(unsigned int j=0; j< AtomDynA_get_size( content ); j++)
 		{
-			t_atom* atom = & AtomDynA_get_array( content)[i];
+			t_atom* atom = & AtomDynA_get_array( content)[j];
 			AtomDynA* entry =
 				BoundData_get( & rt -> bind_ret, sym);
 			if( ! entry )
@@ -2116,7 +2127,7 @@ BOOL lexer_append_to_bind(
 void pattern_atom_type_to_str(
 		t_pattern_atom_type type,
 		char* buf,
-		int buf_size
+		int UNUSED(buf_size)
 )
 {
 	buf[0] = '\0';

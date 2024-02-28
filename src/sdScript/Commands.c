@@ -264,7 +264,7 @@ CommandInfo* getCommandInfo(
 		t_atom* pName
 )
 {
-	for(int i=0; i<CommandInfos_get_size( command_infos ); i++)
+	for(unsigned int i=0; i<CommandInfos_get_size( command_infos ); i++)
 	{
 		CommandInfo* current = & CommandInfos_get_array( command_infos )[i];
 		if( compareAtoms( & current->name, pName))
@@ -274,13 +274,13 @@ CommandInfo* getCommandInfo(
 }
 
 CommandInfo* get_NOP(
-		CommandInfos* command_infos
+		CommandInfos* UNUSED(command_infos)
 )
 {
 	return pNOP;
 }
 CommandInfo* get_RETURN_ALL(
-		CommandInfos* command_infos
+		CommandInfos* UNUSED(command_infos)
 )
 {
 	return pRETURN_ALL;
@@ -289,6 +289,9 @@ CommandInfo* get_RETURN_ALL(
 /*****************************************
  * command implementations:
  *****************************************/
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 PFUNCTION_HEADER( add )
 {
@@ -463,7 +466,7 @@ PFUNCTION_HEADER( getVar )
 		return;
 	}
 
-	for( int i=0; i< AtomDynA_get_size( value ); i++ )
+	for(unsigned int i=0; i< AtomDynA_get_size( value ); i++ )
 	{
 		t_atom* pResult = getbytes(sizeof(t_atom));
 		(*pResult) = AtomDynA_get_array( value )[i];
@@ -1298,3 +1301,5 @@ PFUNCTION_HEADER( callFunction )
 	prog_rt -> rt -> jump_to_program =
 			atom_getsymbol( & pArgs[0] );
 }
+
+#pragma GCC diagnostic pop

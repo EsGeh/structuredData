@@ -104,7 +104,7 @@ t_class* register_pack(
 }
 
 void* pack_init(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -136,14 +136,14 @@ void* pack_init(
 }
 
 void pack_exit(
-	t_pack* x
+	t_pack* UNUSED(x)
 )
 {
 }
 
 void pack_input(
 	t_pack* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -218,9 +218,9 @@ t_class* register_unpack(
 }
 
 void* unpack_init(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* UNUSED(argv)
 )
 {
   t_unpack *x = (t_unpack *)pd_new(unpack_class);
@@ -242,16 +242,16 @@ void* unpack_init(
 }
 
 void unpack_exit(
-	t_unpack* x
+	t_unpack* UNUSED(x)
 )
 {
 }
 
 void unpack_input(
 	t_unpack* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* argv
 )
 {
 	if(
@@ -337,9 +337,9 @@ t_class* register_packFromHuman(
 }
 
 void* packFromHuman_init(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* UNUSED(argv)
 )
 {
   t_packFromHuman *x = (t_packFromHuman *)pd_new(packFromHuman_class);
@@ -356,7 +356,7 @@ void* packFromHuman_init(
 }
 
 void packFromHuman_exit(
-	t_packFromHuman* x
+	t_packFromHuman* UNUSED(x)
 )
 {
 }
@@ -423,7 +423,7 @@ void packFromHuman_exit(
 // recursively parse the input:
 int packFromHuman_fromHuman(
 	// input:
-	int argc,
+	int _argc,
 	t_atom* argv,
 	// util:
 	//AtomList* stack,
@@ -436,6 +436,7 @@ int packFromHuman_fromHuman(
 	unsigned int depth
 )
 {
+	unsigned int argc = _argc;
 	// EOF:
 	if( *index >= argc )
 		return 0;
@@ -493,11 +494,13 @@ int packFromHuman_fromHuman(
 				post("at pos 0: got '(' without preceeding 'packname'", (*index));
 				return 1;
 			}
-			// step back one pos, where the pack begins:
-			// '(' indicates a "pdPack": <packname> ( ... )
-			//                              /\
-			//                              ||
-			//                           indexStart
+			/*
+			 * step back one pos, where the pack begins:
+			 * '(' indicates a "pdPack": <packname> ( ... )
+			 *                              /\
+			 *                              ||
+			 *                           indexStart
+			*/
 			(*index) -= 1;
 			(*outCount) -= 1;
 
@@ -562,11 +565,12 @@ int packFromHuman_fromHuman(
 
 void packFromHuman_input(
 	t_packFromHuman* x,
-	t_symbol *s,
-	int argc,
-	t_atom *argv
+	t_symbol* UNUSED(s),
+	int _argc,
+	t_atom* argv
 )
 {
+	unsigned int argc = _argc;
 	t_atom* outputAtoms = getbytes( sizeof( t_atom ) * argc * 3 );
 	unsigned int outCount = 0;
 	unsigned int index=0;
@@ -668,11 +672,12 @@ t_class* register_packFilter(
 }
 
 void* packFilter_init(
-	t_symbol *s,
-	int argc,
-	t_atom *argv
+	t_symbol* UNUSED(s),
+	int _argc,
+	t_atom* argv
 )
 {
+	unsigned int argc = _argc;
   t_packFilter *x = (t_packFilter *)pd_new(packFilter_class);
 
 
@@ -734,9 +739,9 @@ void packFilter_exit(
 
 void packFilter_input(
 	t_packFilter* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* argv
 )
 {
 	if(
@@ -780,11 +785,12 @@ void packFilter_input(
 
 void packFilter_on_set(
 	t_packFilter* x,
-	t_symbol *s,
-	int argc,
-	t_atom *argv
+	t_symbol* UNUSED(s),
+	int _argc,
+	t_atom* argv
 )
 {
+	unsigned int argc = _argc;
 	freebytes( x->acceptedTypes, sizeof( t_symbol* ) * x->acceptedTypesCount );
 	x->acceptedTypesCount = argc;
 	x->acceptedTypes = getbytes( sizeof( t_symbol* ) * argc );
@@ -845,9 +851,9 @@ t_class* register_packToMessage(
 }
 
 void* packToMessage_init(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* UNUSED(argv)
 )
 {
   t_packToMessage *x = (t_packToMessage *)pd_new(packToMessage_class);
@@ -864,14 +870,14 @@ void* packToMessage_init(
 }
 
 void packToMessage_exit(
-	t_packToMessage* x
+	t_packToMessage* UNUSED(x)
 )
 {
 }
 
 void packToMessage_input(
 	t_packToMessage* x,
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
 	t_atom *argv
 )
@@ -946,9 +952,9 @@ t_class* register_packFromMessage(
 }
 
 void* packFromMessage_init(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* UNUSED(argv)
 )
 {
   t_packFromMessage *x = (t_packFromMessage *)pd_new(packFromMessage_class);
@@ -965,18 +971,19 @@ void* packFromMessage_init(
 }
 
 void packFromMessage_exit(
-	t_packFromMessage* x
+	t_packFromMessage* UNUSED(x)
 )
 {
 }
 
 void packFromMessage_inputList(
 	t_packFromMessage* x,
-	t_symbol *s,
-	int argc,
+	t_symbol* UNUSED(s),
+	int _argc,
 	t_atom *argv
 )
 {
+	unsigned int argc = _argc;
 	if(
 		argc < 1
 		|| argv[0].a_type != A_SYMBOL
@@ -1009,10 +1016,11 @@ void packFromMessage_inputList(
 void packFromMessage_inputAny(
 	t_packFromMessage* x,
 	t_symbol *s,
-	int argc,
+	int _argc,
 	t_atom *argv
 )
 {
+	unsigned int argc = _argc;
 	t_atom* ret = getbytes( sizeof( t_atom ) * (argc+2) );
 	for(unsigned int i=0; i< argc; i++)
 	{

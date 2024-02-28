@@ -7,6 +7,12 @@
 
 #define ACCUML_SIZE 256
 
+#ifdef __GNUC__
+#  define UNUSED(x) UNUSED_ ## x __attribute__((__unused__))
+#else
+#  define UNUSED(x) UNUSED_ ## x
+#endif
+
 
 static t_class* property_class;
 static t_class* propertySym_class;
@@ -398,9 +404,9 @@ void register_propertyMethods(
 }
 
 void* propertyList_init(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* argv
 )
 {
   t_property *x = (t_property *)pd_new(property_class);
@@ -420,9 +426,9 @@ void* propertyList_init(
 }
 
 void* property_init(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* argv
 )
 {
   t_property *x = (t_property *)pd_new(property_class);
@@ -442,9 +448,9 @@ void* property_init(
 }
 
 void* propertySym_init(
-	t_symbol *s,
+	t_symbol* UNUSED(s),
 	int argc,
-	t_atom *argv
+	t_atom* argv
 )
 {
   t_property *x = (t_property *)pd_new(property_class);
@@ -466,7 +472,7 @@ void* propertySym_init(
 int property_initall(
 	t_property* x,
 	int argc,
-	t_atom *argv
+	t_atom* argv
 )
 {
 

@@ -38,6 +38,7 @@ DEF_BUFFER(CommandBuf,CmdRuntimeData,getbytes,freebytes)
 // program name -> cmds ...
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
+#pragma GCC diagnostic ignored "-Wsign-compare"
 DECL_MAP(ProgramMap,t_symbol*,AtomBuf,getbytes,freebytes,DEL_PROG,PROGS_HASH, COMPARE_SYMBOLS)
 DEF_MAP(ProgramMap,t_symbol*,AtomBuf,getbytes,freebytes,DEL_PROG,PROGS_HASH, COMPARE_SYMBOLS)
 #pragma GCC diagnostic pop
