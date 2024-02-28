@@ -82,6 +82,8 @@ void script_obj_continue(
 
 t_class* register_script_class( t_symbol* class_name )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			class_name, 		// name
@@ -92,6 +94,7 @@ t_class* register_script_class( t_symbol* class_name )
 			A_GIMME,			// list of atoms following the selector...
 			0
 		);
+#pragma GCC diagnostic pop
 
 	class_addmethod(
 		class,

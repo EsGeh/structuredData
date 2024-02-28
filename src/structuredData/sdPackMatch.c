@@ -361,6 +361,8 @@ t_class* register_packMatch(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -372,6 +374,7 @@ t_class* register_packMatch(
 			A_GIMME,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdPackMatch")

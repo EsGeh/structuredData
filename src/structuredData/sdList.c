@@ -130,6 +130,8 @@ t_class* register_list(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -141,6 +143,7 @@ t_class* register_list(
 			A_GIMME,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdList")
@@ -801,6 +804,8 @@ t_class* register_listEqual(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -812,6 +817,7 @@ t_class* register_listEqual(
 			A_GIMME,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdList")

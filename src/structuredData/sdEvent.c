@@ -109,6 +109,8 @@ t_class* register_event(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -120,6 +122,7 @@ t_class* register_event(
 			A_GIMME,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdEvent")
@@ -511,6 +514,8 @@ t_class* register_unevent(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -522,6 +527,7 @@ t_class* register_unevent(
 			A_GIMME,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdEvent")
@@ -782,6 +788,8 @@ t_class* register_eventAddParam(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -792,6 +800,7 @@ t_class* register_eventAddParam(
 			// creation arguments:
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdEvent")
@@ -939,6 +948,8 @@ t_class* register_eventToProperties(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -949,6 +960,7 @@ t_class* register_eventToProperties(
 			// creation arguments:
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdEvent")

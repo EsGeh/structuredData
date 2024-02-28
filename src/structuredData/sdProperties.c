@@ -215,6 +215,8 @@ t_class* register_propertyList(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -226,6 +228,7 @@ t_class* register_propertyList(
 			A_GIMME,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdObjState")
@@ -239,6 +242,8 @@ t_class* register_property(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -250,6 +255,7 @@ t_class* register_property(
 			A_GIMME,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdObjState")
@@ -263,6 +269,8 @@ t_class* register_propertySym(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -274,6 +282,7 @@ t_class* register_propertySym(
 			A_GIMME,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdObjState")

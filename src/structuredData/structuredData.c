@@ -104,10 +104,13 @@ t_class* register_any(
 	t_symbol* className
 )
 {
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
-			(t_newmethod)any_new, // constructor
+			(t_newmethod )any_new, // constructor
 			0, // destructor
 			sizeof(t_any),
 			CLASS_DEFAULT, // graphical repr ?
@@ -115,6 +118,7 @@ t_class* register_any(
 			A_GIMME,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdUtils")
@@ -220,6 +224,8 @@ t_class* register_gate(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -231,6 +237,7 @@ t_class* register_gate(
 			A_DEFFLOAT,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdUtils")
@@ -309,6 +316,8 @@ t_class* register_counter(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -322,6 +331,7 @@ t_class* register_counter(
 			A_DEFFLOAT,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdUtils")
@@ -493,6 +503,8 @@ t_class* register_symbolIsEq(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -504,6 +516,7 @@ t_class* register_symbolIsEq(
 			A_GIMME,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdUtils")
@@ -584,6 +597,8 @@ t_class* register_isEq(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -595,6 +610,7 @@ t_class* register_isEq(
 			A_GIMME,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdUtils")
@@ -714,6 +730,8 @@ t_class* register_filter(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -725,6 +743,7 @@ t_class* register_filter(
 			A_GIMME,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdUtils")
@@ -865,6 +884,8 @@ t_class* register_replace(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -876,6 +897,7 @@ t_class* register_replace(
 			A_GIMME,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdUtils")
@@ -1032,6 +1054,8 @@ t_class* register_setselector(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -1043,6 +1067,7 @@ t_class* register_setselector(
 			A_SYMBOL,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdUtils")
@@ -1123,6 +1148,8 @@ t_class* register_replace_by_name(
 	t_symbol* className
 )
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 	t_class* class =
 		class_new(
 			className,
@@ -1134,6 +1161,7 @@ t_class* register_replace_by_name(
 			A_GIMME,
 			0
 		);
+#pragma GCC diagnostic pop
 	class_sethelpsymbol(
 			class,
 			gensym("sdUtils")
