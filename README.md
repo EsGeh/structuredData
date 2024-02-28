@@ -31,7 +31,8 @@ Most objects are written in C, a few are provided as puredata "abstractions".
 
 ## dependencies
 
-- zexy (just needed for the "gui" object)
+- [puredata](https://puredata.info/)
+- [zexy](https://git.iem.at/pd/zexy) (just needed for the "gui" object)
 
 ## build dependencies
 
@@ -72,7 +73,7 @@ Most objects are written in C, a few are provided as puredata "abstractions".
 
     (for options append `--help`)
 
-- add to pd libraries:
+- add to pd library search path:
 
 	you have two options:
 
