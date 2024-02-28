@@ -15,6 +15,27 @@
 	post(message, ## __VA_ARGS__)
 #endif
 
+/************************
+ * safe string handling:
+ ***********************/
+
+#define CHARBUF_SIZE 1024
+
+#define ELLIPSIS "..."
+
+#define SPRINTF(ret, fmt, ...) \
+{ \
+	int ret_size = snprintf( ret, sizeof(ret), fmt, ## __VA_ARGS__ ); \
+	if(ret_size > sizeof(ret)-1) { \
+		if( ! strlen(ELLIPSIS)+1 > sizeof(ret) ) { \
+			int pos_ellipsis = sizeof(ret)-1-strlen(ELLIPSIS); \
+			strcpy( &ret[pos_ellipsis], ELLIPSIS ); \
+		} \
+	} \
+}
+
+#define STRCAT(a,b) strncat(a, b, sizeof(a) - strlen(a) - 1)
+
 // common container types:
 
 DECL_LIST(AtomList,AtomListEl,t_atom,getbytes,freebytes,freebytes)

@@ -5,13 +5,13 @@
 #include "sdScript.h"
 
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "m_pd.h"
 
 #define BOUNDDATA_SIZE 1024
-
-#define CHARBUF_SIZE 1024
 
 static t_class* packMatch_class;;
 
@@ -303,6 +303,58 @@ void pattern_atom_type_to_str(
 		char* buf,
 		int buf_size
 );
+
+/* utility functions */
+void match_output_str(
+		char* ret,
+		RuntimeInfo* rt,
+		char* msg
+);
+
+#ifdef DEBUG
+#define match_db_print( \
+		rt, \
+		msg, ... \
+) \
+{ \
+	char buf[CHARBUF_SIZE]; \
+	char msg_filled[CHARBUF_SIZE]; \
+	msg_filled[0] = '\0'; \
+	SPRINTF( msg_filled, msg, ## __VA_ARGS__ ); \
+	match_output_str( \
+		buf, \
+		rt, \
+		msg_filled \
+	); \
+	DB_PRINT( \
+		buf \
+	); \
+}
+#else
+#define match_db_print( \
+		rt, \
+		msg, ... \
+)
+#endif
+
+#define match_error( \
+		rt, \
+		msg, ... \
+) \
+{ \
+	char buf[CHARBUF_SIZE]; \
+	char msg_filled[CHARBUF_SIZE]; \
+	SPRINTF( msg_filled, msg, ## __VA_ARGS__ ); \
+	match_output_str( \
+		buf, \
+		rt, \
+		msg_filled \
+	); \
+	pd_error( \
+		rt -> x, \
+		buf \
+	); \
+}
 
 t_class* register_packMatch(
 	t_symbol* className
@@ -715,159 +767,74 @@ void packMatch_input(
 	DB_PRINT( "packMatch_input: done" );
 }
 
-#define match_db_print( \
-		rt, \
-		msg, ... \
-) \
-{ \
-	char pattern_name_buf[CHARBUF_SIZE]; \
-	{ \
-		t_atom pattern_name_atom; \
-		SETSYMBOL( & pattern_name_atom, rt->pattern_name ); \
-		atom_string( &pattern_name_atom, pattern_name_buf, CHARBUF_SIZE ); \
-	} \
-	char pattern_buf[CHARBUF_SIZE]; \
-	{ \
-		sprintf( pattern_buf, "'"); \
-		for(int i=rt->pattern_pos; i< rt->pattern_size; i++) \
-		{ \
-			t_atom* current = & rt->pattern[ i ]; \
-			char current_buf[CHARBUF_SIZE]; \
-			atom_string( current, current_buf, CHARBUF_SIZE ); \
-			if( i != 0 ) \
-				strcat( \
-						pattern_buf, \
-						" " \
-				); \
-			strcat( \
-					pattern_buf, \
-					current_buf \
-			); \
-		} \
-		strcat( \
-				pattern_buf, \
-				"'" \
-		); \
-	} \
-	char input_buf[CHARBUF_SIZE]; \
-	{ \
-		sprintf( input_buf, "'"); \
-		for(int i=rt->input_pos; i< rt->input_size; i++) \
-		{ \
-			t_atom* current = & rt->input[ i ]; \
-			char current_buf[CHARBUF_SIZE]; \
-			atom_string( current, current_buf, CHARBUF_SIZE ); \
-			if( i != 0 ) \
-				strcat( \
-						input_buf, \
-						" " \
-				); \
-			strcat( \
-					input_buf, \
-					current_buf \
-			); \
-		} \
-		strcat( \
-				input_buf, \
-				"'" \
-		); \
-	} \
- \
-	char indent_buf[256]; \
-	indent_buf[0] ='\0'; \
-	for(int i=0; i<rt->rec_depth; i++) \
-	{ \
-		strcat(indent_buf, "-"); \
-	} \
-	char msg_filled[CHARBUF_SIZE]; \
-	sprintf( msg_filled, msg, ## __VA_ARGS__ ); \
- \
-	DB_PRINT( \
-			"%s%s, input (%i,%i): %s, pattern (%i,%i): %s: %s", \
-			indent_buf, \
-			pattern_name_buf, \
-			rt->input_pos, rt->input_size, input_buf, \
-			rt->pattern_pos, rt->pattern_size, pattern_buf, \
-			msg_filled \
-	); \
-}
+void match_output_str(
+		char* ret,
+		RuntimeInfo* rt,
+		char* msg
+)
+{
+	char pattern_name_buf[CHARBUF_SIZE];
+	{
+		t_atom pattern_name_atom;
+		SETSYMBOL( & pattern_name_atom, rt->pattern_name );
+		atom_string( &pattern_name_atom, pattern_name_buf, CHARBUF_SIZE );
+	}
+	char pattern_buf[CHARBUF_SIZE];
+	pattern_buf[0] = '\0';
+	{
+		STRCAT( pattern_buf, "'");
+		for(int i=rt->pattern_pos; i< rt->pattern_size && i < 3; i++)
+		{
+			t_atom* current = & rt->pattern[ i ];
+			char current_buf[CHARBUF_SIZE];
+			atom_string( current, current_buf, CHARBUF_SIZE );
+			if( i != 0 )
+			{
+				STRCAT(pattern_buf, " ");
+			}
+			STRCAT(pattern_buf, current_buf);
+		}
+		if( rt->pattern_size > 3 )
+			STRCAT( pattern_buf, "...'");
+		else
+			STRCAT( pattern_buf, "'");
+	}
+	char input_buf[CHARBUF_SIZE];
+	input_buf[0] = '\0';
+	{
+		STRCAT( input_buf, "'");
+		for(int i=rt->input_pos; i< rt->input_size && i < 3; i++)
+		{
+			t_atom* current = & rt->input[ i ];
+			char current_buf[CHARBUF_SIZE];
+			atom_string( current, current_buf, CHARBUF_SIZE );
+			if( i != 0 )
+			{
+				STRCAT(input_buf, " ");
+			}
+			STRCAT(input_buf, current_buf);
+		}
+		if( rt->input_size > 3 )
+			STRCAT( input_buf, "...'");
+		else
+			STRCAT( input_buf, "'");
+	}
 
-#define match_error( \
-		rt, \
-		msg, ... \
-) \
-{ \
-	char pattern_name_buf[CHARBUF_SIZE]; \
-	{ \
-		t_atom pattern_name_atom; \
-		SETSYMBOL( & pattern_name_atom, rt->pattern_name ); \
-		atom_string( &pattern_name_atom, pattern_name_buf, CHARBUF_SIZE ); \
-	} \
-	char pattern_buf[CHARBUF_SIZE]; \
-	{ \
-		sprintf( pattern_buf, "'"); \
-		for(int i=rt->pattern_pos; i< rt->pattern_size; i++) \
-		{ \
-			t_atom* current = & rt->pattern[ i ]; \
-			char current_buf[CHARBUF_SIZE]; \
-			atom_string( current, current_buf, CHARBUF_SIZE ); \
-			if( i != 0 ) \
-				strcat( \
-						pattern_buf, \
-						" " \
-				); \
-			strcat( \
-					pattern_buf, \
-					current_buf \
-			); \
-		} \
-		strcat( \
-				pattern_buf, \
-				"'" \
-		); \
-	} \
-	char input_buf[CHARBUF_SIZE]; \
-	{ \
-		sprintf( input_buf, "'"); \
-		for(int i=rt->input_pos; i< rt->input_size; i++) \
-		{ \
-			t_atom* current = & rt->input[ i ]; \
-			char current_buf[CHARBUF_SIZE]; \
-			atom_string( current, current_buf, CHARBUF_SIZE ); \
-			if( i != 0 ) \
-				strcat( \
-						input_buf, \
-						" " \
-				); \
-			strcat( \
-					input_buf, \
-					current_buf \
-			); \
-		} \
-		strcat( \
-				input_buf, \
-				"'" \
-		); \
-	} \
- \
-	char indent_buf[256]; \
-	indent_buf[0] ='\0'; \
-	for(int i=0; i<rt->rec_depth; i++) \
-	{ \
-		strcat(indent_buf, "-"); \
-	} \
-	char msg_filled[4000]; \
-	sprintf( msg_filled, msg, ## __VA_ARGS__ ); \
- \
-	pd_error( \
-			rt -> x, \
-			"%s%s, input (%i,%i): %s, pattern (%i,%i): %s: ERROR: %s", \
-			indent_buf, \
-			pattern_name_buf, \
-			rt->input_pos, rt->input_size, input_buf, \
-			rt->pattern_pos, rt->pattern_size, pattern_buf, \
-			msg_filled \
-	); \
+	char indent_buf[CHARBUF_SIZE];
+	indent_buf[0] ='\0';
+	for(int i=0; i<rt->rec_depth; i++)
+	{
+		STRCAT( indent_buf, "-" );
+	}
+	sprintf(
+		ret,
+		"%s%s, input (%i,%i): %s, pattern (%i,%i): %s: %s",
+		indent_buf,
+		pattern_name_buf,
+		rt->input_pos, rt->input_size, input_buf,
+		rt->pattern_pos, rt->pattern_size, pattern_buf,
+		msg
+	);
 }
 
 BOOL match(
