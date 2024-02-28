@@ -17,6 +17,7 @@ source $SCRIPTS_DIR/utils/cmd_args.fish
 
 # where to install:
 set install_prefix "$HOME/.local/lib/pd/extra/structuredDataC"
+set debug 0
 
 #################################################
 # cmd line opts:
@@ -26,7 +27,8 @@ set install_prefix "$HOME/.local/lib/pd/extra/structuredDataC"
 set options_descr \
 	'h/help/print help' \
 	"p/prefix=/where to install (default: '$install_prefix')" \
-	"s/symlink/symlink pd patches"
+	"s/symlink/symlink pd patches" \
+	'd/debug/compile for debugging'
 
 #################################################
 # functions
@@ -61,6 +63,9 @@ else
 	if set -q _flag_symlink
 		set symlink
 	end
+	if set -q _flag_debug
+		set debug 1
+	end
 end
 
 #################################################
@@ -81,6 +86,9 @@ begin
 	end
 	if set --query symlink
 		set --append cmd INSTALL_DATA='ln -s'
+	end
+	if test $debug != 0
+		set --append cmd 'CFLAGS=-DDEBUG -g' 
 	end
 	set --append cmd $make_args
 	echo -e "executing: $cmd"
