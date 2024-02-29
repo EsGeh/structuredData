@@ -79,5 +79,5 @@ Most objects are written in C, a few are provided as puredata "abstractions".
 
 ## documentation
 
-The Documentation is provided as puredata example patches.
-Right click, select "help" opens an example.
+The Documentation is provided as puredata example patches accessible in pd under `Help -> Patch Browser -> structuredDataC`.
+Alternatively, for help with a specific object, right click on it and select "help".
