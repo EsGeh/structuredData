@@ -16,7 +16,7 @@ source $SCRIPTS_DIR/utils/cmd_args.fish
 
 
 # where to install:
-set install_prefix "$HOME/.local/lib/pd/extra/structuredDataC"
+set install_prefix "$HOME/.local/lib/pd/extra"
 set debug 0
 
 #################################################
@@ -26,7 +26,7 @@ set debug 0
 # (syntax: short/long/description)
 set options_descr \
 	'h/help/print help' \
-	"p/prefix=/where to install (default: '$install_prefix')" \
+	"p/prefix=/overwrite install location (default: '$install_prefix')" \
 	"s/symlink/symlink pd patches" \
 	'd/debug/compile for debugging'
 
@@ -82,7 +82,7 @@ begin
 	# make:
 	set cmd make
 	if test $install_prefix != ''
-		set --append cmd DESTDIR=$install_prefix
+		set --append cmd PDLIBDIR=$install_prefix
 	end
 	if set --query symlink
 		set --append cmd INSTALL_DATA='ln -s --relative'

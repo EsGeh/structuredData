@@ -79,7 +79,7 @@ end
 begin
 	echo "installing zexy into '$doc_dir'"
 	cd $DEP_DIR/zexy
-	set cmd make DESTDIR="$doc_dir" install
+	set cmd make PDLIBDIR="$doc_dir" install
 	echo "executing: '$cmd'"
 	$cmd
 	cd -
