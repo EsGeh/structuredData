@@ -992,12 +992,18 @@ void replace_input(
 				return;
 			}
 
+			// it is ok to copy without 
+			// NUL terminator here.
+			// NUL is appended in the end.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-truncation"
 			char replacement_str[256];
 			atom_string( & x->argv[argIndex], replacement_str, 255 );
 			int replacement_len = strlen( replacement_str );
 			// append replacement_str:
 			strncpy( ret_str+ret_str_size, replacement_str, replacement_len );
 			ret_str_size += replacement_len;
+#pragma GCC diagnostic pop
 
 			// move to next '%'
 

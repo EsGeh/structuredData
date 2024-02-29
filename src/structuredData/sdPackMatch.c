@@ -345,6 +345,7 @@ void match_output_str(
 { \
 	char buf[CHARBUF_SIZE]; \
 	char msg_filled[CHARBUF_SIZE]; \
+	msg_filled[0] = '\0'; \
 	SPRINTF( msg_filled, msg, ## __VA_ARGS__ ); \
 	match_output_str( \
 		buf, \
@@ -1650,30 +1651,34 @@ t_pattern_atom_type lexer_pattern_peek(
 	else if( atom_getsymbol( &rt->pattern[ pattern_pos ] ) == gensym(")") )
 		return RIGHT_PARENT;
 
+	/* pattern -> buf: */
 	char buf[CharBuf_get_size( & rt->bind_sym )];
 	atom_string( & rt->pattern[ pattern_pos], buf, CharBuf_get_size( & rt->bind_sym ) );
 	int len = strlen( buf );
-	int pos_sep = (strchr( buf, '=' ) - buf);
 	// '?'
 	if( len == 1 && buf[0] == '?' )
 	{
 		return ANY_SYM;
 	}
 	// ?<bind_sym>
-	else if( len >= 1 && buf[0] == '?' )
+	if( len >= 1 && buf[0] == '?' )
 	{
 		return ANY_SYM_BIND;
 	}
 	// <bind_sym>=[
-	else if(
-			pos_sep + 1 == len - 1
-			&& buf[pos_sep+1] == '['
-	)
 	{
-		return START_BIND;
+		int pos_sep = (strchr( buf, '=' ) - buf);
+		if(
+				pos_sep >= 0 								// buf contains '='
+				&& pos_sep + 1 == len - 1		// '=' is the second last char
+				&& buf[pos_sep+1] == '['		// '[' follows after '='
+		)
+		{
+			return START_BIND;
+		}
 	}
 	// =]
-	else if(
+	if(
 			len == 2
 			&& buf[0] == '='
 			&& buf[1] == ']'
@@ -1681,14 +1686,11 @@ t_pattern_atom_type lexer_pattern_peek(
 	{
 		return END_BIND;
 	}
-	else if( rt->pattern[ pattern_pos ].a_type == A_FLOAT )
+	if( rt->pattern[ pattern_pos ].a_type == A_FLOAT )
 	{
 		return FLOAT;
 	}
-	else
-	{
-		return SYMBOL;
-	}
+	return SYMBOL;
 }
 
 // ignorantly consume next pattern token of a specific kind
@@ -1703,8 +1705,10 @@ BOOL lexer_pattern_next_tok(
 			pattern_peek != expected
 	)
 	{
-		char buf_expected[CHARBUF_SIZE/2];
-		char buf_got[CHARBUF_SIZE/2];
+		char buf_expected[CHARBUF_SIZE];
+		buf_expected[0] = '\0';
+		char buf_got[CHARBUF_SIZE];
+		buf_got[0] = '\0';
 		pattern_atom_type_to_str(
 				expected,
 				buf_expected, CHARBUF_SIZE

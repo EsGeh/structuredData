@@ -49,6 +49,7 @@ DECL_LIST(AtomList,AtomListEl,t_atom,getbytes,freebytes,freebytes)
 DEF_LIST(AtomList,AtomListEl,t_atom,getbytes,freebytes,freebytes);
 
 // pointers to atoms are considered references, therefore not deleted automatically:
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-value"
 DECL_LIST(AtomPointerList,ElementAtomPointer,t_atom,getbytes,freebytes,)
 DEF_LIST(AtomPointerList,ElementAtomPointer,t_atom,getbytes,freebytes,);
