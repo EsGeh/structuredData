@@ -88,7 +88,7 @@ begin
 		set --append cmd INSTALL_DATA='ln -s'
 	end
 	if test $debug != 0
-		set --append cmd 'CFLAGS=-DDEBUG -g' 
+		set --append cmd 'optimization.flags=-DDEBUG -g' 
 	end
 	set --append cmd $make_args
 	echo -e "executing: $cmd"
