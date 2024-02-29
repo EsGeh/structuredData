@@ -85,7 +85,7 @@ begin
 		set --append cmd DESTDIR=$install_prefix
 	end
 	if set --query symlink
-		set --append cmd INSTALL_DATA='ln -s'
+		set --append cmd INSTALL_DATA='ln -s --relative'
 	end
 	if test $debug != 0
 		set --append cmd 'optimization.flags=-DDEBUG -g' 
