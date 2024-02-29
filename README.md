@@ -77,6 +77,10 @@ Most objects are written in C, a few are provided as puredata "abstractions".
 
 	start pd and add `structuredDataC` under `File -> Settings -> Start -> New`
 
+- configure pd to find abstractions
+
+	start pd and add `<install_location>/structuredDataC` under `File -> Settings -> Path -> New`
+
 ## documentation
 
 The Documentation is provided as puredata example patches accessible in pd under `Help -> Patch Browser -> structuredDataC`.
