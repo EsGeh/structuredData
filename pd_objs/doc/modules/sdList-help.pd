@@ -1,6 +1,5 @@
-#N canvas 0 0 798 854 10;
-#X obj 63 107 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc #000000
-#000000;
+#N canvas 0 0 1598 621 10;
+#X obj 63 107 bng 15 250 50 0 empty empty empty 17 7 0 10 #fcfcfc #000000 #000000;
 #X obj 142 382 print;
 #X msg 130 104 clear;
 #X msg 114 76 prepend x y z;
@@ -34,16 +33,14 @@
 #X obj 578 388 print equal;
 #X msg 193 245 set a b c b a \, findAll b;
 #X msg 257 107 count;
-#X obj 142 358 sdList bang pop popRev serialize serializeRev get find
-findAll equal count, f 81;
+#X obj 142 358 sdList bang pop popRev serialize serializeRev get find findAll equal count, f 81;
 #X obj 638 424 print count;
 #X msg 283 161 set a b x b c \, find z;
 #X obj 569 635 sdListForEach;
 #X msg 569 541 list 1 2 3;
 #X obj 569 658 print;
 #X obj 675 633 + 1;
-#X text 551 494 apply operation to every element of a list:, f 23
-;
+#X text 551 494 apply operation to every element of a list:, f 23;
 #X obj 569 564 t b a;
 #X connect 0 0 34 0;
 #X connect 2 0 34 0;
@@ -81,5 +78,6 @@ findAll equal count, f 81;
 #X connect 37 0 39 0;
 #X connect 37 1 40 0;
 #X connect 38 0 42 0;
+#X connect 40 0 37 2;
 #X connect 42 0 37 0;
 #X connect 42 1 37 1;
