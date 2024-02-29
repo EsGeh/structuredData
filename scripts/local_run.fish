@@ -10,12 +10,7 @@ set DEP_DIR "$BASE_DIR/dependencies"
 
 set doc_dir $BASE_DIR/doc
 
-set doc_path "$doc_dir/usr/local/lib/pd-externals"
-
-set zexy_path "$doc_path/zexy"
-set sd_path "$doc_path/structuredDataC"
-
-set pd_patch "$sd_path/structuredDataC_doc.pd"
+set pd_patch "$doc_dir/structuredDataC/structuredDataC_doc.pd"
 
 set debug 0
 
@@ -77,10 +72,9 @@ set --append cmd \
 	-stderr \
 	-jack \
 	-nrt \
-	-path "$zexy_path" \
-	-path "$sd_path" \
+	-path "$doc_dir" \
+	-lib structuredDataC \
 	-lib zexy \
-	-lib "structuredDataC" \
 	$pd_patch
 
 $cmd

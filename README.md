@@ -69,27 +69,15 @@ Most objects are written in C, a few are provided as puredata "abstractions".
 
 - build and install:
 
-        $ ./scripts/build.fish build install
+        $ ./scripts/build.fish install
 
     (for options append `--help`)
 
-- add to pd library search path:
+- configure pd to load the library
 
-	you have two options:
-
-	- start pd from the command line like this:
-
-			$ pd -lib structuredDataC
-
-	- add this to `~/.pdsettings` :
-
-			...
-			loadlib1: structuredDataC
-			...
-
-	    (manuall adjust the numbering!)
+	start pd and add `structuredDataC` under `File -> Settings -> Start -> New`
 
 ## documentation
 
-The Documentation is provided as puredata example patches.
-Right click, select "help" opens an example.
+The Documentation is provided as puredata example patches accessible in pd under `Help -> Patch Browser -> structuredDataC`.
+Alternatively, for help with a specific object, right click on it and select "help".
